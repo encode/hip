@@ -26,33 +26,34 @@ A complete HTTP toolkit.
 >>> s.serve()
 ```
 
-**Motivation**
+---
+
+## Motivation
 
 *A neatly typed HTTP implementation re-written from the ground up. Designed for simplicity.*
 
-**Support for both client & server.**
+#### Support for both client & server.
 
-*You can build your HTTP client functionality, or build out your next lightweight server.*
+You can build your HTTP client functionality, or build out your next lightweight server.
 
-*Covers functionality similar to both `requests` and `flask`, but with classes that work on either side.*
+Covers functionality similar to both `requests` and `flask`, but with classes that work on either side.
 
-**Minimal installation footprint.**
+#### Minimal installation footprint.
 
-*With a single dependency, `hx` is radically lightweight, while still being functionally complete.*
+With a single dependency, `hx` is radically lightweight, while still being functionally complete.
 
-**Significantly reduced overall complexity.**
+#### Significantly reduced overall complexity.
 
-*The redesign has radically fewer lines of code, and relies on only core parts of the standard library.*
+The redesign has radically fewer lines of code, and relies on only core parts of the standard library.
+Core functionality such as URL and HTTP parsing has been rebuilt and refined, with internals that are easily testable & comprehensible.
 
-*Core functionality such as URL and HTTP parsing has been rebuilt and refined, with internals that are easily testable & comprehensible.*
+#### Clear, simple typing.
 
-**Clear, simple typing.**
+API signatures throughout that are neat, minimal, and complete.
 
-*API signatures throughout that are neat, minimal, and complete.*
+#### Immutabilty throughout.
 
-**Immutabilty throughout.**
-
-*Immutability is treated as a core concern, helping guide developers towards more robust code.*
+Immutability is treated as a core concern, helping guide developers towards more robust code.
 
 ---
 
