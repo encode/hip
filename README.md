@@ -26,44 +26,33 @@ A complete HTTP toolkit.
 >>> s.serve()
 ```
 
-*Motivation*
+**Motivation**
 
-A neatly typed HTTP implementation re-written from the ground up. Designed for simplicity.
+*A neatly typed HTTP implementation re-written from the ground up. Designed for simplicity.*
 
-### Support for both client & server.
+**Support for both client & server.**
 
-You can build your HTTP client functionality, or build out your next lightweight server.
+*You can build your HTTP client functionality, or build out your next lightweight server.*
 
-Covers functionality similar to both `requests` and `flask`, but with classes that work on either side.
+*Covers functionality similar to both `requests` and `flask`, but with classes that work on either side.*
 
-### Minimal installation footprint.
+**Minimal installation footprint.**
 
-With a single dependency, `hx` is radically lightweight, while still being functionally complete.
+*With a single dependency, `hx` is radically lightweight, while still being functionally complete.*
 
-package        | size
----------------|-----
-`hx`           |  34kB
-`+ truststore` |  19kB
- 
-package                | size
------------------------|-----
-`requests`             |  64kB
-`+ urllib3`            | 131kB
-`+ certifi`            | 153kB
-`+ charset_normalizer` | 309kB
-`+ idna`               |  71kB
+**Significantly reduced overall complexity.**
 
-### Significantly reduced overall complexity.
+*The redesign has radically fewer lines of code, and relies on only core parts of the standard library.*
 
-The package has around 2,500 lines of source code, and relies on only core parts of the standard library.
+*Core functionality such as URL and HTTP parsing has been rebuilt and refined, with internals that are easily testable & comprehensible.*
 
-### Clear, simple typing.
+**Clear, simple typing.**
 
-...
+*API signatures throughout that are neat, minimal, and complete.*
 
-### Immutabilty throughout.
+**Immutabilty throughout.**
 
-Immutability is treated as a core concern, helping guide developers towards more robust code.
+*Immutability is treated as a core concern, helping guide developers towards more robust code.*
 
 ---
 
@@ -374,3 +363,31 @@ True
 ```python
 >>> f = hx.File('image.png')
 ```
+
+---
+
+## Download sizes, and relative complexity
+
+For reference, only core parts of each package are included.
+
+package        |  size  |   SLOC
+---------------|--------|-------
+`hx`           |  34kB  | ~2,500
+`+ truststore` |  19kB  |
+ 
+package                |  size |   SLOC
+-----------------------|-------|-------
+`requests`             |  64kB | ~3,000
+`+ urllib3`            | 131kB | ~6,800
+`+ charset_normalizer` | 309kB |
+`+ certifi`            | 153kB |
+`+ idna`               |  71kB |
+
+package      | size  |   SLOC
+-------------|-------|-------
+`httpx`      |  73kB | ~5,600
+`+ httpcore` |  78kB | ~4,800
+`+ h11`      |  37kB | ~3,100
+`+ certifi`  | 153kB |
+`+ anyio`    | 114kB |
+`+ idna`     |  71kB |
