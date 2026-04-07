@@ -79,8 +79,8 @@
 *Open / close...*
 
 ```python
-with hx.Client() as c:
-    ...
+>>> with hx.Client() as c:
+>>>     ...
 ```
 
 ```python
@@ -105,22 +105,22 @@ with hx.Client() as c:
 
 ```python
 >>> # Serve locally, use an unassigned port. 
->>> hx.Server(hello_world, addr='127.0.0.1')
+>>> s = hx.Server(hello_world, addr='127.0.0.1')
 ```
 
 ```python
 >>> # Serve locally, use a fixed port.
->>> hx.Server(hello_world, addr='127.0.0.1:8000')
+>>> s = hx.Server(hello_world, addr='127.0.0.1:8000')
 ```
 
 ```python
 >>> # Serve globally, use a fixed port.
->>> hx.Server(hello_world, addr='0.0.0.0:8000')
+>>> s = hx.Server(hello_world, addr='0.0.0.0:8000')
 ```
 
 ```python
 >>> # Serve globally, enforcing domain name and SSL.
->>> hx.Server(hello_world, addr='https://www.domainname.com')
+>>> s = hx.Server(hello_world, addr='https://www.domainname.com')
 ```
 
 ---
@@ -254,7 +254,7 @@ True
 *Instantiate from components...*
 
 ```python
->>> hx.URL(scheme='https', host='www.example.com', path='/')
+>>> u = hx.URL(scheme='https', host='www.example.com', path='/')
 ```
 
 *Updates...*
@@ -301,7 +301,7 @@ True
 *Content Types for Requests...*
 
 ```python
->>> d = hx.JSON(...)
+>>> j = hx.JSON(...)
 ```
 
 ```python
