@@ -36,50 +36,50 @@ An HTTP implementation re-written from the ground up. Designed for simplicity.
 
 ```python
 >>> c = hx.Client()
->>> r = c.get(“https://www.example.com/”)
+>>> r = c.get('https://www.example.com/')
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
 >>> c = hx.Client()
->>> u = hx.URL(“https://www.example.com/”, params={"search": "..."})
+>>> u = hx.URL('https://www.example.com/', params={'search': '...'})
 >>> r = c.get(u)
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> f = hx.Form({"email": "...", "message": "..."})
->>> r = c.post(“https://www.example.com/”, content=f)
+>>> f = hx.Form({'email': '...', 'message': '...'})
+>>> r = c.post('https://www.example.com/', content=f)
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> j = hx.JSON({"title": ..., "rating": ...})
->>> r = c.put(“https://www.example.com/”, content=j)
+>>> j = hx.JSON({'title': ..., 'rating': ...})
+>>> r = c.put('https://www.example.com/', content=j)
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> j = hx.JSON({"title": ..., "rating": ...})
->>> r = c.patch(“https://www.example.com/”, content=j)
->>> r
-<Response [200 OK]>
-```
-
-```python
->>> c = hx.Client()
->>> r = c.delete(“https://www.example.com/”)
+>>> j = hx.JSON({'title': ..., 'rating': ...})
+>>> r = c.patch('https://www.example.com/', content=j)
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
 >>> c = hx.Client()
->>> r = c.head(“https://www.example.com/”)
+>>> r = c.delete('https://www.example.com/')
+>>> r
+<Response [200 OK]>
+```
+
+```python
+>>> c = hx.Client()
+>>> r = c.head('https://www.example.com/')
 >>> r
 <Response [200 OK]>
 >>> r.content
@@ -160,7 +160,7 @@ An HTTP implementation re-written from the ground up. Designed for simplicity.
 *Attributes...*
 
 ```python
->>> r = hx.Response(200, content=hx.JSON({‘message’: ‘hello, world’})
+>>> r = hx.Response(200, content=hx.JSON({'message': 'hello, world'})
 >>> r.status_code
 >>> r.headers
 >>> r.content
