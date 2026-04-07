@@ -26,11 +26,7 @@ A complete HTTP toolkit.
 >>> s.serve()
 ```
 
----
-
-## Motivation
-
-*A neatly typed HTTP implementation re-written from the ground up. Designed for simplicity.*
+*Designed for simplicity.*
 
 * Support for both client & server.
 * Minimal installation footprint.
