@@ -28,7 +28,7 @@ A complete HTTP toolkit.
 
 *why?...*
 
-An HTTP reference implementation re-written from the ground up. Designed for simplicity.
+An HTTP implementation re-written from the ground up. Designed for simplicity.
 
 ---
 
