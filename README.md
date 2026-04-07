@@ -1,6 +1,6 @@
-# hx
+# hx
 
-```
+```python
 >>> import hx
 
 >>> cli = hx.Client()
@@ -9,7 +9,7 @@
 <Response [200 OK]>
 ```
 
-```
+```python
 >>> import hx
 
 >>> def hello_world(request):
@@ -22,7 +22,7 @@
 
 ---
 
-Clients
+## Client
 
 ```python
 >>> c = hx.Client()
@@ -78,24 +78,24 @@ Clients
 
 *Open / close...*
 
-```
+```python
 with hx.Client() as c:
     ...
 ```
 
-```
+```python
 >>> c = hx.Client()
 >>> c.close()
 ```
 
-Servers
+## Server
 
-```
+```python
 >>> s = hx.Server(hello_world)
 >>> s.serve(hello_world)  # Serve until Ctrl-C
 ```
 
-```
+```python
 >>> with hx.Server(hello_world) as s:
 ...     # Serve until Ctrl-C, non-blocking
 ...     print(s.url)
@@ -103,33 +103,37 @@ Servers
 
 *Server address...*
 
-```
+```python
 >>> # Serve locally, use an unassigned port. 
 >>> hx.Server(hello_world, addr='127.0.0.1')
 ```
 
-```
+```python
 >>> # Serve locally, use a fixed port.
 >>> hx.Server(hello_world, addr='127.0.0.1:8000')
 ```
 
-```
+```python
 >>> # Serve globally, use a fixed port.
 >>> hx.Server(hello_world, addr='0.0.0.0:8000')
 ```
 
-```
+```python
 >>> # Serve globally, enforcing domain name and SSL.
 >>> hx.Server(hello_world, addr='https://www.domainname.com')
 ```
 
-Requests
+---
 
-```
+## Requests
+
+```python
 >>> r = hx.Request(method, url, headers=..., content=...)
 ```
 
-```
+*Attributes...*
+
+```python
 >>> r = hx.Request('GET', 'https://www.example.com')
 >>> r.method
 >>> r.url
@@ -137,23 +141,26 @@ Requests
 >>> r.content
 ```
 
-Responses
+## Responses
 
-```
+```python
 >>> r = hx.Response(status_code, headers=..., content=...)
 ```
 
-```
->>> j = hx.JSON({‘message’: ‘hello, world’}
->>> r = hx.Response(200, content=j)
+*Attributes...*
+
+```python
+>>> r = hx.Response(200, content=hx.JSON({‘message’: ‘hello, world’})
 >>> r.status_code
 >>> r.headers
 >>> r.content
 ```
 
-Methods
+---
 
-```
+## Methods
+
+```python
 >>> m = hx.Method(‘GET’)
 >>> m == 'GET'
 True
@@ -161,9 +168,9 @@ True
 'GET'
 ```
 
-Status Codes
+## Status Codes
 
-```
+```python
 >>> s = hx.StatusCode(200)
 >>> s.value, s.reason
 (200, "OK")
@@ -171,9 +178,9 @@ Status Codes
 True
 ```
 
-*Classes...*
+*Status classes...*
 
-```
+```python
 >>> s = hx.StatusCode(200)
 >>> s.is_1xx_informational()
 False
@@ -187,9 +194,9 @@ False
 False
 ```
 
-Headers
+## Headers
 
-```
+```python
 >>> h = hx.Headers({...})
 >>> h['Content-Type']
 ...
@@ -199,23 +206,23 @@ Headers
 
 *Multi-dict...*
 
-```
+```python
 >>> h.get_all('set-cookie')
 >>> h.multi_items()
 ```
 
 *Updates...*
 
-```
->>> h.copy_set(...)
->>> h.copy_append('set-cookie', 'session_id=...')
->>> h.copy_remove()
->>> h.copy_update()
+```python
+>>> h = h.copy_set(...)
+>>> h = h.copy_append('set-cookie', 'session_id=...')
+>>> h = h.copy_remove(...)
+>>> h = h.copy_update(...)
 ```
 
-URLs
+## URLs
 
-```
+```python
 >>> u = hx.URL('...')
 >>> u == '...'
 True
@@ -223,7 +230,7 @@ True
 
 *Query parameters...*
 
-```
+```python
 >>> u = hx.URL('...', params={'search': ...})
 >>> u.params
 <QueryParams ...>
@@ -231,7 +238,7 @@ True
 
 *Components...*
 
-```
+```python
 >>> u.scheme
 >>> u.host
 >>> u.port
@@ -239,31 +246,33 @@ True
 >>> u.query
 ```
 
-```
+```python
 >>> u.netloc  # 'example.com:8080'  (HTTP request Host header)
 >>> u.target  # '/path?query'       (HTTP request target)
 ```
 
-```
+*Instantiate from components...*
+
+```python
 >>> hx.URL(scheme='https', host='www.example.com', path='/')
 ```
 
 *Updates...*
 
-```
+```python
 >>> u = u.copy_with(scheme='https')
 ```
 
 *URL joins...*
 
-```
+```python
 >>> u = hx.URL('https://www.example.com/location')
 >>> u = u.join('/redirect')
 ```
 
-Query Params
+## Query Params
 
-```
+```python
 >>> q = hx.QueryParams("...")
 >>> q['...']
 >>> q.get('...')
@@ -287,36 +296,36 @@ Query Params
 >>> q = q.copy_update({...})
 ```
 
-Content Types
+## Content Types
 
 *Content Types for Requests...*
 
-```
+```python
 >>> d = hx.JSON(...)
 ```
 
-```
+```python
 >>> f = hx.Form(...)
 ```
 
-```
+```python
 >>> m = hx.MultiPart(...)
 ```
 
 *Content Types for Responses...*
 
-```
+```python
 >>> h = hx.HTML('<body><h1>Hello, world!</h1></body>')
 ```
 
-```
+```python
 >>> t = hx.Text('hello, world')
 ```
 
-```
+```python
 >>> j = hx.JSON({'content': ...})
 ```
 
-```
+```python
 >>> f = hx.File('image.png')
 ```
