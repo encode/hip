@@ -1,5 +1,9 @@
 # hx
 
+A complete HTTP toolkit.
+
+*Making requests with the client...*
+
 ```python
 >>> import hx
 
@@ -8,6 +12,8 @@
 >>> r
 <Response [200 OK]>
 ```
+
+*Serving responses with the server...*
 
 ```python
 >>> import hx
@@ -19,6 +25,10 @@
 >>> s = hx.Server(hello_world, addr='http://127.0.0.1:8000/')
 >>> s.serve()
 ```
+
+*why?...*
+
+An HTTP reference implementation re-written from the ground up. Designed for simplicity.
 
 ---
 
