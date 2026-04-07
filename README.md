@@ -313,7 +313,7 @@ True
 
 ## Content Types
 
-*Content Types for Requests...*
+*Content types for requests...*
 
 ```python
 >>> j = hx.JSON(...)
@@ -327,7 +327,7 @@ True
 >>> m = hx.MultiPart(...)
 ```
 
-*Content Types for Responses...*
+*Content types for responses...*
 
 ```python
 >>> h = hx.HTML('<body><h1>Hello, world!</h1></body>')
@@ -347,9 +347,9 @@ True
 
 ---
 
-## Download sizes, and relative complexity
+## Package sizes
 
-For reference, only core parts of each package are included.
+For comparison...
 
 package        |  size  |   SLOC
 ---------------|--------|-------
@@ -360,8 +360,8 @@ package                |  size |   SLOC
 -----------------------|-------|-------
 `requests`             |  64kB | ~3,000
 `+ urllib3`            | 131kB | ~6,800
-`+ charset_normalizer` | 309kB |
 `+ certifi`            | 153kB |
+`+ charset_normalizer` | 309kB |
 `+ idna`               |  71kB |
 
 package      | size  |   SLOC
