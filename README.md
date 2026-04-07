@@ -30,7 +30,7 @@ A complete HTTP toolkit.
 
 * Support for both client & server.
 * Minimal installation footprint.
-* Significantly reduced overall complexity.
+* Radically reduced complexity.
 * Clear, simple typing.
 * Immutabilty throughout.
 * System truststores by default.
