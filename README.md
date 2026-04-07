@@ -263,7 +263,7 @@ True
 >>> u = u.copy_with(scheme='https')
 ```
 
-*URL joins...*
+*Joins...*
 
 ```python
 >>> u = hx.URL('https://www.example.com/location')
