@@ -26,9 +26,44 @@ A complete HTTP toolkit.
 >>> s.serve()
 ```
 
-*why?...*
+*Motivation*
 
-An HTTP implementation re-written from the ground up. Designed for simplicity.
+A neatly typed HTTP implementation re-written from the ground up. Designed for simplicity.
+
+### Support for both client & server.
+
+You can build your HTTP client functionality, or build out your next lightweight server.
+
+Covers functionality similar to both `requests` and `flask`, but with classes that work on either side.
+
+### Minimal installation footprint.
+
+With a single dependency, `hx` is radically lightweight, while still being functionally complete.
+
+package        | size
+---------------|-----
+`hx`           |  34kB
+`+ truststore` |  19kB
+ 
+package                | size
+-----------------------|-----
+`requests`             |  64kB
+`+ urllib3`            | 131kB
+`+ certifi`            | 153kB
+`+ charset_normalizer` | 309kB
+`+ idna`               |  71kB
+
+### Significantly reduced overall complexity.
+
+The package has around 2,500 lines of source code, and relies on only core parts of the standard library.
+
+### Clear, simple typing.
+
+...
+
+### Immutabilty throughout.
+
+Immutability is treated as a core concern, helping guide developers towards more robust code.
 
 ---
 
