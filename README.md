@@ -19,7 +19,7 @@ A complete HTTP toolkit.
 >>> import hx
 
 >>> def app(request):
-...     content = hx.HTML('<html><body><h1>¡Hola, mundo!</h1></body></html>')
+...     content = hx.HTML('<html><body>¡Hola, mundo!</body></html>')
 ...     return hx.Response(200, content=content)
 
 >>> s = hx.Server(app, addr='http://127.0.0.1:8000/')
