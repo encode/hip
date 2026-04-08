@@ -18,22 +18,15 @@ A complete HTTP toolkit.
 ```python
 >>> import hx
 
->>> def hello_world(request):
-...     content = hx.HTML('<body><h1>Hello, world!</h1></body>')
+>>> def app(request):
+...     content = hx.HTML('<html><body><h1>¡Hola, mundo!</h1></body></html>')
 ...     return hx.Response(200, content=content)
 
->>> s = hx.Server(hello_world, addr='http://127.0.0.1:8000/')
+>>> s = hx.Server(app, addr='http://127.0.0.1:8000/')
 >>> s.serve()
 ```
 
 *Designed for simplicity.*
-
-* Support for both client & server.
-* Minimal installation footprint.
-* Radically reduced complexity.
-* Clear, simple typing.
-* Immutabilty throughout.
-* System truststores by default.
 
 ---
 
@@ -91,7 +84,7 @@ A complete HTTP toolkit.
 <Empty>
 ```
 
-*Open / close...*
+*Open / Close...*
 
 ```python
 >>> with hx.Client() as c:
@@ -106,36 +99,36 @@ A complete HTTP toolkit.
 ## Server
 
 ```python
->>> s = hx.Server(hello_world)
->>> s.serve(hello_world)  # Serve until Ctrl-C
+>>> s = hx.Server(app)
+>>> s.serve()  # Serve until Ctrl-C
 ```
 
 ```python
->>> with hx.Server(hello_world) as s:
+>>> with hx.Server(app) as s:
 ...     # Serve until Ctrl-C, non-blocking
 ...     print(s.url)
 ```
 
-*Server address...*
+*Address...*
 
 ```python
 >>> # Serve locally, use an unassigned port. 
->>> s = hx.Server(hello_world, addr='127.0.0.1')
+>>> s = hx.Server(app, addr='127.0.0.1')
 ```
 
 ```python
 >>> # Serve locally, use a fixed port.
->>> s = hx.Server(hello_world, addr='127.0.0.1:8000')
+>>> s = hx.Server(app, addr='127.0.0.1:8000')
 ```
 
 ```python
 >>> # Serve globally, use a fixed port.
->>> s = hx.Server(hello_world, addr='0.0.0.0:8000')
+>>> s = hx.Server(app, addr='0.0.0.0:8000')
 ```
 
 ```python
 >>> # Serve globally, enforcing domain name and SSL.
->>> s = hx.Server(hello_world, addr='https://www.domainname.com')
+>>> s = hx.Server(app, addr='https://www.domainname.com')
 ```
 
 ---
