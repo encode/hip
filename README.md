@@ -1,6 +1,10 @@
+<p align="right">en | <a href="es/README.md">es</a> | <a href="fr/README.md">fr</a></p>
+
 # hx
 
 A complete HTTP toolkit.
+
+<br/>
 
 *Making requests with the client...*
 
@@ -26,9 +30,52 @@ A complete HTTP toolkit.
 >>> s.serve()
 ```
 
-*Designed for simplicity.*
+---
 
-en | [es](es/README.md) | [fr](fr/README.md)
+## API Reference
+
+* [Client](#client)
+* [Server](#server)
+* [Request](#request)
+  * [Method](#method)
+  * [URL](#url)
+  * [Headers](#headers)
+  * [Content](#content)
+* [Response](#response)
+  * [StatusCode](#statuscode)
+  * [Headers](#headers)
+  * [Content](#content)
+
+---
+
+## Package sizes
+
+For comparison...
+
+```bash
+$ uv add hx
+$ uv tree --show-sizes --package hx
+hx v0.9.0 (33.5KiB)
+└── truststore v0.10.0 (17.8KiB)
+```
+
+```bash
+$ uv add requests
+$ uv tree --show-sizes --package requests
+requests v2.33.1 (63.4KiB)
+├── certifi v2026.2.25 (150.1KiB)
+├── charset-normalizer v3.4.7 (302.4KiB)
+├── idna v3.11 (69.3KiB)
+└── urllib3 v2.6.3 (128.5KiB)
+```
+
+---
+
+MIT Licensed. Designed & built with love.
+
+<p align="center">&mdash; 💖 &mdash;</p>
+
+<br/><br/><br/>
 
 ---
 
@@ -143,7 +190,7 @@ en | [es](es/README.md) | [fr](fr/README.md)
 
 ---
 
-## Requests
+## Request
 
 ```python
 >>> r = hx.Request(method, url, headers=..., content=...)
@@ -159,7 +206,7 @@ en | [es](es/README.md) | [fr](fr/README.md)
 >>> r.content
 ```
 
-## Responses
+## Response
 
 ```python
 >>> r = hx.Response(status_code, headers=..., content=...)
@@ -176,7 +223,7 @@ en | [es](es/README.md) | [fr](fr/README.md)
 
 ---
 
-## Methods
+## Method
 
 ```python
 >>> m = hx.Method(‘GET’)
@@ -186,7 +233,7 @@ True
 'GET'
 ```
 
-## Status Codes
+## StatusCode
 
 ```python
 >>> s = hx.StatusCode(200)
@@ -238,7 +285,7 @@ False
 >>> h = h.copy_update(...)
 ```
 
-## URLs
+## URL
 
 ```python
 >>> u = hx.URL('...')
@@ -288,7 +335,7 @@ True
 >>> u = u.join('/redirect')
 ```
 
-## Query Params
+## QueryParams
 
 ```python
 >>> q = hx.QueryParams("...")
@@ -314,7 +361,7 @@ True
 >>> q = q.copy_update({...})
 ```
 
-## Content Types
+## Content
 
 *Content types for requests...*
 
@@ -347,25 +394,3 @@ True
 ```python
 >>> f = hx.File('image.png')
 ```
-
----
-
-## Package sizes
-
-For comparison...
-
-```bash
-$ uv tree --show-sizes --package hx
-hx v0.9.0 (33.5KiB)
-└── truststore v0.10.0 (17.8KiB)
-```
-
-```bash
-$ uv tree --show-sizes --package requests
-requests v2.33.1 (63.4KiB)
-├── certifi v2026.2.25 (150.1KiB)
-├── charset-normalizer v3.4.7 (302.4KiB)
-├── idna v3.11 (69.3KiB)
-└── urllib3 v2.6.3 (128.5KiB)
- ```
-
