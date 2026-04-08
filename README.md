@@ -28,9 +28,27 @@ A complete HTTP toolkit.
 
 *Designed for simplicity.*
 
+en | [es](es/README.md) | [fr](fr/README.md)
+
 ---
 
 ## Client
+
+*Explicit open / close... (recommended)*
+
+```python
+>>> with hx.Client() as c:
+>>>     ...
+```
+
+*Simple usage...*
+
+```python
+>>> c = hx.Client()
+>>> c.close()
+```
+
+*Requests...*
 
 ```python
 >>> c = hx.Client()
@@ -84,29 +102,21 @@ A complete HTTP toolkit.
 <Empty>
 ```
 
-*Open / Close...*
-
-```python
->>> with hx.Client() as c:
->>>     ...
-```
-
-```python
->>> c = hx.Client()
->>> c.close()
-```
-
 ## Server
 
-```python
->>> s = hx.Server(app)
->>> s.serve()  # Serve until Ctrl-C
-```
+*Explicit open / close... (recommended)*
 
 ```python
 >>> with hx.Server(app) as s:
 ...     # Serve until Ctrl-C, non-blocking
 ...     print(s.url)
+```
+
+*Simple usage...*
+
+```python
+>>> s = hx.Server(app)
+>>> s.serve()  # Serve until Ctrl-C
 ```
 
 *Address...*
@@ -344,24 +354,18 @@ True
 
 For comparison...
 
-package        |  size  |   SLOC
----------------|--------|-------
-`hx`           |  34kB  | ~2,500
-`+ truststore` |  19kB  |
- 
-package                |  size |   SLOC
------------------------|-------|-------
-`requests`             |  64kB | ~3,000
-`+ urllib3`            | 131kB | ~6,800
-`+ certifi`            | 153kB |
-`+ charset_normalizer` | 309kB |
-`+ idna`               |  71kB |
+```bash
+$ uv tree --show-sizes --package hx
+hx v0.9.0 (33.5KiB)
+└── truststore v0.10.0 (17.8KiB)
+```
 
-package      | size  |   SLOC
--------------|-------|-------
-`httpx`      |  73kB | ~5,600
-`+ httpcore` |  78kB | ~4,800
-`+ h11`      |  37kB | ~3,100
-`+ certifi`  | 153kB |
-`+ anyio`    | 114kB |
-`+ idna`     |  71kB |
+```bash
+$ uv tree --show-sizes --package requests
+requests v2.33.1 (63.4KiB)
+├── certifi v2026.2.25 (150.1KiB)
+├── charset-normalizer v3.4.7 (302.4KiB)
+├── idna v3.11 (69.3KiB)
+└── urllib3 v2.6.3 (128.5KiB)
+ ```
+
