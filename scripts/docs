@@ -1,0 +1,5 @@
+cd docs
+../venv/bin/mkdocs build
+rm -rf ../site
+mv site ..
+cd ..

@@ -1,0 +1,7 @@
+-e .
+
+# Test...
+pytest==8.3.5
+
+# Documentation...
+git+https://github.com/encode/mkdocs.git

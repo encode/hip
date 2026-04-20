@@ -1,0 +1,3 @@
+mkdir -p dist
+rm -f dist/hx-0.1.tar.gz
+tar --create --gzip --verbose --file dist/hx-0.1.tar.gz src/hx/*.py pyproject.toml
