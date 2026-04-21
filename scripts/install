@@ -1,2 +1,9 @@
-python3 -m venv venv
-venv/bin/pip install -e .
+if [ -z "$GITHUB_ACTIONS" ]; then
+    rm -rf venv
+    python3 -m venv venv
+    PREFIX="venv/bin/"
+else
+    PREFIX=""
+fi
+
+${PREFIX}pip install -e .
