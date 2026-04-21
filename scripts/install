@@ -6,4 +6,4 @@ else
     PREFIX=""
 fi
 
-${PREFIX}pip install -e .
+${PREFIX}pip install -r requirements.txt
