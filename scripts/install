@@ -7,3 +7,4 @@ else
 fi
 
 ${PREFIX}pip install -e .
+${PREFIX}pip install pytest
