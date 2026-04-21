@@ -1,0 +1,239 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Client</title>
+        <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;text y=&quot;.9em&quot; font-size=&quot;90&quot;&gt;📘&lt;/text&gt;&lt;/svg&gt;">
+        <link rel="stylesheet" href="../css/highlightjs.min.css">
+        <link rel="stylesheet" href="../css/highlightjs-copy.min.css">
+        <link rel="stylesheet" href="../css/theme.css">
+        <script src="../js/highlightjs.min.js"></script>
+        <script src="../js/highlightjs-copy.min.js"></script>
+        <script src="../js/theme.js"></script>
+    </head>
+    <body>
+        <main>
+            <h1 style="border: none"><a href="/">hx</a></h1>
+
+<hr />
+<ul>
+<li><a href="#client">Client</a></li>
+<li><a href="#server">Server</a></li>
+<li><a href="#request">Request</a><ul>
+<li><a href="#method">Method</a></li>
+<li><a href="#url">URL</a></li>
+<li><a href="#headers">Headers</a></li>
+<li><a href="#content">Content</a></li>
+</ul>
+</li>
+<li><a href="#response">Response</a><ul>
+<li><a href="#statuscode">StatusCode</a></li>
+<li><a href="#headers">Headers</a></li>
+<li><a href="#content">Content</a></li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="client"><a class="toclink" href="#client">Client</a></h2>
+<p><em>Explicit open / close... (recommended)</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; with hx.Client() as c:
+&gt;&gt;&gt;     ...
+</code></pre>
+<p><em>Simple usage...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; c = hx.Client()
+&gt;&gt;&gt; c.close()
+</code></pre>
+<p><em>Requests...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; c = hx.Client()
+&gt;&gt;&gt; r = c.get('https://www.example.com/')
+&gt;&gt;&gt; r
+&lt;Response [200 OK]&gt;
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; c = hx.Client()
+&gt;&gt;&gt; u = hx.URL('https://www.example.com/', params={'search': '...'})
+&gt;&gt;&gt; r = c.get(u)
+&gt;&gt;&gt; r
+&lt;Response [200 OK]&gt;
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; f = hx.Form({'email': '...', 'message': '...'})
+&gt;&gt;&gt; r = c.post('https://www.example.com/', content=f)
+&gt;&gt;&gt; r
+&lt;Response [200 OK]&gt;
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; j = hx.JSON({'title': ..., 'rating': ...})
+&gt;&gt;&gt; r = c.put('https://www.example.com/', content=j)
+&gt;&gt;&gt; r
+&lt;Response [200 OK]&gt;
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; j = hx.JSON({'title': ..., 'rating': ...})
+&gt;&gt;&gt; r = c.patch('https://www.example.com/', content=j)
+&gt;&gt;&gt; r
+&lt;Response [200 OK]&gt;
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; c = hx.Client()
+&gt;&gt;&gt; r = c.delete('https://www.example.com/')
+&gt;&gt;&gt; r
+&lt;Response [200 OK]&gt;
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; c = hx.Client()
+&gt;&gt;&gt; r = c.head('https://www.example.com/')
+&gt;&gt;&gt; r
+&lt;Response [200 OK]&gt;
+</code></pre>
+<h2 id="server"><a class="toclink" href="#server">Server</a></h2>
+<p><em>Explicit open / close... (recommended)</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; with hx.Server(app) as s:
+...     # Serve until Ctrl-C, non-blocking
+...     print(s.url)
+</code></pre>
+<p><em>Simple usage...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; s = hx.Server(app)
+&gt;&gt;&gt; s.serve()  # Serve until Ctrl-C
+</code></pre>
+<p><em>Address...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; # Serve locally, use an unassigned port. 
+&gt;&gt;&gt; s = hx.Server(app, addr='127.0.0.1')
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; # Serve locally, use a fixed port.
+&gt;&gt;&gt; s = hx.Server(app, addr='127.0.0.1:8000')
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; # Serve globally, use a fixed port.
+&gt;&gt;&gt; s = hx.Server(app, addr='0.0.0.0:8000')
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; # Serve globally, enforcing domain name and SSL.
+&gt;&gt;&gt; s = hx.Server(app, addr='https://www.domainname.com')
+</code></pre>
+<hr />
+<h2 id="request"><a class="toclink" href="#request">Request</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; r = hx.Request(method, url, headers=..., content=...)
+</code></pre>
+<p><em>Attributes...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; r = hx.Request('GET', 'https://www.example.com')
+&gt;&gt;&gt; r.method
+&gt;&gt;&gt; r.url
+&gt;&gt;&gt; r.headers
+&gt;&gt;&gt; r.content
+</code></pre>
+<h2 id="response"><a class="toclink" href="#response">Response</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; r = hx.Response(status_code, headers=..., content=...)
+</code></pre>
+<p><em>Attributes...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; r = hx.Response(200, content=hx.JSON({'message': 'hello, world'}))
+&gt;&gt;&gt; r.status_code
+&gt;&gt;&gt; r.headers
+&gt;&gt;&gt; r.content
+</code></pre>
+<hr />
+<h2 id="method"><a class="toclink" href="#method">Method</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; m = hx.Method('GET')
+&gt;&gt;&gt; m == 'GET'
+True
+&gt;&gt;&gt; str(m)
+'GET'
+</code></pre>
+<h2 id="statuscode"><a class="toclink" href="#statuscode">StatusCode</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; s = hx.StatusCode(200)
+&gt;&gt;&gt; s.value, s.reason
+(200, 'OK')
+&gt;&gt;&gt; s == 200
+True
+</code></pre>
+<p><em>Status classes...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; s = hx.StatusCode(200)
+&gt;&gt;&gt; s.is_1xx_informational()
+False
+&gt;&gt;&gt; s.is_2xx_success()
+True
+&gt;&gt;&gt; s.is_3xx_redirect()
+False
+&gt;&gt;&gt; s.is_4xx_client_error()
+False
+&gt;&gt;&gt; s.is_5xx_server_error()
+False
+</code></pre>
+<h2 id="headers"><a class="toclink" href="#headers">Headers</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; h = hx.Headers({...})
+&gt;&gt;&gt; h['Content-Type']
+...
+&gt;&gt;&gt; h.get('content-type')
+...
+</code></pre>
+<p><em>Multi-dict...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; h.get_all('set-cookie')
+&gt;&gt;&gt; h.multi_items()
+</code></pre>
+<p><em>Updates...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; h = h.copy_set(...)
+&gt;&gt;&gt; h = h.copy_append('set-cookie', 'session_id=...')
+&gt;&gt;&gt; h = h.copy_remove(...)
+&gt;&gt;&gt; h = h.copy_update(...)
+</code></pre>
+<h2 id="url"><a class="toclink" href="#url">URL</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; u = hx.URL('...')
+&gt;&gt;&gt; u == '...'
+True
+</code></pre>
+<p><em>Query parameters...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; u = hx.URL('...', params={'search': ...})
+&gt;&gt;&gt; u.params
+&lt;QueryParams ...&gt;
+</code></pre>
+<p><em>Components...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; u.scheme
+&gt;&gt;&gt; u.host
+&gt;&gt;&gt; u.port
+&gt;&gt;&gt; u.path
+&gt;&gt;&gt; u.query
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; u.netloc  # 'example.com:8080'  (HTTP request Host header)
+&gt;&gt;&gt; u.target  # '/path?query'       (HTTP request target)
+</code></pre>
+<p><em>Instantiate from components...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; u = hx.URL(scheme='https', host='www.example.com', path='/')
+</code></pre>
+<p><em>Updates...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; u = u.copy_with(scheme='https')
+</code></pre>
+<p><em>Joins...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; u = hx.URL('https://www.example.com/location')
+&gt;&gt;&gt; u = u.join('/redirect')
+</code></pre>
+<h2 id="queryparams"><a class="toclink" href="#queryparams">QueryParams</a></h2>
+<pre><code class="language-python">&gt;&gt;&gt; q = hx.QueryParams(&quot;...&quot;)
+&gt;&gt;&gt; q['...']
+&gt;&gt;&gt; q.get('...')
+</code></pre>
+<p><em>Multi-dict...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; q.get_all()
+...
+&gt;&gt;&gt; q.multi_items()
+...
+</code></pre>
+<p><em>Updates...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; q = q.copy_set('search', '...')
+&gt;&gt;&gt; q = q.copy_append('color', 'red')
+&gt;&gt;&gt; q = q.copy_remove('ordering')
+&gt;&gt;&gt; q = q.copy_update({...})
+</code></pre>
+<h2 id="content"><a class="toclink" href="#content">Content</a></h2>
+<p><em>Content types for requests...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; j = hx.JSON(...)
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; f = hx.Form(...)
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; m = hx.MultiPart(...)
+</code></pre>
+<p><em>Content types for responses...</em></p>
+<pre><code class="language-python">&gt;&gt;&gt; h = hx.HTML('&lt;html&gt;&lt;body&gt;¡Hola, mundo!&lt;/body&gt;&lt;/html&gt;')
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; t = hx.Text('hello, world')
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; j = hx.JSON({'content': ...})
+</code></pre>
+<pre><code class="language-python">&gt;&gt;&gt; f = hx.File('image.png')
+</code></pre>
+<p align="center">&mdash; 💖 &mdash;</p>
+            
+        </main>
+    </body>
+</html>
