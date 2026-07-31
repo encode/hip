@@ -2,35 +2,51 @@
   <img width="350" height="208" src="https://raw.githubusercontent.com/encode/httpx/master/docs/img/butterfly.png" alt='HTTPX'>
 </p>
 
-# [hx](README.md)
+# [hip](README.md)
 
-*Installation...*
+<p style="text-align: center">An HTTP toolkit for folks who give a damn.</p>
+
+<br/>
+
+Engineered for simplicity, `hip` provides a complete Python web suite&hellip;
+
+* Supports both client and server functionality.
+* Presents a clear, simple, and tightly constrained API.
+* A miminal, easily readable implementation.
+
+## Installation
+
+Install the package from PyPI&hellip;
 
 ```bash
-uv add https://wwww.encode.io/hx/releases/hx-0.1.tar.gz
+$ uv add hip
 ```
 
-*Making requests with [the client](API.md#client)...*
+## Client
+
+Sending HTTP requests&hellip;
 
 ```python
->>> import hx
+>>> import hip
 
->>> cli = hx.Client()
+>>> cli = hip.Client()
 >>> r = cli.get('https://www.example.com/')
 >>> r
 <Response [200 OK]>
 ```
 
-*Serving responses with [the server](API.md#server)...*
+## Server
+
+Creating web apps&hellip;
 
 ```python
->>> import hx
+>>> import hip
 
 >>> def app(request):
-...     content = hx.HTML('<html><body>¡Hola, mundo!</body></html>')
-...     return hx.Response(200, content=content)
+...     content = hip.HTML('<html><body>¡Hola, mundo!</body></html>')
+...     return hip.Response(200, content=content)
 
->>> s = hx.Server(app, addr='http://127.0.0.1:8000/')
+>>> s = hip.Server(app)
 >>> s.serve()
 ```
 
@@ -38,22 +54,18 @@ uv add https://wwww.encode.io/hx/releases/hx-0.1.tar.gz
 
 ## Motivation
 
-A smart, simple HTTP toolkit.
+A clean modern design, with [a focused API](API.md) and an exceptionally light installation footprint.
 
-* Provides both client and server functionality.
-* Exceptionally lightweight.
-* A [consistent, minimal API](API.md).
-
-## Package sizes
-
-For comparison...
+For comparison, see `hip` <small>vs</small> `requests`&hellip;
 
 ```bash
-$ uv add hx
-$ uv tree --show-sizes --package hx
-hx v0.9.0 (33.5KiB)
+$ uv add hip
+$ uv tree --show-sizes --package hip
+hip v1.0.0 (33.5KiB)
 └── truststore v0.10.0 (17.8KiB)
 ```
+
+<p></p>
 
 ```bash
 $ uv add requests
@@ -65,8 +77,16 @@ requests v2.33.1 (63.4KiB)
 └── urllib3 v2.6.3 (128.5KiB)
 ```
 
+## Contribution
+
+We have a transparent development model, and welcome feedback.
+
+Pull requests are restricted to team members only.
+
 ---
 
-[MIT Licensed](LICENSE.md). Designed & built with love.
+<p align="center">
+<a href="LICENSE.md">MIT Licensed</a>.<br/>Designed & Built with Love.
+</p>
 
 <p align="center">&mdash; 💖 &mdash;</p>
