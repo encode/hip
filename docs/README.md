@@ -1,14 +1,14 @@
 <p align="center">
-  <img width="350" height="208" src="https://raw.githubusercontent.com/encode/httpx/master/docs/img/butterfly.png" alt='HTTPX'>
+  <img width="350" height="208" src="https://raw.githubusercontent.com/encode/httpx/master/docs/img/butterfly.png" alt='hx'>
 </p>
 
-# [hip](README.md)
+# [hx](README.md)
 
 <p style="text-align: center">An HTTP toolkit for folks who give a damn.</p>
 
 <br/>
 
-Engineered for simplicity, `hip` provides a complete Python web suite&hellip;
+Engineered for simplicity, `hx` provides a complete Python web suite&hellip;
 
 * Supports both client and server functionality.
 * Presents a clear, simple, and tightly constrained API.
@@ -19,7 +19,7 @@ Engineered for simplicity, `hip` provides a complete Python web suite&hellip;
 Install the package from PyPI&hellip;
 
 ```bash
-$ uv add hip
+$ uv add hx
 ```
 
 ## Client
@@ -27,9 +27,9 @@ $ uv add hip
 Sending HTTP requests&hellip;
 
 ```python
->>> import hip
+>>> import hx
 
->>> cli = hip.Client()
+>>> cli = hx.Client()
 >>> r = cli.get('https://www.example.com/')
 >>> r
 <Response [200 OK]>
@@ -40,13 +40,13 @@ Sending HTTP requests&hellip;
 Creating web apps&hellip;
 
 ```python
->>> import hip
+>>> import hx
 
 >>> def app(request):
-...     content = hip.HTML('<html><body>¡Hola, mundo!</body></html>')
-...     return hip.Response(200, content=content)
+...     content = hx.HTML('<html><body>¡Hola, mundo!</body></html>')
+...     return hx.Response(200, content=content)
 
->>> s = hip.Server(app)
+>>> s = hx.Server(app)
 >>> s.serve()
 ```
 
@@ -56,12 +56,12 @@ Creating web apps&hellip;
 
 A clean modern design, with [a focused API](API.md) and an exceptionally light installation footprint.
 
-For comparison, see `hip` <small>vs</small> `requests`&hellip;
+For comparison, see `hx` <small>vs</small> `requests`&hellip;
 
 ```bash
-$ uv add hip
-$ uv tree --show-sizes --package hip
-hip v1.0.0 (33.5KiB)
+$ uv add hx
+$ uv tree --show-sizes --package hx
+hx v1.0.0 (33.5KiB)
 └── truststore v0.10.0 (17.8KiB)
 ```
 
