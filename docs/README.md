@@ -22,7 +22,7 @@ Install the package from PyPI&hellip;
 $ uv add hx
 ```
 
-## Client
+## Client
 
 Sending HTTP requests&hellip;
 
@@ -35,7 +35,7 @@ Sending HTTP requests&hellip;
 <Response [200 OK]>
 ```
 
-## Server
+## Server
 
 Creating web apps&hellip;
 
