@@ -1,5 +1,11 @@
+if [ -z "$GITHUB_ACTIONS" ]; then
+    PREFIX="../venv/bin/"
+else
+    PREFIX=""
+fi
+
 cd docs
-../venv/bin/mkdocs build
+${PREFIX}mkdocs build
 rm -rf ../site
 mv site ..
 cd ..
