@@ -79,7 +79,7 @@ requests v2.33.1 (63.4KiB)
 
 ## Contribution
 
-Development of the `httpx` re-design is currently private.
+The `httpx` redesign is currently in early development and not yet public.
 
 ---
 
