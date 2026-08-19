@@ -11,7 +11,7 @@ __all__ = [
     "Server"
 ]
 
-logger = logging.getLogger("hx.server")
+logger = logging.getLogger("httpx.server")
 
 
 class ConnectionClosed(Exception):

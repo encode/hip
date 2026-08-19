@@ -1,10 +1,10 @@
 import json
-import hx
+import httpx
 import pytest
 
 
 def echo(request):
-    response = hx.Response(200, content=hx.JSON({
+    response = httpx.Response(200, content=httpx.JSON({
         'method': str(request.method),
         'query-params': dict(request.url.params.items()),
         'content-type': request.headers.get('Content-Type'),
@@ -15,13 +15,13 @@ def echo(request):
 
 @pytest.fixture
 def client():
-    with hx.Client() as client:
+    with httpx.Client() as client:
         yield client
 
 
 @pytest.fixture
 def server():
-    with hx.Server(echo) as server:
+    with httpx.Server(echo) as server:
         yield server
 
 
@@ -42,7 +42,7 @@ def test_get(client, server):
 
 
 def test_post(client, server):
-    data = hx.JSON({"data": 123})
+    data = httpx.JSON({"data": 123})
     r = client.post(server.url, content=data)
     assert r.status_code == 200
     assert r.content == {
@@ -54,7 +54,7 @@ def test_post(client, server):
 
 
 def test_put(client, server):
-    data = hx.JSON({"data": 123})
+    data = httpx.JSON({"data": 123})
     r = client.put(server.url, content=data)
     assert r.status_code == 200
     assert r.content == {
@@ -66,7 +66,7 @@ def test_put(client, server):
 
 
 def test_patch(client, server):
-    data = hx.JSON({"data": 123})
+    data = httpx.JSON({"data": 123})
     r = client.patch(server.url, content=data)
     assert r.status_code == 200
     assert r.content == {

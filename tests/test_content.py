@@ -1,4 +1,4 @@
-import hx
+import httpx
 import os
 import tempfile
 import pytest
@@ -7,7 +7,7 @@ import pytest
 # HTML
 
 def test_html():
-    html = hx.HTML("<html><body>Hello, world</body></html>")
+    html = httpx.HTML("<html><body>Hello, world</body></html>")
 
     assert str(html) == '<html><body>Hello, world</body></html>'
     assert bytes(html) == b'<html><body>Hello, world</body></html>'
@@ -20,7 +20,7 @@ def test_html():
 # Text
 
 def test_text():
-    text = hx.Text("Hello, world")
+    text = httpx.Text("Hello, world")
 
     assert str(text) == 'Hello, world'
     assert bytes(text) == b'Hello, world'
@@ -33,7 +33,7 @@ def test_text():
 # JSON
 
 def test_json():
-    data = hx.JSON({'data': 123})
+    data = httpx.JSON({'data': 123})
 
     assert bytes(data) == b'{"data":123}'
     assert data.headers() == {
@@ -45,7 +45,7 @@ def test_json():
 # Form
 
 def test_form():
-    f = hx.Form("a=123&a=456&b=789")
+    f = httpx.Form("a=123&a=456&b=789")
 
     assert str(f) == "a=123&a=456&b=789"
     assert repr(f) == "<Form [('a', '123'), ('a', '456'), ('b', '789')]>"
@@ -56,7 +56,7 @@ def test_form():
 
 
 def test_form_from_dict():
-    f = hx.Form({
+    f = httpx.Form({
         "a": ["123", "456"],
         "b": "789"
     })
@@ -69,7 +69,7 @@ def test_form_from_dict():
 
 
 def test_form_from_list():
-    f = hx.Form([("a", "123"), ("a", "456"), ("b", "789")])
+    f = httpx.Form([("a", "123"), ("a", "456"), ("b", "789")])
     assert str(f) == "a=123&a=456&b=789"
     assert repr(f) == "<Form [('a', '123'), ('a', '456'), ('b', '789')]>"
     assert f.multi_dict() == {
@@ -79,14 +79,14 @@ def test_form_from_list():
 
 
 def test_empty_form():
-    f = hx.Form()
+    f = httpx.Form()
     assert str(f) == ''
     assert repr(f) == "<Form []>"
     assert f.multi_dict() == {}
 
 
 def test_form_accessors():
-    f = hx.Form([("a", "123"), ("a", "456"), ("b", "789")])
+    f = httpx.Form([("a", "123"), ("a", "456"), ("b", "789")])
     assert "a" in f
     assert "A" not in f
     assert "c" not in f
@@ -96,7 +96,7 @@ def test_form_accessors():
 
 
 def test_form_dict():
-    f = hx.Form([("a", "123"), ("a", "456"), ("b", "789")])
+    f = httpx.Form([("a", "123"), ("a", "456"), ("b", "789")])
     assert list(f.keys()) == ["a", "b"]
     assert list(f.values()) == ["123", "789"]
     assert list(f.items()) == [("a", "123"), ("b", "789")]
@@ -105,29 +105,29 @@ def test_form_dict():
 
 
 def test_form_multidict():
-    f = hx.Form([("a", "123"), ("a", "456"), ("b", "789")])
+    f = httpx.Form([("a", "123"), ("a", "456"), ("b", "789")])
     assert f.get_list("a") == ["123", "456"]
     assert f.multi_items() == [("a", "123"), ("a", "456"), ("b", "789")]
     assert f.multi_dict() == {"a": ["123", "456"], "b": ["789"]}
 
 
 def test_form_builtins():
-    f = hx.Form([("a", "123"), ("a", "456"), ("b", "789")])
+    f = httpx.Form([("a", "123"), ("a", "456"), ("b", "789")])
     assert len(f) == 2
     assert bool(f)
     assert hash(f)
-    assert f == hx.Form([("a", "123"), ("a", "456"), ("b", "789")])
+    assert f == httpx.Form([("a", "123"), ("a", "456"), ("b", "789")])
 
 
 def test_form_copy_operations():
-    f = hx.Form([("a", "123"), ("a", "456"), ("b", "789")])
-    assert f.copy_set("a", "abc") == hx.Form([("a", "abc"), ("b", "789")])
-    assert f.copy_append("a", "abc") == hx.Form([("a", "123"), ("a", "456"), ("a", "abc"), ("b", "789")])
-    assert f.copy_remove("a") == hx.Form([("b", "789")])
+    f = httpx.Form([("a", "123"), ("a", "456"), ("b", "789")])
+    assert f.copy_set("a", "abc") == httpx.Form([("a", "abc"), ("b", "789")])
+    assert f.copy_append("a", "abc") == httpx.Form([("a", "123"), ("a", "456"), ("a", "abc"), ("b", "789")])
+    assert f.copy_remove("a") == httpx.Form([("b", "789")])
 
 
 def test_form_encode():
-    form = hx.Form({'email': 'address@example.com'})
+    form = httpx.Form({'email': 'address@example.com'})
     assert form['email'] == "address@example.com"
 
     assert bytes(form) == b"email=address%40example.com"
@@ -140,26 +140,26 @@ def test_form_encode():
 # Files
 
 def test_files():
-    f = hx.Files()
+    f = httpx.Files()
     assert f.multi_dict() == {}
     assert repr(f) == "<Files []>"
 
 
 def test_files_from_dict():
-    f = hx.Files({
+    f = httpx.Files({
         "a": [
-            hx.File("123.json"),
-            hx.File("456.json"),
+            httpx.File("123.json"),
+            httpx.File("456.json"),
         ],
-        "b": hx.File("789.json")
+        "b": httpx.File("789.json")
     })
     assert f.multi_dict() == {
         "a": [
-            hx.File("123.json"),
-            hx.File("456.json"),
+            httpx.File("123.json"),
+            httpx.File("456.json"),
         ],
         "b": [
-            hx.File("789.json"),
+            httpx.File("789.json"),
         ]
     }
     assert repr(f) == (
@@ -169,18 +169,18 @@ def test_files_from_dict():
 
 
 def test_files_from_list():
-    f = hx.Files([
-        ("a", hx.File("123.json")),
-        ("a", hx.File("456.json")),
-        ("b", hx.File("789.json"))
+    f = httpx.Files([
+        ("a", httpx.File("123.json")),
+        ("a", httpx.File("456.json")),
+        ("b", httpx.File("789.json"))
     ])
     assert f.multi_dict() == {
         "a": [
-            hx.File("123.json"),
-            hx.File("456.json"),
+            httpx.File("123.json"),
+            httpx.File("456.json"),
         ],
         "b": [
-            hx.File("789.json"),
+            httpx.File("789.json"),
         ]
     }
     assert repr(f) == (
@@ -189,70 +189,70 @@ def test_files_from_list():
 
 
 def test_files_accessors():
-    f = hx.Files([
-        ("a", hx.File("123.json")),
-        ("a", hx.File("456.json")),
-        ("b", hx.File("789.json"))
+    f = httpx.Files([
+        ("a", httpx.File("123.json")),
+        ("a", httpx.File("456.json")),
+        ("b", httpx.File("789.json"))
     ])
     assert "a" in f
     assert "A" not in f
     assert "c" not in f
-    assert f["a"] == hx.File("123.json")
-    assert f.get("a") == hx.File("123.json")
+    assert f["a"] == httpx.File("123.json")
+    assert f.get("a") == httpx.File("123.json")
     assert f.get("nope", default=None) is None
 
 
 def test_files_dict():
-    f = hx.Files([
-        ("a", hx.File("123.json")),
-        ("a", hx.File("456.json")),
-        ("b", hx.File("789.json"))
+    f = httpx.Files([
+        ("a", httpx.File("123.json")),
+        ("a", httpx.File("456.json")),
+        ("b", httpx.File("789.json"))
     ])
     assert list(f.keys()) == ["a", "b"]
-    assert list(f.values()) == [hx.File("123.json"), hx.File("789.json")]
-    assert list(f.items()) == [("a", hx.File("123.json")), ("b", hx.File("789.json"))]
+    assert list(f.values()) == [httpx.File("123.json"), httpx.File("789.json")]
+    assert list(f.items()) == [("a", httpx.File("123.json")), ("b", httpx.File("789.json"))]
     assert list(f) == ["a", "b"]
-    assert dict(f) == {"a": hx.File("123.json"), "b": hx.File("789.json")}
+    assert dict(f) == {"a": httpx.File("123.json"), "b": httpx.File("789.json")}
 
 
 def test_files_multidict():
-    f = hx.Files([
-        ("a", hx.File("123.json")),
-        ("a", hx.File("456.json")),
-        ("b", hx.File("789.json"))
+    f = httpx.Files([
+        ("a", httpx.File("123.json")),
+        ("a", httpx.File("456.json")),
+        ("b", httpx.File("789.json"))
     ])
     assert f.get_list("a") == [
-        hx.File("123.json"),
-        hx.File("456.json"),
+        httpx.File("123.json"),
+        httpx.File("456.json"),
     ]
     assert f.multi_items() == [
-        ("a", hx.File("123.json")), 
-        ("a", hx.File("456.json")),
-        ("b", hx.File("789.json")),
+        ("a", httpx.File("123.json")), 
+        ("a", httpx.File("456.json")),
+        ("b", httpx.File("789.json")),
     ]
     assert f.multi_dict() == {
         "a": [
-            hx.File("123.json"),
-            hx.File("456.json"),
+            httpx.File("123.json"),
+            httpx.File("456.json"),
         ],
         "b": [
-            hx.File("789.json"),
+            httpx.File("789.json"),
         ]
     }
 
 
 def test_files_builtins():
-    f = hx.Files([
-        ("a", hx.File("123.json")),
-        ("a", hx.File("456.json")),
-        ("b", hx.File("789.json"))
+    f = httpx.Files([
+        ("a", httpx.File("123.json")),
+        ("a", httpx.File("456.json")),
+        ("b", httpx.File("789.json"))
     ])
     assert len(f) == 2
     assert bool(f)
-    assert f == hx.Files([
-        ("a", hx.File("123.json")),
-        ("a", hx.File("456.json")),
-        ("b", hx.File("789.json")),
+    assert f == httpx.Files([
+        ("a", httpx.File("123.json")),
+        ("a", httpx.File("456.json")),
+        ("b", httpx.File("789.json")),
     ])
 
 
@@ -261,13 +261,13 @@ def test_multipart():
         f.write(b"Hello, world")
         f.seek(0)
 
-        multipart = hx.MultiPart(
+        multipart = httpx.MultiPart(
             form={'email': 'me@example.com'},
-            files={'upload': hx.File(f.name)},
+            files={'upload': httpx.File(f.name)},
             boundary='BOUNDARY',
         )
         assert multipart.form['email'] == "me@example.com"
-        assert multipart.files['upload'] == hx.File(f.name)
+        assert multipart.files['upload'] == httpx.File(f.name)
 
         fname = os.path.basename(f.name).encode('utf-8')
 

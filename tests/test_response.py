@@ -1,9 +1,9 @@
-import hx
+import httpx
 import pytest
 
 
 def test_response():
-    r = hx.Response(200)
+    r = httpx.Response(200)
 
     assert repr(r) == "<Response [200 OK]>"
     assert r.status_code == 200
@@ -12,7 +12,7 @@ def test_response():
 
 
 def test_response_204():
-    r = hx.Response(204)
+    r = httpx.Response(204)
 
     assert repr(r) == "<Response [204 No Content]>"
     assert r.status_code == 204
@@ -22,7 +22,7 @@ def test_response_204():
 
 def test_response_bytes():
     content = b"Hello, world"
-    r = hx.Response(200, content=content)
+    r = httpx.Response(200, content=content)
 
     assert repr(r) == "<Response [200 OK]>"
     assert r.headers == {
@@ -32,8 +32,8 @@ def test_response_bytes():
 
 
 def test_response_json():
-    data = hx.JSON({"msg": "Hello, world"})
-    r = hx.Response(200, content=data)
+    data = httpx.JSON({"msg": "Hello, world"})
+    r = httpx.Response(200, content=data)
 
     assert repr(r) == "<Response [200 OK]>"
     assert r.headers == {
