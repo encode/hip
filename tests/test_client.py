@@ -111,6 +111,14 @@ def test_stream(client, server):
         }
 
 
+def test_keepalive(client, server):
+    first = client.get(server.url)
+    second = client.get(server.url)
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+
+
 def test_get_with_invalid_scheme(client):
     with pytest.raises(ValueError):
         client.get("nope://www.example.com")

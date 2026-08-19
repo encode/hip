@@ -81,6 +81,7 @@ class HTTPConnection:
             while data := stream.read(64 * 1024):
                 self._parser.send_body(data)
             self._parser.send_body(b'')
+        self._parser.complete()
 
 
 class Server:
