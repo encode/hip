@@ -79,9 +79,7 @@ requests v2.33.1 (63.4KiB)
 
 ## Contribution
 
-We have a transparent development model, and welcome feedback.
-
-Pull requests are restricted to team members only.
+Development of the `httpx` re-design is currently private.
 
 ---
 
