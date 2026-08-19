@@ -2,7 +2,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>hx</title>
+        <title>httpx</title>
         <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;text y=&quot;.9em&quot; font-size=&quot;90&quot;&gt;🦋&lt;/text&gt;&lt;/svg&gt;">
         <link rel="stylesheet" href="css/highlightjs.min.css">
         <link rel="stylesheet" href="css/highlightjs-copy.min.css">
@@ -14,14 +14,14 @@
     <body>
         <main>
             <p align="center">
-  <img width="350" height="208" src="https://raw.githubusercontent.com/encode/httpx/master/docs/img/butterfly.png" alt='hx'>
+  <img width="350" height="208" src="https://raw.githubusercontent.com/encode/httpx/master/docs/img/butterfly.png" alt='httpx'>
 </p>
 
-<h1 id="hx"><a class="toclink" href="#hx"><a class="active" href=".">hx</a></a></h1>
+<h1 id="httpx"><a class="toclink" href="#httpx"><a class="active" href=".">httpx</a></a></h1>
 <p style="text-align: center">An HTTP toolkit for folks who give a damn.</p>
 
 <p><br/></p>
-<p>Engineered for simplicity, <code>hx</code> provides a complete Python web suite&hellip;</p>
+<p>Engineered for simplicity, <code>httpx</code> provides a complete Python web suite&hellip;</p>
 <ul>
 <li>Supports both client and server functionality.</li>
 <li>Presents a clear, simple, and tightly constrained API.</li>
@@ -29,35 +29,35 @@
 </ul>
 <h2 id="installation"><a class="toclink" href="#installation">Installation</a></h2>
 <p>Install the package from PyPI&hellip;</p>
-<pre><code class="language-bash">$ uv add hx
+<pre><code class="language-bash">$ uv add httpx --pre
 </code></pre>
 <h2 id="client"><a class="toclink" href="#client">Client</a></h2>
 <p>Sending HTTP requests&hellip;</p>
-<pre><code class="language-python">&gt;&gt;&gt; import hx
+<pre><code class="language-python">&gt;&gt;&gt; import httpx
 
-&gt;&gt;&gt; cli = hx.Client()
+&gt;&gt;&gt; cli = httpx.Client()
 &gt;&gt;&gt; r = cli.get('https://www.example.com/')
 &gt;&gt;&gt; r
 &lt;Response [200 OK]&gt;
 </code></pre>
 <h2 id="server"><a class="toclink" href="#server">Server</a></h2>
 <p>Creating web apps&hellip;</p>
-<pre><code class="language-python">&gt;&gt;&gt; import hx
+<pre><code class="language-python">&gt;&gt;&gt; import httpx
 
 &gt;&gt;&gt; def app(request):
-...     content = hx.HTML('&lt;html&gt;&lt;body&gt;¡Hola, mundo!&lt;/body&gt;&lt;/html&gt;')
-...     return hx.Response(200, content=content)
+...     content = httpx.HTML('&lt;html&gt;&lt;body&gt;¡Hola, mundo!&lt;/body&gt;&lt;/html&gt;')
+...     return httpx.Response(200, content=content)
 
-&gt;&gt;&gt; s = hx.Server(app)
+&gt;&gt;&gt; s = httpx.Server(app)
 &gt;&gt;&gt; s.serve()
 </code></pre>
 <hr />
 <h2 id="motivation"><a class="toclink" href="#motivation">Motivation</a></h2>
 <p>A clean modern design, with <a href="api/">a focused API</a> and an exceptionally light installation footprint.</p>
-<p>For comparison, see <code>hx</code> <small>vs</small> <code>requests</code>&hellip;</p>
-<pre><code class="language-bash">$ uv add hx
-$ uv tree --show-sizes --package hx
-hx v1.0.0 (33.5KiB)
+<p>For comparison, see <code>httpx</code> <small>vs</small> <code>requests</code>&hellip;</p>
+<pre><code class="language-bash">$ uv add httpx
+$ uv tree --show-sizes --package httpx
+httpx v1.0.0 (33.5KiB)
 └── truststore v0.10.0 (17.8KiB)
 </code></pre>
 <p></p>
@@ -75,7 +75,7 @@ requests v2.33.1 (63.4KiB)
 <p>Pull requests are restricted to team members only.</p>
 <hr />
 <p align="center">
-<a href="LICENSE.md">MIT Licensed</a>.<br/>Designed & Built with Love.
+<a href="license/">MIT Licensed</a>.<br/>Designed & Built with Love.
 </p>
 
 <p align="center">&mdash; 💖 &mdash;</p>

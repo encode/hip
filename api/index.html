@@ -13,7 +13,7 @@
     </head>
     <body>
         <main>
-            <h1 style="border: none"><a href="/">hx</a></h1>
+            <h1 style="border: none"><a href="/">httpx</a></h1>
 
 <hr />
 <ul>
@@ -36,110 +36,110 @@
 <hr />
 <h2 id="client"><a class="toclink" href="#client">Client</a></h2>
 <p><em>Explicit open / close... (recommended)</em></p>
-<pre><code class="language-python">&gt;&gt;&gt; with hx.Client() as c:
+<pre><code class="language-python">&gt;&gt;&gt; with httpx.Client() as c:
 &gt;&gt;&gt;     ...
 </code></pre>
 <p><em>Simple usage...</em></p>
-<pre><code class="language-python">&gt;&gt;&gt; c = hx.Client()
+<pre><code class="language-python">&gt;&gt;&gt; c = httpx.Client()
 &gt;&gt;&gt; c.close()
 </code></pre>
 <p><em>Requests...</em></p>
-<pre><code class="language-python">&gt;&gt;&gt; c = hx.Client()
+<pre><code class="language-python">&gt;&gt;&gt; c = httpx.Client()
 &gt;&gt;&gt; r = c.get('https://www.example.com/')
 &gt;&gt;&gt; r
 &lt;Response [200 OK]&gt;
 </code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; c = hx.Client()
-&gt;&gt;&gt; u = hx.URL('https://www.example.com/', params={'search': '...'})
+<pre><code class="language-python">&gt;&gt;&gt; c = httpx.Client()
+&gt;&gt;&gt; u = httpx.URL('https://www.example.com/', params={'search': '...'})
 &gt;&gt;&gt; r = c.get(u)
 &gt;&gt;&gt; r
 &lt;Response [200 OK]&gt;
 </code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; f = hx.Form({'email': '...', 'message': '...'})
+<pre><code class="language-python">&gt;&gt;&gt; f = httpx.Form({'email': '...', 'message': '...'})
 &gt;&gt;&gt; r = c.post('https://www.example.com/', content=f)
 &gt;&gt;&gt; r
 &lt;Response [200 OK]&gt;
 </code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; j = hx.JSON({'title': ..., 'rating': ...})
+<pre><code class="language-python">&gt;&gt;&gt; j = httpx.JSON({'title': ..., 'rating': ...})
 &gt;&gt;&gt; r = c.put('https://www.example.com/', content=j)
 &gt;&gt;&gt; r
 &lt;Response [200 OK]&gt;
 </code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; j = hx.JSON({'title': ..., 'rating': ...})
+<pre><code class="language-python">&gt;&gt;&gt; j = httpx.JSON({'title': ..., 'rating': ...})
 &gt;&gt;&gt; r = c.patch('https://www.example.com/', content=j)
 &gt;&gt;&gt; r
 &lt;Response [200 OK]&gt;
 </code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; c = hx.Client()
+<pre><code class="language-python">&gt;&gt;&gt; c = httpx.Client()
 &gt;&gt;&gt; r = c.delete('https://www.example.com/')
 &gt;&gt;&gt; r
 &lt;Response [200 OK]&gt;
 </code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; c = hx.Client()
+<pre><code class="language-python">&gt;&gt;&gt; c = httpx.Client()
 &gt;&gt;&gt; r = c.head('https://www.example.com/')
 &gt;&gt;&gt; r
 &lt;Response [200 OK]&gt;
 </code></pre>
 <h2 id="server"><a class="toclink" href="#server">Server</a></h2>
 <p><em>Explicit open / close... (recommended)</em></p>
-<pre><code class="language-python">&gt;&gt;&gt; with hx.Server(app) as s:
+<pre><code class="language-python">&gt;&gt;&gt; with httpx.Server(app) as s:
 ...     # Serve until Ctrl-C, non-blocking
 ...     print(s.url)
 </code></pre>
 <p><em>Simple usage...</em></p>
-<pre><code class="language-python">&gt;&gt;&gt; s = hx.Server(app)
+<pre><code class="language-python">&gt;&gt;&gt; s = httpx.Server(app)
 &gt;&gt;&gt; s.serve()  # Serve until Ctrl-C
 </code></pre>
 <p><em>Address...</em></p>
 <pre><code class="language-python">&gt;&gt;&gt; # Serve locally, use an unassigned port. 
-&gt;&gt;&gt; s = hx.Server(app, addr='127.0.0.1')
+&gt;&gt;&gt; s = httpx.Server(app, addr='127.0.0.1')
 </code></pre>
 <pre><code class="language-python">&gt;&gt;&gt; # Serve locally, use a fixed port.
-&gt;&gt;&gt; s = hx.Server(app, addr='127.0.0.1:8000')
+&gt;&gt;&gt; s = httpx.Server(app, addr='127.0.0.1:8000')
 </code></pre>
 <pre><code class="language-python">&gt;&gt;&gt; # Serve globally, use a fixed port.
-&gt;&gt;&gt; s = hx.Server(app, addr='0.0.0.0:8000')
+&gt;&gt;&gt; s = httpx.Server(app, addr='0.0.0.0:8000')
 </code></pre>
 <pre><code class="language-python">&gt;&gt;&gt; # Serve globally, enforcing domain name and SSL.
-&gt;&gt;&gt; s = hx.Server(app, addr='https://www.domainname.com')
+&gt;&gt;&gt; s = httpx.Server(app, addr='https://www.domainname.com')
 </code></pre>
 <hr />
 <h2 id="request"><a class="toclink" href="#request">Request</a></h2>
-<pre><code class="language-python">&gt;&gt;&gt; r = hx.Request(method, url, headers=..., content=...)
+<pre><code class="language-python">&gt;&gt;&gt; r = httpx.Request(method, url, headers=..., content=...)
 </code></pre>
 <p><em>Attributes...</em></p>
-<pre><code class="language-python">&gt;&gt;&gt; r = hx.Request('GET', 'https://www.example.com')
+<pre><code class="language-python">&gt;&gt;&gt; r = httpx.Request('GET', 'https://www.example.com')
 &gt;&gt;&gt; r.method
 &gt;&gt;&gt; r.url
 &gt;&gt;&gt; r.headers
 &gt;&gt;&gt; r.content
 </code></pre>
 <h2 id="response"><a class="toclink" href="#response">Response</a></h2>
-<pre><code class="language-python">&gt;&gt;&gt; r = hx.Response(status_code, headers=..., content=...)
+<pre><code class="language-python">&gt;&gt;&gt; r = httpx.Response(status_code, headers=..., content=...)
 </code></pre>
 <p><em>Attributes...</em></p>
-<pre><code class="language-python">&gt;&gt;&gt; r = hx.Response(200, content=hx.JSON({'message': 'hello, world'}))
+<pre><code class="language-python">&gt;&gt;&gt; r = httpx.Response(200, content=httpx.JSON({'message': 'hello, world'}))
 &gt;&gt;&gt; r.status_code
 &gt;&gt;&gt; r.headers
 &gt;&gt;&gt; r.content
 </code></pre>
 <hr />
 <h2 id="method"><a class="toclink" href="#method">Method</a></h2>
-<pre><code class="language-python">&gt;&gt;&gt; m = hx.Method('GET')
+<pre><code class="language-python">&gt;&gt;&gt; m = httpx.Method('GET')
 &gt;&gt;&gt; m == 'GET'
 True
 &gt;&gt;&gt; str(m)
 'GET'
 </code></pre>
 <h2 id="statuscode"><a class="toclink" href="#statuscode">StatusCode</a></h2>
-<pre><code class="language-python">&gt;&gt;&gt; s = hx.StatusCode(200)
+<pre><code class="language-python">&gt;&gt;&gt; s = httpx.StatusCode(200)
 &gt;&gt;&gt; s.value, s.reason
 (200, 'OK')
 &gt;&gt;&gt; s == 200
 True
 </code></pre>
 <p><em>Status classes...</em></p>
-<pre><code class="language-python">&gt;&gt;&gt; s = hx.StatusCode(200)
+<pre><code class="language-python">&gt;&gt;&gt; s = httpx.StatusCode(200)
 &gt;&gt;&gt; s.is_1xx_informational()
 False
 &gt;&gt;&gt; s.is_2xx_success()
@@ -152,7 +152,7 @@ False
 False
 </code></pre>
 <h2 id="headers"><a class="toclink" href="#headers">Headers</a></h2>
-<pre><code class="language-python">&gt;&gt;&gt; h = hx.Headers({...})
+<pre><code class="language-python">&gt;&gt;&gt; h = httpx.Headers({...})
 &gt;&gt;&gt; h['Content-Type']
 ...
 &gt;&gt;&gt; h.get('content-type')
@@ -169,12 +169,12 @@ False
 &gt;&gt;&gt; h = h.copy_update(...)
 </code></pre>
 <h2 id="url"><a class="toclink" href="#url">URL</a></h2>
-<pre><code class="language-python">&gt;&gt;&gt; u = hx.URL('...')
+<pre><code class="language-python">&gt;&gt;&gt; u = httpx.URL('...')
 &gt;&gt;&gt; u == '...'
 True
 </code></pre>
 <p><em>Query parameters...</em></p>
-<pre><code class="language-python">&gt;&gt;&gt; u = hx.URL('...', params={'search': ...})
+<pre><code class="language-python">&gt;&gt;&gt; u = httpx.URL('...', params={'search': ...})
 &gt;&gt;&gt; u.params
 &lt;QueryParams ...&gt;
 </code></pre>
@@ -189,17 +189,17 @@ True
 &gt;&gt;&gt; u.target  # '/path?query'       (HTTP request target)
 </code></pre>
 <p><em>Instantiate from components...</em></p>
-<pre><code class="language-python">&gt;&gt;&gt; u = hx.URL(scheme='https', host='www.example.com', path='/')
+<pre><code class="language-python">&gt;&gt;&gt; u = httpx.URL(scheme='https', host='www.example.com', path='/')
 </code></pre>
 <p><em>Updates...</em></p>
 <pre><code class="language-python">&gt;&gt;&gt; u = u.copy_with(scheme='https')
 </code></pre>
 <p><em>Joins...</em></p>
-<pre><code class="language-python">&gt;&gt;&gt; u = hx.URL('https://www.example.com/location')
+<pre><code class="language-python">&gt;&gt;&gt; u = httpx.URL('https://www.example.com/location')
 &gt;&gt;&gt; u = u.join('/redirect')
 </code></pre>
 <h2 id="queryparams"><a class="toclink" href="#queryparams">QueryParams</a></h2>
-<pre><code class="language-python">&gt;&gt;&gt; q = hx.QueryParams(&quot;...&quot;)
+<pre><code class="language-python">&gt;&gt;&gt; q = httpx.QueryParams(&quot;...&quot;)
 &gt;&gt;&gt; q['...']
 &gt;&gt;&gt; q.get('...')
 </code></pre>
@@ -217,20 +217,20 @@ True
 </code></pre>
 <h2 id="content"><a class="toclink" href="#content">Content</a></h2>
 <p><em>Content types for requests...</em></p>
-<pre><code class="language-python">&gt;&gt;&gt; j = hx.JSON(...)
+<pre><code class="language-python">&gt;&gt;&gt; j = httpx.JSON(...)
 </code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; f = hx.Form(...)
+<pre><code class="language-python">&gt;&gt;&gt; f = httpx.Form(...)
 </code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; m = hx.MultiPart(...)
+<pre><code class="language-python">&gt;&gt;&gt; m = httpx.MultiPart(...)
 </code></pre>
 <p><em>Content types for responses...</em></p>
-<pre><code class="language-python">&gt;&gt;&gt; h = hx.HTML('&lt;html&gt;&lt;body&gt;¡Hola, mundo!&lt;/body&gt;&lt;/html&gt;')
+<pre><code class="language-python">&gt;&gt;&gt; h = httpx.HTML('&lt;html&gt;&lt;body&gt;¡Hola, mundo!&lt;/body&gt;&lt;/html&gt;')
 </code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; t = hx.Text('hello, world')
+<pre><code class="language-python">&gt;&gt;&gt; t = httpx.Text('hello, world')
 </code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; j = hx.JSON({'content': ...})
+<pre><code class="language-python">&gt;&gt;&gt; j = httpx.JSON({'content': ...})
 </code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; f = hx.File('image.png')
+<pre><code class="language-python">&gt;&gt;&gt; f = httpx.File('image.png')
 </code></pre>
 <p align="center">&mdash; 💖 &mdash;</p>
             
