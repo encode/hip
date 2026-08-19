@@ -1,10 +1,10 @@
 import json
-import hx
+import httpx
 import pytest
 
 
 def echo(request):
-    response = hx.Response(200, content=hx.JSON({
+    response = httpx.Response(200, content=httpx.JSON({
         'method': str(request.method),
         'query-params': dict(request.url.params.items()),
         'content-type': request.headers.get('Content-Type'),
@@ -15,12 +15,12 @@ def echo(request):
 
 @pytest.fixture
 def server():
-    with hx.Server(echo) as server:
+    with httpx.Server(echo) as server:
         yield server
 
 
 def test_get(server):
-    r = hx.get(server.url)
+    r = httpx.get(server.url)
     assert r.status_code == 200
     assert r.content == {
         'method': 'GET',
@@ -31,8 +31,8 @@ def test_get(server):
 
 
 def test_post(server):
-    data = hx.JSON({"data": 123})
-    r = hx.post(server.url, content=data)
+    data = httpx.JSON({"data": 123})
+    r = httpx.post(server.url, content=data)
     assert r.status_code == 200
     assert r.content == {
         'method': 'POST',
@@ -43,8 +43,8 @@ def test_post(server):
 
 
 def test_put(server):
-    data = hx.JSON({"data": 123})
-    r = hx.put(server.url, content=data)
+    data = httpx.JSON({"data": 123})
+    r = httpx.put(server.url, content=data)
     assert r.status_code == 200
     assert r.content == {
         'method': 'PUT',
@@ -55,8 +55,8 @@ def test_put(server):
 
 
 def test_patch(server):
-    data = hx.JSON({"data": 123})
-    r = hx.patch(server.url, content=data)
+    data = httpx.JSON({"data": 123})
+    r = httpx.patch(server.url, content=data)
     assert r.status_code == 200
     assert r.content == {
         'method': 'PATCH',
@@ -67,7 +67,7 @@ def test_patch(server):
 
 
 def test_delete(server):
-    r = hx.delete(server.url)
+    r = httpx.delete(server.url)
     assert r.status_code == 200
     assert r.content == {
         'method': 'DELETE',

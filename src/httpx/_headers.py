@@ -63,7 +63,7 @@ class Headers(typing.Mapping[str, str]):
 
         Usage:
 
-        h = hx.Headers({"Accept": "*/*", "User-Agent": "python/hx"})
+        h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
         assert list(h.keys()) == ["Accept", "User-Agent"]
         """
         return self._dict.keys()
@@ -74,8 +74,8 @@ class Headers(typing.Mapping[str, str]):
 
         Usage:
 
-        h = hx.Headers({"Accept": "*/*", "User-Agent": "python/hx"})
-        assert list(h.values()) == ["*/*", "python/hx"]
+        h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
+        assert list(h.values()) == ["*/*", "python/httpx"]
         """
         return self._dict.values()
 
@@ -85,8 +85,8 @@ class Headers(typing.Mapping[str, str]):
 
         Usage:
 
-        h = hx.Headers({"Accept": "*/*", "User-Agent": "python/hx"})
-        assert list(h.items()) == [("Accept", "*/*"), ("User-Agent", "python/hx")]
+        h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
+        assert list(h.items()) == [("Accept", "*/*"), ("User-Agent", "python/httpx")]
         """
         return self._dict.items()
 
@@ -97,8 +97,8 @@ class Headers(typing.Mapping[str, str]):
 
         Usage:
 
-        h = hx.Headers({"Accept": "*/*", "User-Agent": "python/hx"})
-        assert h.get("User-Agent") == "python/hx"
+        h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
+        assert h.get("User-Agent") == "python/httpx"
         """
         for k, v in self._dict.items():
             if k.lower() == key.lower():
@@ -111,9 +111,9 @@ class Headers(typing.Mapping[str, str]):
 
         Usage:
 
-        h = hx.Headers({"Expires": "0"})
+        h = httpx.Headers({"Expires": "0"})
         h = h.copy_set("Expires", "Wed, 21 Oct 2015 07:28:00 GMT")
-        assert h == hx.Headers({"Expires": "Wed, 21 Oct 2015 07:28:00 GMT"})
+        assert h == httpx.Headers({"Expires": "Wed, 21 Oct 2015 07:28:00 GMT"})
         """
         l = []
         seen = False
@@ -138,9 +138,9 @@ class Headers(typing.Mapping[str, str]):
 
         Usage:
 
-        h = hx.Headers({"Accept": "*/*"})
+        h = httpx.Headers({"Accept": "*/*"})
         h = h.copy_remove("Accept")
-        assert h == hx.Headers({})
+        assert h == httpx.Headers({})
         """
         h = {k: v for k, v in self._dict.items() if k.lower() != key.lower()}
         return Headers(h)
@@ -151,9 +151,9 @@ class Headers(typing.Mapping[str, str]):
 
         Usage:
 
-        h = hx.Headers({"Accept": "*/*", "User-Agent": "python/hx"})
+        h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
         h = h.copy_update({"Accept-Encoding": "gzip"})
-        assert h == hx.Headers({"Accept": "*/*", "Accept-Encoding": "gzip", "User-Agent": "python/hx"})
+        assert h == httpx.Headers({"Accept": "*/*", "Accept-Encoding": "gzip", "User-Agent": "python/httpx"})
         """
         if update is None:
             return self

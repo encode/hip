@@ -1,9 +1,9 @@
 import pytest
-import hx
+import httpx
 
 
 def test_stream():
-    i = hx.Stream()
+    i = httpx.Stream()
     with pytest.raises(NotImplementedError):
         i.read()
 
@@ -15,11 +15,11 @@ def test_stream():
 
 def test_bytestream():
     data = b'abc'
-    s = hx.ByteStream(data)
+    s = httpx.ByteStream(data)
     assert s.size == 3
     assert s.read() == b'abc'
 
-    s = hx.ByteStream(data)
+    s = httpx.ByteStream(data)
     assert s.read(1) == b'a'
     assert s.read(1) == b'b'
     assert s.read(1) == b'c'
@@ -30,17 +30,17 @@ def test_filestream(tmp_path):
     path = tmp_path / "example.txt"
     path.write_bytes(b"hello world")
 
-    with hx.FileStream(path) as s:
+    with httpx.FileStream(path) as s:
         assert s.size == 11
         assert s.read() == b'hello world'
 
-    with hx.FileStream(path) as s:
+    with httpx.FileStream(path) as s:
         assert s.read(5) == b'hello'
         assert s.read(5) == b' worl'
         assert s.read(5) == b'd'
         assert s.read(5) == b''
 
-    with hx.FileStream(path) as s:
+    with httpx.FileStream(path) as s:
         assert s.read(5) == b'hello'
 
 
@@ -62,18 +62,18 @@ def test_multipartstream(tmp_path):
 
     form = [('email', 'heya@example.com')]
     files = [('upload', str(path))]
-    with hx.MultiPartStream(form, files, boundary='boundary') as s:
+    with httpx.MultiPartStream(form, files, boundary='boundary') as s:
         assert s.size is None
         assert s.read() == expected
 
-    with hx.MultiPartStream(form, files, boundary='boundary') as s:
+    with httpx.MultiPartStream(form, files, boundary='boundary') as s:
         assert s.read(50) == expected[:50]
         assert s.read(50) == expected[50:100]
         assert s.read(50) == expected[100:150]
         assert s.read(50) == expected[150:200]
         assert s.read(50) == expected[200:250]
 
-    with hx.MultiPartStream(form, files, boundary='boundary') as s:
+    with httpx.MultiPartStream(form, files, boundary='boundary') as s:
         assert s.read(50) == expected[:50]
         assert s.read(50) == expected[50:100]
         assert s.read(50) == expected[100:150]

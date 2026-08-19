@@ -1,4 +1,4 @@
-import hx
+import httpx
 import pytest
 
 
@@ -9,18 +9,18 @@ def echo(stream):
 
 @pytest.fixture
 def server():
-    net = hx.NetworkBackend()
+    net = httpx.NetworkBackend()
     with net.serve("127.0.0.1", 8080, echo) as server:
         yield server
 
 
 def test_network_backend():
-    net = hx.NetworkBackend()
+    net = httpx.NetworkBackend()
     assert repr(net) in ["<NetworkBackend [trio]>", "<NetworkBackend [threaded]>"]
 
 
 def test_network_backend_connect(server):
-    net = hx.NetworkBackend()
+    net = httpx.NetworkBackend()
     stream = net.connect(server.host, server.port)
     try:
         assert repr(stream) == f"<NetworkStream [{server.host}:{server.port}]>"
@@ -32,7 +32,7 @@ def test_network_backend_connect(server):
 
 
 def test_network_backend_context_managed(server):
-    net = hx.NetworkBackend()
+    net = httpx.NetworkBackend()
     with net.connect(server.host, server.port) as stream:
         stream.write(b"Hello, world.")
         content = stream.read()
@@ -41,18 +41,18 @@ def test_network_backend_context_managed(server):
 
 
 def test_network_backend_timeout(server):
-    net = hx.NetworkBackend()
-    with hx.timeout(0.0):
+    net = httpx.NetworkBackend()
+    with httpx.timeout(0.0):
         with pytest.raises(TimeoutError):
             with net.connect(server.host, server.port) as stream:
                 pass
 
-    with hx.timeout(10.0):
+    with httpx.timeout(10.0):
         with net.connect(server.host, server.port) as stream:
             pass
 
 
-# >>> net = hx.NetworkBackend()
+# >>> net = httpx.NetworkBackend()
 # >>> stream = net.connect("dev.encode.io", 80)
 # >>> try:
 # >>>     ...
@@ -61,11 +61,11 @@ def test_network_backend_timeout(server):
 # >>> stream
 # <NetworkStream ["168.0.0.1:80" CLOSED]>
 
-# import hx
+# import httpx
 # import ssl
 # import truststore
 
-# net = hx.NetworkBackend()
+# net = httpx.NetworkBackend()
 # ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 # req = b'\r\n'.join([
 #     b'GET / HTTP/1.1',
@@ -94,7 +94,7 @@ def test_network_backend_timeout(server):
 # def test_fixture(tcp_echo_server):
 #     host, port = (tcp_echo_server.host, tcp_echo_server.port)
 
-#     net = hx.NetworkBackend()
+#     net = httpx.NetworkBackend()
 #     with net.connect(host, port) as stream:
 #         stream.write(b"123")
 #         buffer = stream.read()
