@@ -1,9 +1,9 @@
-import hx
+import httpx
 import pytest
 
 
 def test_request():
-    r = hx.Request("GET", "https://example.com")
+    r = httpx.Request("GET", "https://example.com")
 
     assert repr(r) == "<Request [GET 'https://example.com']>"
     assert r.method == "GET"
@@ -16,7 +16,7 @@ def test_request():
 
 def test_request_bytes():
     content = b"Hello, world"
-    r = hx.Request("POST", "https://example.com", content=content)
+    r = httpx.Request("POST", "https://example.com", content=content)
 
     assert repr(r) == "<Request [POST 'https://example.com']>"
     assert r.method == "POST"
@@ -29,8 +29,8 @@ def test_request_bytes():
 
 
 def test_request_json():
-    data = hx.JSON({"msg": "Hello, world"})
-    r = hx.Request("POST", "https://example.com", content=data)
+    data = httpx.JSON({"msg": "Hello, world"})
+    r = httpx.Request("POST", "https://example.com", content=data)
 
     assert repr(r) == "<Request [POST 'https://example.com']>"
     assert r.method == "POST"
@@ -44,7 +44,7 @@ def test_request_json():
 
 
 def test_request_empty_post():
-    r = hx.Request("POST", "https://example.com")
+    r = httpx.Request("POST", "https://example.com")
 
     assert repr(r) == "<Request [POST 'https://example.com']>"
     assert r.method == "POST"

@@ -1,9 +1,9 @@
-import hx
+import httpx
 import pytest
 
 
-class TrickleIO(hx.Stream):
-    def __init__(self, stream: hx.Stream):
+class TrickleIO(httpx.Stream):
+    def __init__(self, stream: httpx.Stream):
         self._stream = stream
 
     def read(self, size) -> bytes:
@@ -17,7 +17,7 @@ class TrickleIO(hx.Stream):
 
 
 def test_parser():
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Length: 12\r\n"
         b"Content-Type: text/plain\r\n"
@@ -25,7 +25,7 @@ def test_parser():
         b"hello, world"
     )
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"POST", b"/", b"HTTP/1.1")
     p.send_headers([
         (b"Host", b"example.com"),
@@ -72,13 +72,13 @@ def test_parser():
 
 
 def test_parser_server():
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"GET / HTTP/1.1\r\n"
         b"Host: www.example.com\r\n"
         b"\r\n"
     )
 
-    p = hx.HTTPParser(stream, mode='SERVER')
+    p = httpx.HTTPParser(stream, mode='SERVER')
     method, target, protocol = p.recv_method_line()
     headers = p.recv_headers()
     body = p.recv_body()
@@ -118,7 +118,7 @@ def test_parser_server():
 
 
 def test_parser_trickle():
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Length: 12\r\n"
         b"Content-Type: text/plain\r\n"
@@ -126,7 +126,7 @@ def test_parser_trickle():
         b"hello, world"
     )
 
-    p = hx.HTTPParser(TrickleIO(stream), mode='CLIENT')
+    p = httpx.HTTPParser(TrickleIO(stream), mode='CLIENT')
     p.send_method_line(b"POST", b"/", b"HTTP/1.1")
     p.send_headers([
         (b"Host", b"example.com"),
@@ -169,7 +169,7 @@ def test_parser_trickle():
 
 
 def test_parser_transfer_encoding_chunked():
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Type: text/plain\r\n"
         b"Transfer-Encoding: chunked\r\n"
@@ -179,7 +179,7 @@ def test_parser_transfer_encoding_chunked():
         b"0\r\n\r\n"
     )
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"POST", b"/", b"HTTP/1.1")
     p.send_headers([
         (b"Host", b"example.com"),
@@ -226,7 +226,7 @@ def test_parser_transfer_encoding_chunked():
 
 
 def test_parser_transfer_encoding_chunked_trickle():
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Type: text/plain\r\n"
         b"Transfer-Encoding: chunked\r\n"
@@ -236,7 +236,7 @@ def test_parser_transfer_encoding_chunked_trickle():
         b"0\r\n\r\n"
     )
 
-    p = hx.HTTPParser(TrickleIO(stream), mode='CLIENT')
+    p = httpx.HTTPParser(TrickleIO(stream), mode='CLIENT')
     p.send_method_line(b"POST", b"/", b"HTTP/1.1")
     p.send_headers([
         (b"Host", b"example.com"),
@@ -283,7 +283,7 @@ def test_parser_transfer_encoding_chunked_trickle():
 
 
 def test_parser_repr():
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Type: application/json\r\n"
         b"Content-Length: 23\r\n"
@@ -291,7 +291,7 @@ def test_parser_repr():
         b'{"msg": "hello, world"}'
     )
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     assert repr(p) == "<HTTPParser [client SEND_METHOD_LINE, server WAIT]>"
 
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
@@ -320,105 +320,105 @@ def test_parser_repr():
 
 
 def test_parser_invalid_transitions():
-    stream = hx.DuplexStream()
+    stream = httpx.DuplexStream()
 
-    with pytest.raises(hx.ProtocolError):
-        p = hx.HTTPParser(stream, mode='CLIENT')
+    with pytest.raises(httpx.ProtocolError):
+        p = httpx.HTTPParser(stream, mode='CLIENT')
         p.send_method_line(b'GET', b'/', b'HTTP/1.1')
         p.send_method_line(b'GET', b'/', b'HTTP/1.1')
 
-    with pytest.raises(hx.ProtocolError):
-        p = hx.HTTPParser(stream, mode='CLIENT')
+    with pytest.raises(httpx.ProtocolError):
+        p = httpx.HTTPParser(stream, mode='CLIENT')
         p.send_headers([])
 
-    with pytest.raises(hx.ProtocolError):
-        p = hx.HTTPParser(stream, mode='CLIENT')
+    with pytest.raises(httpx.ProtocolError):
+        p = httpx.HTTPParser(stream, mode='CLIENT')
         p.send_body(b'')
 
-    with pytest.raises(hx.ProtocolError):
-        reader = hx.ByteStream(b'HTTP/1.1 200 OK\r\n')
-        p = hx.HTTPParser(stream, mode='CLIENT')
+    with pytest.raises(httpx.ProtocolError):
+        reader = httpx.ByteStream(b'HTTP/1.1 200 OK\r\n')
+        p = httpx.HTTPParser(stream, mode='CLIENT')
         p.recv_status_line()
 
-    with pytest.raises(hx.ProtocolError):
-        p = hx.HTTPParser(stream, mode='CLIENT')
+    with pytest.raises(httpx.ProtocolError):
+        p = httpx.HTTPParser(stream, mode='CLIENT')
         p.recv_headers()
 
-    with pytest.raises(hx.ProtocolError):
-        p = hx.HTTPParser(stream, mode='CLIENT')
+    with pytest.raises(httpx.ProtocolError):
+        p = httpx.HTTPParser(stream, mode='CLIENT')
         p.recv_body()
 
 
 def test_parser_invalid_status_line():
     # ...
-    stream = hx.DuplexStream(b'...')
+    stream = httpx.DuplexStream(b'...')
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b'')
 
     msg = 'Stream closed early reading response status line'
-    with pytest.raises(hx.ProtocolError, match=msg):
+    with pytest.raises(httpx.ProtocolError, match=msg):
         p.recv_status_line()
 
     # ...
-    stream = hx.DuplexStream(b'HTTP/1.1' + b'x' * 5000)
+    stream = httpx.DuplexStream(b'HTTP/1.1' + b'x' * 5000)
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b'')
 
     msg = 'Exceeded maximum size reading response status line'
-    with pytest.raises(hx.ProtocolError, match=msg):
+    with pytest.raises(httpx.ProtocolError, match=msg):
         p.recv_status_line()
 
     # ...
-    stream = hx.DuplexStream(b'HTTP/1.1' + b'x' * 5000 + b'\r\n')
+    stream = httpx.DuplexStream(b'HTTP/1.1' + b'x' * 5000 + b'\r\n')
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b'')
 
     msg = 'Exceeded maximum size reading response status line'
-    with pytest.raises(hx.ProtocolError, match=msg):
+    with pytest.raises(httpx.ProtocolError, match=msg):
         p.recv_status_line()
 
 
 def test_parser_sent_unsupported_protocol():
     # Currently only HTTP/1.1 is supported.
-    stream = hx.DuplexStream()
+    stream = httpx.DuplexStream()
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     msg = 'Sent unsupported protocol version'
-    with pytest.raises(hx.ProtocolError, match=msg):
+    with pytest.raises(httpx.ProtocolError, match=msg):
         p.send_method_line(b"GET", b"/", b"HTTP/1.0")
 
 
 def test_parser_recv_unsupported_protocol():
     # Currently only HTTP/1.1 is supported.
-    stream = hx.DuplexStream(b"HTTP/1.0 200 OK\r\n")
+    stream = httpx.DuplexStream(b"HTTP/1.0 200 OK\r\n")
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     msg = 'Received unsupported protocol version'
-    with pytest.raises(hx.ProtocolError, match=msg):
+    with pytest.raises(httpx.ProtocolError, match=msg):
         p.recv_status_line()
 
 
 def test_parser_large_body():
     body = b"x" * 6988
 
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Length: 6988\r\n"
         b"Content-Type: text/plain\r\n"
         b"\r\n" + body
     )
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b'')
@@ -433,7 +433,7 @@ def test_parser_large_body():
 def test_parser_stream_large_body():
     body = b"x" * 6956
 
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Transfer-Encoding: chunked\r\n"
         b"Content-Type: text/plain\r\n"
@@ -441,7 +441,7 @@ def test_parser_stream_large_body():
         b"1b2c\r\n" + body + b'\r\n0\r\n\r\n'
     )
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b'')
@@ -456,7 +456,7 @@ def test_parser_stream_large_body():
 
 
 def test_parser_not_enough_data_received():
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Length: 188\r\n"
         b"Content-Type: text/plain\r\n"
@@ -464,7 +464,7 @@ def test_parser_not_enough_data_received():
         b"truncated"
     )
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b'')
@@ -474,14 +474,14 @@ def test_parser_not_enough_data_received():
     p.recv_headers()
     p.recv_body()
     msg = 'Not enough data received for declared Content-Length'
-    with pytest.raises(hx.ProtocolError, match=msg):
+    with pytest.raises(httpx.ProtocolError, match=msg):
         p.recv_body()
 
 
 def test_parser_not_enough_data_sent():
-    stream = hx.DuplexStream()
+    stream = httpx.DuplexStream()
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"POST", b"/", b"HTTP/1.1")
     p.send_headers([
         (b"Host", b"example.com"),
@@ -490,14 +490,14 @@ def test_parser_not_enough_data_sent():
     ])
     p.send_body(b'{"msg": "too smol"}')
     msg = 'Not enough data sent for declared Content-Length'
-    with pytest.raises(hx.ProtocolError, match=msg):
+    with pytest.raises(httpx.ProtocolError, match=msg):
         p.send_body(b'')
 
 
 def test_parser_too_much_data_sent():
-    stream = hx.DuplexStream()
+    stream = httpx.DuplexStream()
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"POST", b"/", b"HTTP/1.1")
     p.send_headers([
         (b"Host", b"example.com"),
@@ -505,22 +505,22 @@ def test_parser_too_much_data_sent():
         (b"Content-Length", b"19"),
     ])
     msg = 'Too much data sent for declared Content-Length'
-    with pytest.raises(hx.ProtocolError, match=msg):
+    with pytest.raises(httpx.ProtocolError, match=msg):
         p.send_body(b'{"msg": "too chonky"}')
 
 
 def test_parser_missing_host_header():
-    stream = hx.DuplexStream()
+    stream = httpx.DuplexStream()
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     msg = "Request missing 'Host' header"
-    with pytest.raises(hx.ProtocolError, match=msg):
+    with pytest.raises(httpx.ProtocolError, match=msg):
         p.send_headers([])
 
 
 def test_client_connection_close():
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Length: 12\r\n"
         b"Content-Type: text/plain\r\n"
@@ -528,7 +528,7 @@ def test_client_connection_close():
         b"hello, world"
     )
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([
         (b"Host", b"example.com"),
@@ -559,7 +559,7 @@ def test_client_connection_close():
 
 
 def test_server_connection_close():
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Length: 12\r\n"
         b"Content-Type: text/plain\r\n"
@@ -568,7 +568,7 @@ def test_server_connection_close():
         b"hello, world"
     )
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b'')
@@ -595,7 +595,7 @@ def test_server_connection_close():
 
 
 def test_invalid_status_code():
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 99 OK\r\n"
         b"Content-Length: 12\r\n"
         b"Content-Type: text/plain\r\n"
@@ -603,7 +603,7 @@ def test_invalid_status_code():
         b"hello, world"
     )
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([
         (b"Host", b"example.com"),
@@ -612,12 +612,12 @@ def test_invalid_status_code():
     p.send_body(b'')
 
     msg = "Received invalid status code"
-    with pytest.raises(hx.ProtocolError, match=msg):
+    with pytest.raises(httpx.ProtocolError, match=msg):
         p.recv_status_line()
 
 
 def test_1xx_status_code():
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 103 Early Hints\r\n"
         b"Link: </style.css>; rel=preload; as=style\r\n"
         b"Link: </script.js>; rel=preload; as=script\r\n"
@@ -629,7 +629,7 @@ def test_1xx_status_code():
         b"hello, world"
     )
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b'')
@@ -662,7 +662,7 @@ def test_1xx_status_code():
 
 
 def test_received_invalid_content_length():
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Length: -999\r\n"
         b"Content-Type: text/plain\r\n"
@@ -670,7 +670,7 @@ def test_received_invalid_content_length():
         b"hello, world"
     )
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([
         (b"Host", b"example.com"),
@@ -680,17 +680,17 @@ def test_received_invalid_content_length():
 
     p.recv_status_line()
     msg = "Received invalid Content-Length"
-    with pytest.raises(hx.ProtocolError, match=msg):
+    with pytest.raises(httpx.ProtocolError, match=msg):
         p.recv_headers()
 
 
 def test_sent_invalid_content_length():
-    stream = hx.DuplexStream()
+    stream = httpx.DuplexStream()
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     msg = "Sent invalid Content-Length"
-    with pytest.raises(hx.ProtocolError, match=msg):
+    with pytest.raises(httpx.ProtocolError, match=msg):
         # Limited to 20 digits.
         # 100 million terabytes should be enough for anyone.
         p.send_headers([
@@ -700,7 +700,7 @@ def test_sent_invalid_content_length():
 
 
 def test_received_invalid_characters_in_chunk_size():
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Transfer-Encoding: chunked\r\n"
         b"Content-Type: text/plain\r\n"
@@ -708,7 +708,7 @@ def test_received_invalid_characters_in_chunk_size():
         b"0xFF\r\n..."
     )
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([
         (b"Host", b"example.com"),
@@ -719,12 +719,12 @@ def test_received_invalid_characters_in_chunk_size():
     p.recv_status_line()
     p.recv_headers()
     msg = "Received invalid chunk size"
-    with pytest.raises(hx.ProtocolError, match=msg):
+    with pytest.raises(httpx.ProtocolError, match=msg):
         p.recv_body()
 
 
 def test_received_oversized_chunk():
-    stream = hx.DuplexStream(
+    stream = httpx.DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Transfer-Encoding: chunked\r\n"
         b"Content-Type: text/plain\r\n"
@@ -732,7 +732,7 @@ def test_received_oversized_chunk():
         b"FFFFFFFFFF\r\n..."
     )
 
-    p = hx.HTTPParser(stream, mode='CLIENT')
+    p = httpx.HTTPParser(stream, mode='CLIENT')
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([
         (b"Host", b"example.com"),
@@ -743,5 +743,5 @@ def test_received_oversized_chunk():
     p.recv_status_line()
     p.recv_headers()
     msg = "Received invalid chunk size"
-    with pytest.raises(hx.ProtocolError, match=msg):
+    with pytest.raises(httpx.ProtocolError, match=msg):
         p.recv_body()
