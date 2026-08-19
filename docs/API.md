@@ -1,4 +1,4 @@
-<h1 style="border: none"><a href="/">hx</a></h1>
+<h1 style="border: none"><a href="/">httpx</a></h1>
 
 ---
 
@@ -21,64 +21,64 @@
 *Explicit open / close... (recommended)*
 
 ```python
->>> with hx.Client() as c:
+>>> with httpx.Client() as c:
 >>>     ...
 ```
 
 *Simple usage...*
 
 ```python
->>> c = hx.Client()
+>>> c = httpx.Client()
 >>> c.close()
 ```
 
 *Requests...*
 
 ```python
->>> c = hx.Client()
+>>> c = httpx.Client()
 >>> r = c.get('https://www.example.com/')
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> c = hx.Client()
->>> u = hx.URL('https://www.example.com/', params={'search': '...'})
+>>> c = httpx.Client()
+>>> u = httpx.URL('https://www.example.com/', params={'search': '...'})
 >>> r = c.get(u)
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> f = hx.Form({'email': '...', 'message': '...'})
+>>> f = httpx.Form({'email': '...', 'message': '...'})
 >>> r = c.post('https://www.example.com/', content=f)
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> j = hx.JSON({'title': ..., 'rating': ...})
+>>> j = httpx.JSON({'title': ..., 'rating': ...})
 >>> r = c.put('https://www.example.com/', content=j)
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> j = hx.JSON({'title': ..., 'rating': ...})
+>>> j = httpx.JSON({'title': ..., 'rating': ...})
 >>> r = c.patch('https://www.example.com/', content=j)
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> c = hx.Client()
+>>> c = httpx.Client()
 >>> r = c.delete('https://www.example.com/')
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> c = hx.Client()
+>>> c = httpx.Client()
 >>> r = c.head('https://www.example.com/')
 >>> r
 <Response [200 OK]>
@@ -89,7 +89,7 @@
 *Explicit open / close... (recommended)*
 
 ```python
->>> with hx.Server(app) as s:
+>>> with httpx.Server(app) as s:
 ...     # Serve until Ctrl-C, non-blocking
 ...     print(s.url)
 ```
@@ -97,7 +97,7 @@
 *Simple usage...*
 
 ```python
->>> s = hx.Server(app)
+>>> s = httpx.Server(app)
 >>> s.serve()  # Serve until Ctrl-C
 ```
 
@@ -105,22 +105,22 @@
 
 ```python
 >>> # Serve locally, use an unassigned port. 
->>> s = hx.Server(app, addr='127.0.0.1')
+>>> s = httpx.Server(app, addr='127.0.0.1')
 ```
 
 ```python
 >>> # Serve locally, use a fixed port.
->>> s = hx.Server(app, addr='127.0.0.1:8000')
+>>> s = httpx.Server(app, addr='127.0.0.1:8000')
 ```
 
 ```python
 >>> # Serve globally, use a fixed port.
->>> s = hx.Server(app, addr='0.0.0.0:8000')
+>>> s = httpx.Server(app, addr='0.0.0.0:8000')
 ```
 
 ```python
 >>> # Serve globally, enforcing domain name and SSL.
->>> s = hx.Server(app, addr='https://www.domainname.com')
+>>> s = httpx.Server(app, addr='https://www.domainname.com')
 ```
 
 ---
@@ -128,13 +128,13 @@
 ## Request
 
 ```python
->>> r = hx.Request(method, url, headers=..., content=...)
+>>> r = httpx.Request(method, url, headers=..., content=...)
 ```
 
 *Attributes...*
 
 ```python
->>> r = hx.Request('GET', 'https://www.example.com')
+>>> r = httpx.Request('GET', 'https://www.example.com')
 >>> r.method
 >>> r.url
 >>> r.headers
@@ -144,13 +144,13 @@
 ## Response
 
 ```python
->>> r = hx.Response(status_code, headers=..., content=...)
+>>> r = httpx.Response(status_code, headers=..., content=...)
 ```
 
 *Attributes...*
 
 ```python
->>> r = hx.Response(200, content=hx.JSON({'message': 'hello, world'}))
+>>> r = httpx.Response(200, content=httpx.JSON({'message': 'hello, world'}))
 >>> r.status_code
 >>> r.headers
 >>> r.content
@@ -161,7 +161,7 @@
 ## Method
 
 ```python
->>> m = hx.Method('GET')
+>>> m = httpx.Method('GET')
 >>> m == 'GET'
 True
 >>> str(m)
@@ -171,7 +171,7 @@ True
 ## StatusCode
 
 ```python
->>> s = hx.StatusCode(200)
+>>> s = httpx.StatusCode(200)
 >>> s.value, s.reason
 (200, 'OK')
 >>> s == 200
@@ -181,7 +181,7 @@ True
 *Status classes...*
 
 ```python
->>> s = hx.StatusCode(200)
+>>> s = httpx.StatusCode(200)
 >>> s.is_1xx_informational()
 False
 >>> s.is_2xx_success()
@@ -197,7 +197,7 @@ False
 ## Headers
 
 ```python
->>> h = hx.Headers({...})
+>>> h = httpx.Headers({...})
 >>> h['Content-Type']
 ...
 >>> h.get('content-type')
@@ -223,7 +223,7 @@ False
 ## URL
 
 ```python
->>> u = hx.URL('...')
+>>> u = httpx.URL('...')
 >>> u == '...'
 True
 ```
@@ -231,7 +231,7 @@ True
 *Query parameters...*
 
 ```python
->>> u = hx.URL('...', params={'search': ...})
+>>> u = httpx.URL('...', params={'search': ...})
 >>> u.params
 <QueryParams ...>
 ```
@@ -254,7 +254,7 @@ True
 *Instantiate from components...*
 
 ```python
->>> u = hx.URL(scheme='https', host='www.example.com', path='/')
+>>> u = httpx.URL(scheme='https', host='www.example.com', path='/')
 ```
 
 *Updates...*
@@ -266,14 +266,14 @@ True
 *Joins...*
 
 ```python
->>> u = hx.URL('https://www.example.com/location')
+>>> u = httpx.URL('https://www.example.com/location')
 >>> u = u.join('/redirect')
 ```
 
 ## QueryParams
 
 ```python
->>> q = hx.QueryParams("...")
+>>> q = httpx.QueryParams("...")
 >>> q['...']
 >>> q.get('...')
 ```
@@ -301,33 +301,33 @@ True
 *Content types for requests...*
 
 ```python
->>> j = hx.JSON(...)
+>>> j = httpx.JSON(...)
 ```
 
 ```python
->>> f = hx.Form(...)
+>>> f = httpx.Form(...)
 ```
 
 ```python
->>> m = hx.MultiPart(...)
+>>> m = httpx.MultiPart(...)
 ```
 
 *Content types for responses...*
 
 ```python
->>> h = hx.HTML('<html><body>¡Hola, mundo!</body></html>')
+>>> h = httpx.HTML('<html><body>¡Hola, mundo!</body></html>')
 ```
 
 ```python
->>> t = hx.Text('hello, world')
+>>> t = httpx.Text('hello, world')
 ```
 
 ```python
->>> j = hx.JSON({'content': ...})
+>>> j = httpx.JSON({'content': ...})
 ```
 
 ```python
->>> f = hx.File('image.png')
+>>> f = httpx.File('image.png')
 ```
 
 <p align="center">&mdash; 💖 &mdash;</p>

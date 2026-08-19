@@ -1,14 +1,14 @@
 <p align="center">
-  <img width="350" height="208" src="https://raw.githubusercontent.com/encode/httpx/master/docs/img/butterfly.png" alt='hx'>
+  <img width="350" height="208" src="https://raw.githubusercontent.com/encode/httpx/master/docs/img/butterfly.png" alt='httpx'>
 </p>
 
-# [hx](README.md)
+# [httpx](README.md)
 
 <p style="text-align: center">An HTTP toolkit for folks who give a damn.</p>
 
 <br/>
 
-Engineered for simplicity, `hx` provides a complete Python web suite&hellip;
+Engineered for simplicity, `httpx` provides a complete Python web suite&hellip;
 
 * Supports both client and server functionality.
 * Presents a clear, simple, and tightly constrained API.
@@ -19,7 +19,7 @@ Engineered for simplicity, `hx` provides a complete Python web suite&hellip;
 Install the package from PyPI&hellip;
 
 ```bash
-$ uv add hx
+$ uv add httpx --pre
 ```
 
 ## Client
@@ -27,9 +27,9 @@ $ uv add hx
 Sending HTTP requests&hellip;
 
 ```python
->>> import hx
+>>> import httpx
 
->>> cli = hx.Client()
+>>> cli = httpx.Client()
 >>> r = cli.get('https://www.example.com/')
 >>> r
 <Response [200 OK]>
@@ -40,13 +40,13 @@ Sending HTTP requests&hellip;
 Creating web apps&hellip;
 
 ```python
->>> import hx
+>>> import httpx
 
 >>> def app(request):
-...     content = hx.HTML('<html><body>¡Hola, mundo!</body></html>')
-...     return hx.Response(200, content=content)
+...     content = httpx.HTML('<html><body>¡Hola, mundo!</body></html>')
+...     return httpx.Response(200, content=content)
 
->>> s = hx.Server(app)
+>>> s = httpx.Server(app)
 >>> s.serve()
 ```
 
@@ -56,12 +56,12 @@ Creating web apps&hellip;
 
 A clean modern design, with [a focused API](API.md) and an exceptionally light installation footprint.
 
-For comparison, see `hx` <small>vs</small> `requests`&hellip;
+For comparison, see `httpx` <small>vs</small> `requests`&hellip;
 
 ```bash
-$ uv add hx
-$ uv tree --show-sizes --package hx
-hx v1.0.0 (33.5KiB)
+$ uv add httpx
+$ uv tree --show-sizes --package httpx
+httpx v1.0.0 (33.5KiB)
 └── truststore v0.10.0 (17.8KiB)
 ```
 
@@ -86,7 +86,7 @@ Pull requests are restricted to team members only.
 ---
 
 <p align="center">
-<a href="LICENSE.md">MIT Licensed</a>.<br/>Designed & Built with Love.
+<a href="license/">MIT Licensed</a>.<br/>Designed & Built with Love.
 </p>
 
 <p align="center">&mdash; 💖 &mdash;</p>
