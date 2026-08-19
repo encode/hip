@@ -1,2 +1,2 @@
-__title__ = "hx"
+__title__ = "httpx"
 __version__ = "0.1"
