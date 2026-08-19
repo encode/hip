@@ -83,6 +83,10 @@ class NetworkStream(Stream):
     def close(self) -> None:
         if not self._is_closed:
             self._is_closed = True
+            try:
+                self._socket.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
             self._socket.close()
 
     def __repr__(self):
