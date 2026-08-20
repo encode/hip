@@ -25,5 +25,7 @@ jobs:
         run: scripts/install
       - name: "Run tests"
         run: scripts/test
+      - name: "Report coverage"
+        run: scripts/coverage
       - name: "Build documentation"
         run: scripts/docs
