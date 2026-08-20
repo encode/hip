@@ -4,5 +4,4 @@ else
     PREFIX=""
 fi
 
-${PREFIX}coverage run ${PREFIX}pytest tests
-${PREFIX}coverage report --include="src/*" --sort=cover --skip-covered
+${PREFIX}pytest --cov="httpx" --no-cov-on-fail tests
