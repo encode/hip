@@ -1,0 +1,7 @@
+if [ -z "$GITHUB_ACTIONS" ]; then
+    PREFIX="venv/bin/"
+else
+    PREFIX=""
+fi
+
+${PREFIX}coverage report
