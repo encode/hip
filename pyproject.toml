@@ -32,7 +32,6 @@ dynamic = [
 [tool.hatch.build.targets.sdist]
 include = [
     "/src",
-    "/docs/README.md",
 ]
 
 [tool.hatch.version]
