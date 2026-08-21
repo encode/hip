@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "httpx"
-version = "1.0.dev4"
 description = "HTTP, for Python."
+readme = "docs/README.md"
 requires-python = ">=3.10"
 authors = [
     { name = "Kim Christie", email = "noreply@lovelydinosaur.com" },
@@ -25,3 +25,14 @@ classifiers = [
 dependencies = [
     "truststore",
 ]
+dynamic = [
+    "version"
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+]
+
+[tool.hatch.version]
+path = "src/httpx/__version__.py"

@@ -27,5 +27,7 @@ jobs:
         run: scripts/test
       - name: "Report coverage"
         run: scripts/coverage
+      - name: "Build package"
+        run: scripts/build
       - name: "Build documentation"
         run: scripts/docs
