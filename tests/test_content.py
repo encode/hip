@@ -9,12 +9,16 @@ import pytest
 def test_html():
     html = httpx.HTML("<html><body>Hello, world</body></html>")
 
+    assert repr(html) == "<HTML '<html><body>Hello, world</body></html>'>"
     assert str(html) == '<html><body>Hello, world</body></html>'
     assert bytes(html) == b'<html><body>Hello, world</body></html>'
     assert html.headers() == {
         "Content-Type": "text/html; charset='utf-8'",
         "Content-Length": "38",
     }
+    with html.open() as stream:
+        b = stream.read()
+        assert b == b'<html><body>Hello, world</body></html>'
 
 
 # Text
@@ -22,12 +26,17 @@ def test_html():
 def test_text():
     text = httpx.Text("Hello, world")
 
+    assert repr(text) == "<Text 'Hello, world'>"
     assert str(text) == 'Hello, world'
     assert bytes(text) == b'Hello, world'
     assert text.headers() == {
         "Content-Type": "text/plain; charset='utf-8'",
         "Content-Length": "12",
     }
+    with text.open() as stream:
+        b = stream.read()
+        assert b == b'Hello, world'
+
 
 
 # JSON
@@ -35,11 +44,15 @@ def test_text():
 def test_json():
     data = httpx.JSON({'data': 123})
 
+    assert repr(data) == "<JSON {'data': 123}>"
     assert bytes(data) == b'{"data":123}'
     assert data.headers() == {
         "Content-Type": "application/json",
         "Content-Length": "12",
     }
+    with data.open() as stream:
+        b = stream.read()
+        assert b == b'{"data":123}'
 
 
 # Form
@@ -47,12 +60,15 @@ def test_json():
 def test_form():
     f = httpx.Form("a=123&a=456&b=789")
 
-    assert str(f) == "a=123&a=456&b=789"
     assert repr(f) == "<Form [('a', '123'), ('a', '456'), ('b', '789')]>"
+    assert str(f) == "a=123&a=456&b=789"
     assert f.multi_dict() == {
         "a": ["123", "456"],
         "b": ["789"]
     }
+    with f.open() as stream:
+        b = stream.read()
+        assert b == b"a=123&a=456&b=789"
 
 
 def test_form_from_dict():
@@ -135,6 +151,24 @@ def test_form_encode():
         "Content-Type": "application/x-www-form-urlencoded",
         "Content-Length": "27",
     }
+
+
+# File
+
+def test_file():
+    with tempfile.NamedTemporaryFile(suffix=".txt") as temp:
+        temp.write(b"Hello, world")
+        temp.seek(0)
+
+        print(temp.name)
+        file = httpx.File(temp.name)
+        assert file.headers() == {
+            "Content-Type": "text/plain; charset='utf-8'",
+            "Content-Length": "12",
+        }
+        with file.open() as stream:
+            b = stream.read()
+            assert b == b"Hello, world"
 
 
 # Files

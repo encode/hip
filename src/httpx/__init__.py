@@ -6,7 +6,6 @@ from ._headers import *  # Headers
 from ._network import *  # NetworkBackend, NetworkStream, timeout
 from ._parsers import *  # HTTPParser, ProtocolError
 from ._pool import *  # ConnectionPool
-from ._quickstart import *  # get, post, put, patch, delete
 from ._response import *  # StatusCode, Response
 from ._request import *  # Method, Request
 from ._streams import *  # ByteStream, DuplexStream, FileStream, Stream
@@ -24,13 +23,11 @@ __all__ = [
     "Connection",
     "ConnectionPool",
     "Content",
-    "delete",
     "DuplexStream",
     "File",
     "FileStream",
     "Files",
     "Form",
-    "get",
     "Headers",
     "HTML",
     "HTTPParser",
@@ -40,10 +37,7 @@ __all__ = [
     "NetworkBackend",
     "NetworkStream",
     "open_connection",
-    "post",
     "ProtocolError",
-    "put",
-    "patch",
     "Response",
     "Request",
     "run",

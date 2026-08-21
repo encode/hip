@@ -18,7 +18,7 @@ def test_url_params():
 
 
 def test_url_normalisation():
-    url = httpx.URL('https://www.EXAMPLE.com:443/path/../main')
+    url = httpx.URL('https://www.EXAMPLE.com:443/./path/../main')
     assert str(url) == 'https://www.example.com/main'
 
 
@@ -32,9 +32,30 @@ def test_url_escaping():
     assert str(url) == 'https://example.com/path%20to%20here?search=%F0%9F%A6%8B'
 
 
+def test_url_already_escaped():
+    url = httpx.URL('https://example.com/path%20to%20here?search=%F0%9F%A6%8B')
+    assert str(url) == 'https://example.com/path%20to%20here?search=%F0%9F%A6%8B'
+
+
 def test_url_components():
     url = httpx.URL(scheme="https", host="example.com", path="/")
     assert str(url) == 'https://example.com/'
+
+
+def test_url_copy_with():
+    url = httpx.URL('https://www.example.com/')
+    url = url.copy_with(path="/path.txt")
+    assert str(url) == "https://www.example.com/path.txt"
+
+
+def test_url_ipv4():
+    url = httpx.URL('http://127.0.0.1/')
+    assert str(url) == 'http://127.0.0.1/'
+
+
+def test_url_ipv6():
+    url = httpx.URL('http://[::1]/')
+    assert str(url) == 'http://[::1]/'
 
 
 # QueryParams

@@ -3,6 +3,12 @@ import httpx
 import pytest
 
 
+def redirect(request):
+    if request.url.path == '/redirect':
+        return httpx.Response(302, headers={'Location': '/'})
+    return httpx.Response(200, content=httpx.Text('hello, world!'))
+
+
 def echo(request):
     response = httpx.Response(200, content=httpx.JSON({
         'method': str(request.method),
@@ -122,3 +128,10 @@ def test_keepalive(client, server):
 def test_get_with_invalid_scheme(client):
     with pytest.raises(ValueError):
         client.get("nope://www.example.com")
+
+
+def test_redirect(client):
+    with httpx.Server(redirect) as server:
+        r = client.get(server.url + 'redirect')
+        assert r.status_code == 200
+        assert r.body == b'hello, world!'

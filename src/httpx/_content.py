@@ -26,6 +26,7 @@ __all__ = [
 _content_types = {
     ".json": "application/json",
     ".js": "application/javascript",
+    ".txt": "text/plain",
     ".html": "text/html",
     ".css": "text/css",
     ".png": "image/png",
