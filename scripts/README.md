@@ -4,12 +4,12 @@ Here's our project scripts, styled after GitHub's [Scripts to Rule Them All](htt
 
 * Setup
     * [`install`](install) - Install the development dependencies.
-* Packaging
-    * [`butild`](build) - Build the installable package.
-    * [`deploy`](deploy) - Upload the installable package to PyPI.
 * Testing
     * [`test`](test) - Run the tests.
     * [`coverage`](coverage) - Check the test coverage.
+* Packaging
+    * [`butild`](build) - Build the installable package.
+    * [`deploy`](deploy) - Upload the installable package to PyPI.
 * Documentation
     * [`docs`](docs) - Build or serve the project docs.
 
