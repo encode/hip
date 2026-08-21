@@ -61,7 +61,7 @@ For comparison, see `httpx` <small>vs</small> `requests`&hellip;
 ```bash
 $ uv add httpx
 $ uv tree --show-sizes --package httpx
-httpx v1.0.0 (33.5KiB)
+httpx v1.0.dev5 (33.5KiB)
 └── truststore v0.10.0 (17.8KiB)
 ```
 
