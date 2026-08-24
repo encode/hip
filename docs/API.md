@@ -104,23 +104,13 @@
 *Address...*
 
 ```python
->>> # Serve locally, use an unassigned port. 
->>> s = httpx.Server(app, addr='127.0.0.1')
+>>> # Serve locally on a fixed port.
+>>> s = httpx.Server(app, host='127.0.0.1', port=8000)
 ```
 
 ```python
->>> # Serve locally, use a fixed port.
->>> s = httpx.Server(app, addr='127.0.0.1:8000')
-```
-
-```python
->>> # Serve globally, use a fixed port.
->>> s = httpx.Server(app, addr='0.0.0.0:8000')
-```
-
-```python
->>> # Serve globally, enforcing domain name and SSL.
->>> s = httpx.Server(app, addr='https://www.domainname.com')
+>>> # Serve on all interfaces on a fixed port.
+>>> s = httpx.Server(app, host='0.0.0.0', port=8000)
 ```
 
 ---
