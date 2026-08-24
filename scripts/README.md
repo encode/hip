@@ -7,6 +7,7 @@ Here's our project scripts, styled after GitHub's [Scripts to Rule Them All](htt
 * Testing
     * [`test`](test) - Run the tests.
     * [`coverage`](coverage) - Check the test coverage.
+    * [`lint`](lint) - Lint and format the source and test files.
 * Packaging
     * [`build`](build) - Build the installable package.
     * [`deploy`](deploy) - Upload the installable package to PyPI.

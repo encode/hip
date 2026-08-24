@@ -24,6 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "truststore",
+    "typing-extensions>=4.0",
 ]
 dynamic = [
     "version"
