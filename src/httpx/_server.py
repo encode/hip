@@ -4,14 +4,12 @@ import logging
 from ._body import RequestContent
 from ._content import Text
 from ._headers import Headers
+from ._network import NetworkBackend, sleep
 from ._parsers import HTTPParser
 from ._request import Request
 from ._response import Response
-from ._network import NetworkBackend, sleep
 
-__all__ = [
-    "Server"
-]
+__all__ = ["Server"]
 
 logger = logging.getLogger("httpx.server")
 
@@ -24,8 +22,10 @@ class HTTPConnection:
     def __init__(self, stream, endpoint):
         self._stream = stream
         self._endpoint = endpoint
-        self._parser = HTTPParser(stream, mode='SERVER')
-        self._default_headers = Headers({"Server": "httpx/dev", "Connection": "keep-alive"})
+        self._parser = HTTPParser(stream, mode="SERVER")
+        self._default_headers = Headers(
+            {"Server": "httpx/dev", "Connection": "keep-alive"}
+        )
 
     # API entry points...
     def handle_requests(self):
@@ -59,13 +59,10 @@ class HTTPConnection:
     # Receive the request...
     def _recv_head(self) -> tuple[str, str, list[tuple[str, str]]]:
         method, target, _ = self._parser.recv_method_line()
-        m = method.decode('ascii')
-        t = target.decode('ascii')
+        m = method.decode("ascii")
+        t = target.decode("ascii")
         headers = self._parser.recv_headers()
-        h = [
-            (k.decode('latin-1'), v.decode('latin-1'))
-            for k, v in headers
-        ]
+        h = [(k.decode("latin-1"), v.decode("latin-1")) for k, v in headers]
         return m, t, h
 
     def _recv_body(self):
@@ -81,7 +78,7 @@ class HTTPConnection:
         date = now.strftime("%a, %d %b %Y, %H:%M:%S GMT")
 
         headers = self._default_headers
-        headers = headers.copy_set('Date', date)
+        headers = headers.copy_set("Date", date)
         headers = headers.copy_update(response.headers)
         self._parser.send_headers(headers.as_byte_pairs())
 
@@ -89,22 +86,22 @@ class HTTPConnection:
         with response as stream:
             while data := stream.read(64 * 1024):
                 self._parser.send_body(data)
-            self._parser.send_body(b'')
+            self._parser.send_body(b"")
         self._parser.complete()
 
 
 class Server:
-    def __init__(self, app, host='127.0.0.1', port=8080):
+    def __init__(self, app, host="127.0.0.1", port=8080):
         self.app = app
         self.host = host
         self.port = port
         self.backend = NetworkBackend()
-        self.url = f'http://{host}:{port}/'
+        self.url = f"http://{host}:{port}/"
 
         logging.basicConfig(
             format="%(levelname)s [%(asctime)s] %(name)s - %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
-            level=logging.DEBUG
+            level=logging.DEBUG,
         )
 
     def __enter__(self):
@@ -122,5 +119,5 @@ class Server:
 
     def serve(self):
         with self as server:
-            while(True):
+            while True:
                 sleep(1)

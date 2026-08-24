@@ -1,13 +1,11 @@
 import time
-import typing
 import types
 
 from ._connection import Connection, Transport, open_connection
 from ._network import NetworkBackend, Semaphore
-from ._response import Response
 from ._request import Request
+from ._response import Response
 from ._urls import URL
-
 
 __all__ = [
     "ConnectionPool",
@@ -53,9 +51,7 @@ class ConnectionPool(Transport):
 
         # Or else create a new connection.
         conn = open_connection(
-            origin,
-            hostname=request.headers["Host"],
-            backend=self._network_backend
+            origin, hostname=request.headers["Host"], backend=self._network_backend
         )
         self._connections.append(conn)
         return conn
@@ -70,7 +66,7 @@ class ConnectionPool(Transport):
                 self._connections.remove(conn)
 
     @property
-    def connections(self) -> typing.List['Connection']:
+    def connections(self) -> list["Connection"]:
         return [c for c in self._connections]
 
     def description(self) -> str:
@@ -86,6 +82,7 @@ class ConnectionPool(Transport):
     def __del__(self):
         if not self._closed:
             import warnings
+
             warnings.warn("ConnectionPool was garbage collected without being closed.")
 
     def __enter__(self) -> "ConnectionPool":

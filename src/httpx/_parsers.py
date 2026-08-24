@@ -3,7 +3,7 @@ import time
 
 from ._streams import Stream
 
-__all__ = ['HTTPParser', 'Mode', 'ProtocolError']
+__all__ = ["HTTPParser", "Mode", "ProtocolError"]
 
 
 # TODO...
@@ -11,7 +11,7 @@ __all__ = ['HTTPParser', 'Mode', 'ProtocolError']
 # * Upgrade
 # * CONNECT
 
-# * Support 'Expect: 100 Continue'
+# * Support 'Expect: 100 Continue'
 # * Add 'Error' state transitions
 # * Add tests to trickle data
 # * Add type annotations
@@ -66,6 +66,7 @@ class Mode(enum.Enum):
 #    transition from SEND_HEADERS back to IDLE
 # 3. ...
 
+
 class ProtocolError(Exception):
     pass
 
@@ -84,10 +85,11 @@ class HTTPParser:
     client.complete()
     client.close()
     """
+
     def __init__(self, stream: Stream, mode: str) -> None:
         self.stream = stream
         self.parser = ReadAheadParser(stream)
-        self.mode = {'CLIENT': Mode.CLIENT, 'SERVER': Mode.SERVER}[mode]
+        self.mode = {"CLIENT": Mode.CLIENT, "SERVER": Mode.SERVER}[mode]
         self.keepalive_duration = 5.0
 
         # Track state...
@@ -128,7 +130,7 @@ class HTTPParser:
             raise ProtocolError(msg)
 
         # Send initial request line, eg. "GET / HTTP/1.1"
-        if protocol != b'HTTP/1.1':
+        if protocol != b"HTTP/1.1":
             raise ProtocolError("Sent unsupported protocol version")
         data = b" ".join([method, target, protocol]) + b"\r\n"
         self.stream.write(data)
@@ -136,7 +138,9 @@ class HTTPParser:
         self.send_state = State.SEND_HEADERS
         self.recv_state = State.RECV_STATUS_LINE
 
-    def send_status_line(self, protocol: bytes, status_code: int, reason: bytes) -> None:
+    def send_status_line(
+        self, protocol: bytes, status_code: int, reason: bytes
+    ) -> None:
         """
         Send the initial response line:
 
@@ -149,9 +153,9 @@ class HTTPParser:
             raise ProtocolError(msg)
 
         # Send initial request line, eg. "GET / HTTP/1.1"
-        if protocol != b'HTTP/1.1':
+        if protocol != b"HTTP/1.1":
             raise ProtocolError("Sent unsupported protocol version")
-        status_code_bytes = str(status_code).encode('ascii')
+        status_code_bytes = str(status_code).encode("ascii")
         data = b" ".join([protocol, status_code_bytes, reason]) + b"\r\n"
         self.stream.write(data)
 
@@ -173,17 +177,15 @@ class HTTPParser:
         seen_host = False
         for name, value in headers:
             lname = name.lower()
-            if lname == b'host':
+            if lname == b"host":
                 seen_host = True
-            elif lname == b'content-length':
+            elif lname == b"content-length":
                 self.send_content_length = bounded_int(
-                    value,
-                    max_digits=20,
-                    exc_text="Sent invalid Content-Length"
+                    value, max_digits=20, exc_text="Sent invalid Content-Length"
                 )
-            elif lname == b'connection' and value == b'close':
+            elif lname == b"connection" and value == b"close":
                 self.send_keep_alive = False
-            elif lname == b'transfer-encoding' and value == b'chunked':
+            elif lname == b"transfer-encoding" and value == b"chunked":
                 self.send_content_length = None
 
         if self.mode == Mode.CLIENT and not seen_host:
@@ -211,22 +213,22 @@ class HTTPParser:
         if self.send_content_length is None:
             # Transfer-Encoding: chunked
             self.send_seen_length += len(body)
-            marker = f'{len(body):x}\r\n'.encode('ascii')
-            self.stream.write(marker + body + b'\r\n')
+            marker = f"{len(body):x}\r\n".encode("ascii")
+            self.stream.write(marker + body + b"\r\n")
 
         else:
             # Content-Length: xxx
             self.send_seen_length += len(body)
             if self.send_seen_length > self.send_content_length:
-                msg = 'Too much data sent for declared Content-Length'
+                msg = "Too much data sent for declared Content-Length"
                 raise ProtocolError(msg)
-            if self.send_seen_length < self.send_content_length and body == b'':
-                msg = 'Not enough data sent for declared Content-Length'
+            if self.send_seen_length < self.send_content_length and body == b"":
+                msg = "Not enough data sent for declared Content-Length"
                 raise ProtocolError(msg)
             if body:
                 self.stream.write(body)
 
-        if body == b'':
+        if body == b"":
             # Handle body close
             self.send_state = State.DONE
 
@@ -259,7 +261,7 @@ class HTTPParser:
         exc_text = "reading request method line"
         line = self.parser.read_until(b"\r\n", max_size=4096, exc_text=exc_text)
         method, target, protocol = line.split(b" ", 2)
-        if protocol != b'HTTP/1.1':
+        if protocol != b"HTTP/1.1":
             raise ProtocolError("Received unsupported protocol version")
 
         self.recv_state = State.RECV_HEADERS
@@ -282,13 +284,11 @@ class HTTPParser:
         exc_text = "reading response status line"
         line = self.parser.read_until(b"\r\n", max_size=4096, exc_text=exc_text)
         protocol, status_code_str, reason_phrase = line.split(b" ", 2)
-        if protocol != b'HTTP/1.1':
+        if protocol != b"HTTP/1.1":
             raise ProtocolError("Received unsupported protocol version")
 
         status_code = bounded_int(
-            status_code_str,
-            max_digits=3,
-            exc_text="Received invalid status code"
+            status_code_str, max_digits=3, exc_text="Received invalid status code"
         )
         if status_code < 100:
             raise ProtocolError("Received invalid status code")
@@ -323,17 +323,15 @@ class HTTPParser:
         seen_host = False
         for name, value in headers:
             lname = name.lower()
-            if lname == b'host':
+            if lname == b"host":
                 seen_host = True
-            elif lname == b'content-length':
+            elif lname == b"content-length":
                 self.recv_content_length = bounded_int(
-                    value,
-                    max_digits=20,
-                    exc_text="Received invalid Content-Length"
+                    value, max_digits=20, exc_text="Received invalid Content-Length"
                 )
-            elif lname == b'connection' and value == b'close':
+            elif lname == b"connection" and value == b"close":
                 self.recv_keep_alive = False
-            elif lname == b'transfer-encoding' and value == b'chunked':
+            elif lname == b"transfer-encoding" and value == b"chunked":
                 self.recv_content_length = None
 
         if self.mode == Mode.SERVER and not seen_host:
@@ -363,7 +361,7 @@ class HTTPParser:
 
         if self.recv_content_length is None:
             # Transfer-Encoding: chunked
-            exc_text = 'reading chunk size'
+            exc_text = "reading chunk size"
             line = self.parser.read_until(b"\r\n", max_size=4096, exc_text=exc_text)
             sizestr, _, _ = line.partition(b";")
 
@@ -371,12 +369,12 @@ class HTTPParser:
             size = bounded_hex(sizestr, max_digits=8, exc_text=exc_text)
             if size > 0:
                 body = self.parser.read(size=size)
-                exc_text = 'reading chunk data'
+                exc_text = "reading chunk data"
                 self.parser.read_until(b"\r\n", max_size=2, exc_text=exc_text)
                 self.recv_seen_length += len(body)
             else:
-                body = b''
-                exc_text = 'reading chunk termination'
+                body = b""
+                exc_text = "reading chunk termination"
                 self.parser.read_until(b"\r\n", max_size=2, exc_text=exc_text)
 
         else:
@@ -385,17 +383,19 @@ class HTTPParser:
             size = min(remaining, 4096)
             body = self.parser.read(size=size)
             self.recv_seen_length += len(body)
-            if self.recv_seen_length < self.recv_content_length and body == b'':
-                msg = 'Not enough data received for declared Content-Length'
+            if self.recv_seen_length < self.recv_content_length and body == b"":
+                msg = "Not enough data received for declared Content-Length"
                 raise ProtocolError(msg)
 
-        if body == b'':
+        if body == b"":
             # Handle body close
             self.recv_state = State.DONE
         return body
 
     def complete(self):
-        is_fully_complete = self.send_state == State.DONE and self.recv_state == State.DONE
+        is_fully_complete = (
+            self.send_state == State.DONE and self.recv_state == State.DONE
+        )
         is_keepalive = self.send_keep_alive and self.recv_keep_alive
 
         if not (is_fully_complete and is_keepalive):
@@ -426,15 +426,17 @@ class HTTPParser:
 
     def is_idle(self) -> bool:
         return (
-            self.send_state == State.SEND_METHOD_LINE or
-            self.recv_state == State.RECV_METHOD_LINE
+            self.send_state == State.SEND_METHOD_LINE
+            or self.recv_state == State.RECV_METHOD_LINE
         )
 
     def is_closed(self) -> bool:
         return self.send_state == State.CLOSED
 
     def keepalive_expired(self) -> bool:
-        return (self.keepalive_until is not None) and (time.monotonic() > self.keepalive_until)
+        return (self.keepalive_until is not None) and (
+            time.monotonic() > self.keepalive_until
+        )
 
     def description(self) -> str:
         return {
@@ -446,26 +448,27 @@ class HTTPParser:
         cl_state = self.send_state.name
         sr_state = self.recv_state.name
         detail = f"client {cl_state}, server {sr_state}"
-        return f'<HTTPParser [{detail}]>'
+        return f"<HTTPParser [{detail}]>"
 
 
 class ReadAheadParser:
     """
     A buffered I/O stream, with methods for read-ahead parsing.
     """
+
     def __init__(self, stream: Stream) -> None:
-        self._buffer = b''
+        self._buffer = b""
         self._stream = stream
         self._chunk_size = 4096
 
     def _read_some(self) -> bytes:
         if self._buffer:
-            ret, self._buffer = self._buffer, b''
+            ret, self._buffer = self._buffer, b""
             return ret
         return self._stream.read(self._chunk_size)
 
     def _push_back(self, buffer):
-        assert self._buffer == b''
+        assert self._buffer == b""
         self._buffer = buffer
 
     def read(self, size: int) -> bytes:
@@ -532,7 +535,7 @@ def bounded_int(intstr: bytes, max_digits: int, exc_text: str):
     if len(intstr) > max_digits:
         # Length of bytestring exceeds maximum.
         raise ProtocolError(exc_text)
-    if len(intstr.strip(b'0123456789')) != 0:
+    if len(intstr.strip(b"0123456789")) != 0:
         # Contains invalid characters.
         raise ProtocolError(exc_text)
 
@@ -543,7 +546,7 @@ def bounded_hex(hexstr: bytes, max_digits: int, exc_text: str):
     if len(hexstr) > max_digits:
         # Length of bytestring exceeds maximum.
         raise ProtocolError(exc_text)
-    if len(hexstr.strip(b'0123456789abcdefABCDEF')) != 0:
+    if len(hexstr.strip(b"0123456789abcdefABCDEF")) != 0:
         # Contains invalid characters.
         raise ProtocolError(exc_text)
 

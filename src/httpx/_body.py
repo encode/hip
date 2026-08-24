@@ -5,8 +5,7 @@ from ._headers import Headers
 from ._parsers import HTTPParser
 from ._streams import Stream
 
-
-__all__ = ['RequestContent', 'ResponseContent', 'HTTPStream']
+__all__ = ["HTTPStream", "RequestContent", "ResponseContent"]
 
 
 class RequestContent(Content):
@@ -54,11 +53,11 @@ class HTTPStream(Stream):
             section = self._parser.recv_body()
             sections.append(section)
             length += len(section)
-            if section == b'':
+            if section == b"":
                 break
 
         # If we've more data than requested, then push some back into the buffer.
-        output = b''.join(sections)
+        output = b"".join(sections)
         if size > -1 and len(output) > size:
             output, remainder = output[:size], output[size:]
             self._buffer.write(remainder)

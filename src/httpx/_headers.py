@@ -1,15 +1,11 @@
 import re
 import typing
 
-
 __all__ = ["Headers"]
 
 
 VALID_HEADER_CHARS = (
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    "abcdefghijklmnopqrstuvwxyz"
-    "0123456789"
-    "!#$%&'*+-.^_`|~"
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&'*+-.^_`|~"
 )
 
 
@@ -37,7 +33,9 @@ def headervalue(value: str) -> str:
 class Headers(typing.Mapping[str, str]):
     def __init__(
         self,
-        headers: typing.Mapping[str, str] | typing.Sequence[tuple[str, str]] | None = None,
+        headers: typing.Mapping[str, str]
+        | typing.Sequence[tuple[str, str]]
+        | None = None,
     ) -> None:
         # {'accept': ('Accept', '*/*')}
         d: dict[str, str] = {}
@@ -145,7 +143,9 @@ class Headers(typing.Mapping[str, str]):
         h = {k: v for k, v in self._dict.items() if k.lower() != key.lower()}
         return Headers(h)
 
-    def copy_update(self, update: "Headers" | typing.Mapping[str, str] | None) -> "Headers":
+    def copy_update(
+        self, update: "Headers" | typing.Mapping[str, str] | None
+    ) -> "Headers":
         """
         Return a new Headers instance, removing the value of a key.
 
@@ -170,10 +170,7 @@ class Headers(typing.Mapping[str, str]):
         return Headers(h)
 
     def as_byte_pairs(self) -> list[tuple[bytes, bytes]]:
-        return [
-            (k.encode('ascii'), v.encode('ascii'))
-            for k, v in self.items()
-        ]
+        return [(k.encode("ascii"), v.encode("ascii")) for k, v in self.items()]
 
     def __getitem__(self, key: str) -> str:
         match = key.lower()
@@ -195,7 +192,7 @@ class Headers(typing.Mapping[str, str]):
     def __bool__(self) -> bool:
         return bool(self._dict)
 
-    def __eq__(self, other: typing.Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         self_lower = {k.lower(): v for k, v in self.items()}
         other_lower = {k.lower(): v for k, v in Headers(other).items()}
         return self_lower == other_lower
@@ -215,19 +212,20 @@ def parse_opts_header(header: str) -> tuple[str, dict[str, str]]:
     # https://datatracker.ietf.org/doc/html/rfc2616#section-3.6
 
     header = header.strip()
-    content_type = ''
+    content_type = ""
     params = {}
 
     # Match the content type (up to the first semicolon or end)
-    match = re.match(r'^([^;]+)', header)
+    match = re.match(r"^([^;]+)", header)
     if match:
         content_type = match.group(1).strip().lower()
-        rest = header[match.end():]
+        rest = header[match.end() :]
     else:
-        return '', {}
+        return "", {}
 
     # Parse parameters, accounting for quoted strings
-    param_pattern = re.compile(r'''
+    param_pattern = re.compile(
+        r"""
         ;\s*                             # Semicolon + optional whitespace
         (?P<key>[^=;\s]+)                # Parameter key
         =                                # Equal sign
@@ -236,14 +234,16 @@ def parse_opts_header(header: str) -> tuple[str, dict[str, str]]:
             |                            #   OR
             [^;]*                        #   Unquoted string (until semicolon)
         )
-    ''', re.VERBOSE)
+    """,
+        re.VERBOSE,
+    )
 
     for match in param_pattern.finditer(rest):
-        key = match.group('key').lower()
-        value = match.group('value').strip()
+        key = match.group("key").lower()
+        value = match.group("value").strip()
         if value.startswith('"') and value.endswith('"'):
             # Remove surrounding quotes and unescape
-            value = re.sub(r'\\(.)', r'\1', value[1:-1])
+            value = re.sub(r"\\(.)", r"\1", value[1:-1])
         params[key] = value
 
     return content_type, params
