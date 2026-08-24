@@ -1,7 +1,1 @@
-if [ -z "$GITHUB_ACTIONS" ]; then
-    PREFIX="venv/bin/"
-else
-    PREFIX=""
-fi
-
-${PREFIX}python3 -m twine upload dist/*
+uv publish dist/*
