@@ -85,10 +85,12 @@ class HTTPConnection:
 
 
 class Server:
-    def __init__(self, app):
+    def __init__(self, app, host='127.0.0.1', port=8080):
         self.app = app
+        self.host = host
+        self.port = port
         self.backend = NetworkBackend()
-        self.url = 'http://127.0.0.1:8080/'
+        self.url = f'http://{host}:{port}/'
 
         logging.basicConfig(
             format="%(levelname)s [%(asctime)s] %(name)s - %(message)s",
@@ -97,9 +99,9 @@ class Server:
         )
 
     def __enter__(self):
-        self._tcp_server = self.backend.serve("127.0.0.1", 8080, self.handle_stream)
+        self._tcp_server = self.backend.serve(self.host, self.port, self.handle_stream)
         self._tcp_server.__enter__()
-        logger.info(f"Serving on http://127.0.0.1:8080 (Press CTRL+C to quit)")
+        logger.info(f"Serving on http://{self.host}:{self.port} (Press CTRL+C to quit)")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
