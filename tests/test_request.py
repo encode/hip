@@ -1,5 +1,4 @@
 import httpx
-import pytest
 
 
 def test_request():
@@ -8,9 +7,7 @@ def test_request():
     assert repr(r) == "<Request [GET 'https://example.com']>"
     assert r.method == "GET"
     assert r.url == "https://example.com"
-    assert r.headers == {
-        "Host": "example.com"
-    }
+    assert r.headers == {"Host": "example.com"}
     assert r.body == b""
 
 
@@ -53,4 +50,4 @@ def test_request_empty_post():
         "Host": "example.com",
         "Content-Length": "0",
     }
-    assert r.body == b''
+    assert r.body == b""

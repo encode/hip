@@ -1,5 +1,4 @@
 import httpx
-import pytest
 
 
 def test_response():
@@ -7,7 +6,7 @@ def test_response():
 
     assert repr(r) == "<Response [200 OK]>"
     assert r.status_code == 200
-    assert r.headers == {'Content-Length': '0'}
+    assert r.headers == {"Content-Length": "0"}
     assert r.body == b""
 
 

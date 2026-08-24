@@ -1,9 +1,10 @@
-import httpx
 import pytest
+
+import httpx
 
 
 def hello_world(request):
-    content = httpx.Text('Hello, world.')
+    content = httpx.Text("Hello, world.")
     return httpx.Response(200, content=content)
 
 
@@ -123,4 +124,3 @@ def test_connection_stream(server):
 # #     with conn.upgrade("CONNECT", "www.encode.io:443") as stream:
 # #         stream.start_tls(ctx, hostname="www.encode.io")
 # #         ...
-
