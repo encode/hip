@@ -20,8 +20,7 @@ $ ./scripts/install
 $ ./scripts/test && ./scripts/coverage
 ```
 
-The scripts require [uv](https://docs.astral.sh/uv/) and run commands in the
-project's `.venv` environment.
+The scripts require [uv](https://docs.astral.sh/uv/) and run commands in the project's `.venv` environment.
 
 Or from the project workflows...
 
