@@ -88,7 +88,8 @@ class FileStream(Stream):
         return self._fileobj.read(size)
 
     def open(self):
-        self._fileobj = open(self._path, "rb")
+        # FileStream owns the handle until close() is called.
+        self._fileobj = open(self._path, "rb")  # noqa: SIM115
         self._size = os.path.getsize(self._path)
         return self
 

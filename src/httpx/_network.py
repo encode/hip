@@ -16,8 +16,8 @@ from ._streams import Stream
 
 __all__ = ["NetworkBackend", "NetworkStream", "timeout"]
 
-_timeout_stack: contextvars.ContextVar[list[float]] = contextvars.ContextVar(
-    "timeout_context", default=[]
+_timeout_stack: contextvars.ContextVar[tuple[float]] = contextvars.ContextVar(
+    "timeout_context", default=()
 )
 
 
@@ -31,8 +31,7 @@ def timeout(duration: float) -> typing.Iterator[None]:
     """
     now = time.monotonic()
     until = now + duration
-    stack = typing.cast(list[float], _timeout_stack.get())
-    stack = [until] + stack
+    stack = (until, *_timeout_stack.get())
     token = _timeout_stack.set(stack)
     try:
         yield

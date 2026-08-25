@@ -433,11 +433,10 @@ def validate_path(path: str, has_scheme: bool, has_authority: bool) -> None:
 
     See https://datatracker.ietf.org/doc/html/rfc3986.html#section-3.3
     """
-    if has_authority:
-        # If a URI contains an authority component, then the path component
-        # must either be empty or begin with a slash ("/") character."
-        if path and not path.startswith("/"):
-            raise InvalidURL("For absolute URLs, path must be empty or begin with '/'")
+    # If a URI contains an authority component, then the path component
+    # must either be empty or begin with a slash ("/") character."
+    if has_authority and path and not path.startswith("/"):
+        raise InvalidURL("For absolute URLs, path must be empty or begin with '/'")
 
     if not has_scheme and not has_authority:
         # If a URI does not contain an authority component, then the path cannot begin

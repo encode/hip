@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 import typing
 
@@ -103,7 +105,7 @@ class Headers(typing.Mapping[str, str]):
                 return v
         return default
 
-    def copy_set(self, key: str, value: str) -> "Headers":
+    def copy_set(self, key: str, value: str) -> Headers:
         """
         Return a new Headers instance, setting the value of a key.
 
@@ -130,7 +132,7 @@ class Headers(typing.Mapping[str, str]):
 
         return Headers(l)
 
-    def copy_remove(self, key: str) -> "Headers":
+    def copy_remove(self, key: str) -> Headers:
         """
         Return a new Headers instance, removing the value of a key.
 
@@ -143,9 +145,7 @@ class Headers(typing.Mapping[str, str]):
         h = {k: v for k, v in self._dict.items() if k.lower() != key.lower()}
         return Headers(h)
 
-    def copy_update(
-        self, update: "Headers" | typing.Mapping[str, str] | None
-    ) -> "Headers":
+    def copy_update(self, update: Headers | typing.Mapping[str, str] | None) -> Headers:
         """
         Return a new Headers instance, removing the value of a key.
 
@@ -161,7 +161,7 @@ class Headers(typing.Mapping[str, str]):
         new = update if isinstance(update, Headers) else Headers(update)
 
         # Remove updated items using a case-insensitive approach...
-        keys = set([key.lower() for key in new.keys()])
+        keys = {key.lower() for key in new}
         h = {k: v for k, v in self._dict.items() if k.lower() not in keys}
 
         # Perform the actual update...
@@ -181,7 +181,7 @@ class Headers(typing.Mapping[str, str]):
 
     def __contains__(self, key: typing.Any) -> bool:
         match = key.lower()
-        return any(k.lower() == match for k in self._dict.keys())
+        return any(k.lower() == match for k in self._dict)
 
     def __iter__(self) -> typing.Iterator[str]:
         return iter(self.keys())

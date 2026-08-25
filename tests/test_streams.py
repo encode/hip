@@ -11,7 +11,7 @@ def test_stream():
     with pytest.raises(NotImplementedError):
         i.close()
 
-    i.size == None
+    assert i.size == None
 
 
 def test_bytestream():

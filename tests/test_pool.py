@@ -54,12 +54,12 @@ def test_connection_pool_stream(server):
         assert len(pool.connections) == 1
 
 
-def test_connection_pool_cannot_request_after_closed(server):
+def test_connection_pool_cannot_request_after_closed():
     with httpx.ConnectionPool() as pool:
-        pool
+        pass
 
     with pytest.raises(RuntimeError):
-        pool.request("GET", server.url)
+        pool.request("GET", "http://example.com")
 
 
 def test_connection_pool_should_have_managed_lifespan(server):

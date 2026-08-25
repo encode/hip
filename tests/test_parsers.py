@@ -339,7 +339,7 @@ def test_parser_invalid_transitions():
         p.send_body(b"")
 
     with pytest.raises(httpx.ProtocolError):
-        reader = httpx.ByteStream(b"HTTP/1.1 200 OK\r\n")
+        httpx.ByteStream(b"HTTP/1.1 200 OK\r\n")
         p = httpx.HTTPParser(stream, mode="CLIENT")
         p.recv_status_line()
 

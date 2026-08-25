@@ -42,7 +42,7 @@ class HTTPConnection:
                     status_line = f"{request.method} {request.url.target} [{response.status_code}]"
                     logger.info(status_line)
                 except Exception:
-                    logger.error("Internal Server Error", exc_info=True)
+                    logger.exception("Internal Server Error")
                     content = Text("Internal Server Error")
                     err = Response(500, content=content)
                     self._send_head(err)
@@ -51,7 +51,7 @@ class HTTPConnection:
                     self._send_head(response)
                     self._send_body(response)
         except BaseException:
-            logger.error("Internal Server Error", exc_info=True)
+            logger.exception("Internal Server Error")
 
     def close(self):
         self._parser.close()
@@ -74,7 +74,7 @@ class HTTPConnection:
         status, reason = response.status_code.as_tuple()
         self._parser.send_status_line(protocol, status, reason)
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(datetime.timezone.utc)
         date = now.strftime("%a, %d %b %Y, %H:%M:%S GMT")
 
         headers = self._default_headers
@@ -118,6 +118,6 @@ class Server:
         connection.handle_requests()
 
     def serve(self):
-        with self as server:
+        with self:
             while True:
                 sleep(1)

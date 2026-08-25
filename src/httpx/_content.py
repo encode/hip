@@ -8,18 +8,18 @@ from ._streams import ByteStream, FileStream, MultiPartStream, Stream
 from ._urlencode import urldecode, urlencode
 
 __all__ = [
+    "HTML",
+    "JSON",
     "Binary",
     "Content",
     "Empty",
-    # Request Content Types
-    "Form",
     "File",
     "Files",
-    "JSON",
+    # Request Content Types
+    "Form",
     "MultiPart",
     # Response Content Types
     "Text",
-    "HTML",
 ]
 
 # https://github.com/nginx/nginx/blob/master/conf/mime.types

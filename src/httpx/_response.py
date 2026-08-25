@@ -1,4 +1,5 @@
 import types
+import typing
 
 from ._content import Binary, Content, Empty
 from ._headers import Headers
@@ -11,7 +12,7 @@ class StatusCode:
     # We're using the same set as stdlib `http.HTTPStatus` here...
     #
     # https://github.com/python/cpython/blob/main/Lib/http/__init__.py
-    _codes = {
+    _codes: typing.ClassVar[dict[int, str]] = {
         100: "Continue",
         101: "Switching Protocols",
         102: "Processing",

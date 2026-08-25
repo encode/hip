@@ -60,7 +60,7 @@ class ConnectionPool(Transport):
 
     # Connection pool management...
     def _cleanup(self) -> None:
-        now = time.monotonic()
+        time.monotonic()
         for conn in list(self._connections):
             if conn.is_expired():
                 conn.close()
