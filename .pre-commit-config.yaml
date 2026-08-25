@@ -1,0 +1,25 @@
+repos:
+  - repo: local
+    hooks:
+      - id: mypy
+        name: Mypy
+        entry: uv run --no-sync mypy src
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: ruff-check
+        name: Ruff lint
+        entry: uv run --no-sync ruff check --fix
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: Ruff format
+        entry: uv run --no-sync ruff format
+        language: system
+        types: [python]
+      - id: test-coverage
+        name: Tests and coverage
+        entry: uv run --no-sync pytest --cov=hip --no-cov-on-fail tests
+        language: system
+        pass_filenames: false
+        verbose: true
