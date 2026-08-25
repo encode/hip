@@ -1,5 +1,7 @@
 import types
 
+from typing_extensions import Self
+
 from ._body import ResponseContent
 from ._content import Content
 from ._headers import Headers
@@ -142,7 +144,7 @@ class Connection(Transport):
     def __repr__(self) -> str:
         return f"<Connection [{self._origin} {self.description()}]>"
 
-    def __enter__(self) -> "Connection":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(

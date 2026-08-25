@@ -1,6 +1,8 @@
 import time
 import types
 
+from typing_extensions import Self
+
 from ._connection import Connection, Transport, open_connection
 from ._network import NetworkBackend, Semaphore
 from ._request import Request
@@ -85,7 +87,7 @@ class ConnectionPool(Transport):
 
             warnings.warn("ConnectionPool was garbage collected without being closed.")
 
-    def __enter__(self) -> "ConnectionPool":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(

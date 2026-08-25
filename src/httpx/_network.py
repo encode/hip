@@ -10,6 +10,7 @@ import types
 import typing
 
 import truststore
+from typing_extensions import Self
 
 from ._streams import Stream
 
@@ -102,7 +103,7 @@ class NetworkStream(Stream):
 
             warnings.warn("NetworkStream was garbage collected without being closed.")
 
-    def __enter__(self) -> "NetworkStream":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(
@@ -150,7 +151,7 @@ class NetworkListener:
 
             warnings.warn("NetworkListener was garbage collected without being closed.")
 
-    def __enter__(self) -> "NetworkListener":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(
