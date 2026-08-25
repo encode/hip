@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from ._body import RequestContent
@@ -75,7 +76,13 @@ class HTTPConnection:
         protocol = b"HTTP/1.1"
         status, reason = response.status_code.as_tuple()
         self._parser.send_status_line(protocol, status, reason)
-        headers = self._default_headers.copy_update(response.headers)
+
+        now = datetime.datetime.now()
+        date = now.strftime("%a, %d %b %Y, %H:%M:%S GMT")
+
+        headers = self._default_headers
+        headers = headers.copy_set('Date', date)
+        headers = headers.copy_update(response.headers)
         self._parser.send_headers(headers.as_byte_pairs())
 
     def _send_body(self, response: Response):
