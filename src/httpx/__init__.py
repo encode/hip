@@ -9,7 +9,7 @@ from ._pool import *  # ConnectionPool
 from ._response import *  # StatusCode, Response
 from ._request import *  # Method, Request
 from ._streams import *  # ByteStream, DuplexStream, FileStream, Stream
-from ._server import *  # serve_http, run
+from ._server import *  # Server
 from ._urlencode import *  # quote, unquote, urldecode, urlencode
 from ._urls import *  # QueryParams, URL
 
@@ -40,8 +40,7 @@ __all__ = [
     "ProtocolError",
     "Response",
     "Request",
-    "run",
-    "serve_http",
+    "Server",
     "StatusCode",
     "Stream",
     "Text",

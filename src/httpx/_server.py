@@ -1,7 +1,9 @@
+import datetime
 import logging
 
 from ._body import RequestContent
 from ._content import Text
+from ._headers import Headers
 from ._parsers import HTTPParser
 from ._request import Request
 from ._response import Response
@@ -23,6 +25,7 @@ class HTTPConnection:
         self._stream = stream
         self._endpoint = endpoint
         self._parser = HTTPParser(stream, mode='SERVER')
+        self._default_headers = Headers({"Server": "httpx/dev", "Connection": "keep-alive"})
 
     # API entry points...
     def handle_requests(self):
@@ -73,8 +76,14 @@ class HTTPConnection:
         protocol = b"HTTP/1.1"
         status, reason = response.status_code.as_tuple()
         self._parser.send_status_line(protocol, status, reason)
-        headers = response.headers.as_byte_pairs()
-        self._parser.send_headers(headers)
+
+        now = datetime.datetime.now()
+        date = now.strftime("%a, %d %b %Y, %H:%M:%S GMT")
+
+        headers = self._default_headers
+        headers = headers.copy_set('Date', date)
+        headers = headers.copy_update(response.headers)
+        self._parser.send_headers(headers.as_byte_pairs())
 
     def _send_body(self, response: Response):
         with response as stream:

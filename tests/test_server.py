@@ -2,7 +2,8 @@ import httpx
 
 
 def app(request):
-    return httpx.Response(200)
+    content = httpx.HTML('<html><body>¡Hola, mundo!</body></html>')
+    return httpx.Response(200, content=content)
 
 
 def test_server_defaults():
@@ -19,3 +20,12 @@ def test_server_custom_host_and_port():
     assert server.host == '0.0.0.0'
     assert server.port == 8000
     assert server.url == 'http://0.0.0.0:8000/'
+
+
+def test_server_defaults_headers():
+    with httpx.Server(app) as server:
+        with httpx.Client() as client:
+            response = client.get(server.url)
+            assert response.headers['Server'] == 'httpx/dev'
+            assert response.headers['Connection'] == 'keep-alive'
+            assert response.headers['Date'].endswith('GMT')
