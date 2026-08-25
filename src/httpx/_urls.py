@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import typing
 
-from ._urlparse import urlparse
 from ._urlencode import unquote, urldecode, urlencode
+from ._urlparse import urlparse
 
-__all__ = ["QueryParams", "URL"]
+__all__ = ["URL", "QueryParams"]
 
 
 class URL:
@@ -70,7 +70,7 @@ class URL:
       themselves.
     """
 
-    def __init__(self, url: "URL" | str = "", **kwargs: typing.Any) -> None:
+    def __init__(self, url: URL | str = "", **kwargs: typing.Any) -> None:
         if kwargs:
             allowed = {
                 "scheme": str,
@@ -233,7 +233,7 @@ class URL:
         return query.encode("ascii")
 
     @property
-    def params(self) -> "QueryParams":
+    def params(self) -> QueryParams:
         """
         The URL query parameters, neatly parsed and packaged into an immutable
         multidict representation.
@@ -285,7 +285,7 @@ class URL:
         """
         return not self.is_absolute_url
 
-    def copy_with(self, **kwargs: typing.Any) -> "URL":
+    def copy_with(self, **kwargs: typing.Any) -> URL:
         """
         Copy this URL, returning a new URL with some components altered.
         Accepts the same set of parameters as the components that are made
@@ -300,22 +300,22 @@ class URL:
         """
         return URL(self, **kwargs)
 
-    def copy_set_param(self, key: str, value: typing.Any = None) -> "URL":
+    def copy_set_param(self, key: str, value: typing.Any = None) -> URL:
         return self.copy_with(params=self.params.copy_set(key, value))
 
-    def copy_append_param(self, key: str, value: typing.Any = None) -> "URL":
+    def copy_append_param(self, key: str, value: typing.Any = None) -> URL:
         return self.copy_with(params=self.params.copy_append(key, value))
 
-    def copy_remove_param(self, key: str) -> "URL":
+    def copy_remove_param(self, key: str) -> URL:
         return self.copy_with(params=self.params.copy_remove(key))
 
     def copy_merge_params(
         self,
-        params: "QueryParams" | dict[str, str | list[str]] | list[tuple[str, str]] | None,
-    ) -> "URL":
+        params: QueryParams | dict[str, str | list[str]] | list[tuple[str, str]] | None,
+    ) -> URL:
         return self.copy_with(params=self.params.copy_update(params))
 
-    def join(self, url: "URL" | str) -> "URL":
+    def join(self, url: URL | str) -> URL:
         """
         Return an absolute URL, using this URL as the base.
 
@@ -332,7 +332,7 @@ class URL:
     def __hash__(self) -> int:
         return hash(str(self))
 
-    def __eq__(self, other: typing.Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, (URL, str)) and str(self) == str(URL(other))
 
     def __str__(self) -> str:
@@ -350,7 +350,11 @@ class QueryParams(typing.Mapping[str, str]):
     def __init__(
         self,
         params: (
-            "QueryParams" | dict[str, str | list[str]] | list[tuple[str, str]] | str | None
+            QueryParams
+            | dict[str, str | list[str]]
+            | list[tuple[str, str]]
+            | str
+            | None
         ) = None,
     ) -> None:
         d: dict[str, list[str]] = {}
@@ -454,7 +458,7 @@ class QueryParams(typing.Mapping[str, str]):
         """
         return list(self._dict.get(key, []))
 
-    def copy_set(self, key: str, value: str) -> "QueryParams":
+    def copy_set(self, key: str, value: str) -> QueryParams:
         """
         Return a new QueryParams instance, setting the value of a key.
 
@@ -469,7 +473,7 @@ class QueryParams(typing.Mapping[str, str]):
         q._dict[key] = [value]
         return q
 
-    def copy_append(self, key: str, value: str) -> "QueryParams":
+    def copy_append(self, key: str, value: str) -> QueryParams:
         """
         Return a new QueryParams instance, setting or appending the value of a key.
 
@@ -502,9 +506,9 @@ class QueryParams(typing.Mapping[str, str]):
     def copy_update(
         self,
         params: (
-            "QueryParams" | dict[str, str | list[str]] | list[tuple[str, str]] | None
+            QueryParams | dict[str, str | list[str]] | list[tuple[str, str]] | None
         ) = None,
-    ) -> "QueryParams":
+    ) -> QueryParams:
         """
         Return a new QueryParams instance, updated with.
 
@@ -540,7 +544,7 @@ class QueryParams(typing.Mapping[str, str]):
     def __hash__(self) -> int:
         return hash(str(self))
 
-    def __eq__(self, other: typing.Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, self.__class__):
             return False
         return sorted(self.multi_items()) == sorted(other.multi_items())

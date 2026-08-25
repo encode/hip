@@ -1,8 +1,9 @@
 import types
+import typing
 
 from ._content import Binary, Content, Empty
+from ._headers import Headers
 from ._streams import Stream
-from ._headers import Headers, parse_opts_header
 
 __all__ = ["Response"]
 
@@ -11,7 +12,7 @@ class StatusCode:
     # We're using the same set as stdlib `http.HTTPStatus` here...
     #
     # https://github.com/python/cpython/blob/main/Lib/http/__init__.py
-    _codes = {
+    _codes: typing.ClassVar[dict[int, str]] = {
         100: "Continue",
         101: "Switching Protocols",
         102: "Processing",
@@ -113,10 +114,12 @@ class StatusCode:
         return 500 <= int(self) <= 599
 
     def has_body(self) -> bool:
-        return not(self.is_1xx_informational() or self.value == 204 or self.value == 304)
+        return not (
+            self.is_1xx_informational() or self.value == 204 or self.value == 304
+        )
 
     def as_tuple(self) -> tuple[int, bytes]:
-        return (self.value, self.reason_phrase.encode('ascii'))
+        return (self.value, self.reason_phrase.encode("ascii"))
 
     def __eq__(self, other) -> bool:
         return int(self) == int(other)
@@ -139,16 +142,22 @@ class Response:
         headers: Headers | dict[str, str] | None = None,
         content: Content | bytes | None = None,
     ):
-        self.status_code = StatusCode(status_code) if not isinstance(status_code, StatusCode) else status_code
+        self.status_code = (
+            StatusCode(status_code)
+            if not isinstance(status_code, StatusCode)
+            else status_code
+        )
         self.headers = Headers(headers) if not isinstance(headers, Headers) else headers
         self.content = (
-            content if isinstance(content, Content) else
-            Binary(content) if isinstance(content, bytes) or self.status_code.has_body() else
-            Empty()
+            content
+            if isinstance(content, Content)
+            else Binary(content)
+            if isinstance(content, bytes) or self.status_code.has_body()
+            else Empty()
         )
 
         # https://datatracker.ietf.org/doc/html/rfc2616#section-4.3
-        # RFC 2616, Section 4.3, Message Body.
+        # RFC 2616, Section 4.3, Message Body.
         #
         # All responses to the HEAD request method
         # MUST NOT include a message-body, even though the presence of entity-
@@ -162,16 +171,17 @@ class Response:
     def body(self) -> bytes:
         return bytes(self.content)
 
-    def __enter__(self) -> 'ResponseStream':
+    def __enter__(self) -> "ResponseStream":
         stream = self.content.open()
         context = ResponseStream(self.status_code, self.headers, stream)
         self._context = context
         return self._context
 
-    def __exit__(self,
+    def __exit__(
+        self,
         exc_type: type[BaseException] | None = None,
         exc_value: BaseException | None = None,
-        traceback: types.TracebackType | None = None
+        traceback: types.TracebackType | None = None,
     ) -> None:
         self._context.close()
 
@@ -180,12 +190,14 @@ class Response:
 
 
 class ResponseStream(Stream):
-    def __init__(self, status_code: StatusCode, headers: Headers, stream: Stream) -> None:
+    def __init__(
+        self, status_code: StatusCode, headers: Headers, stream: Stream
+    ) -> None:
         self.status_code = status_code
         self.headers = headers
         self._stream = stream
 
-    def read(self, size: int=-1) -> bytes:
+    def read(self, size: int = -1) -> bytes:
         return self._stream.read(size)
 
     def close(self) -> None:

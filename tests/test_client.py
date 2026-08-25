@@ -1,21 +1,28 @@
 import json
-import httpx
+
 import pytest
+
+import httpx
 
 
 def redirect(request):
-    if request.url.path == '/redirect':
-        return httpx.Response(302, headers={'Location': '/'})
-    return httpx.Response(200, content=httpx.Text('hello, world!'))
+    if request.url.path == "/redirect":
+        return httpx.Response(302, headers={"Location": "/"})
+    return httpx.Response(200, content=httpx.Text("hello, world!"))
 
 
 def echo(request):
-    response = httpx.Response(200, content=httpx.JSON({
-        'method': str(request.method),
-        'query-params': dict(request.url.params.items()),
-        'content-type': request.headers.get('Content-Type'),
-        'json': json.loads(request.body) if request.body else None,
-    }))
+    response = httpx.Response(
+        200,
+        content=httpx.JSON(
+            {
+                "method": str(request.method),
+                "query-params": dict(request.url.params.items()),
+                "content-type": request.headers.get("Content-Type"),
+                "json": json.loads(request.body) if request.body else None,
+            }
+        ),
+    )
     return response
 
 
@@ -38,12 +45,14 @@ def test_client(client):
 def test_get(client, server):
     r = client.get(server.url)
     assert r.status_code == 200
-    assert r.body == b'{"method":"GET","query-params":{},"content-type":null,"json":null}'
+    assert (
+        r.body == b'{"method":"GET","query-params":{},"content-type":null,"json":null}'
+    )
     assert r.content == {
         "method": "GET",
         "query-params": {},
         "content-type": None,
-        "json": None
+        "json": None,
     }
 
 
@@ -52,10 +61,10 @@ def test_post(client, server):
     r = client.post(server.url, content=data)
     assert r.status_code == 200
     assert r.content == {
-        'method': 'POST',
-        'query-params': {},
-        'content-type': 'application/json',
-        'json': {"data": 123},
+        "method": "POST",
+        "query-params": {},
+        "content-type": "application/json",
+        "json": {"data": 123},
     }
 
 
@@ -64,10 +73,10 @@ def test_put(client, server):
     r = client.put(server.url, content=data)
     assert r.status_code == 200
     assert r.content == {
-        'method': 'PUT',
-        'query-params': {},
-        'content-type': 'application/json',
-        'json': {"data": 123},
+        "method": "PUT",
+        "query-params": {},
+        "content-type": "application/json",
+        "json": {"data": 123},
     }
 
 
@@ -76,10 +85,10 @@ def test_patch(client, server):
     r = client.patch(server.url, content=data)
     assert r.status_code == 200
     assert r.content == {
-        'method': 'PATCH',
-        'query-params': {},
-        'content-type': 'application/json',
-        'json': {"data": 123},
+        "method": "PATCH",
+        "query-params": {},
+        "content-type": "application/json",
+        "json": {"data": 123},
     }
 
 
@@ -87,10 +96,10 @@ def test_delete(client, server):
     r = client.delete(server.url)
     assert r.status_code == 200
     assert r.content == {
-        'method': 'DELETE',
-        'query-params': {},
-        'content-type': None,
-        'json': None,
+        "method": "DELETE",
+        "query-params": {},
+        "content-type": None,
+        "json": None,
     }
 
 
@@ -98,10 +107,10 @@ def test_request(client, server):
     r = client.request("GET", server.url)
     assert r.status_code == 200
     assert r.content == {
-        'method': 'GET',
-        'query-params': {},
-        'content-type': None,
-        'json': None,
+        "method": "GET",
+        "query-params": {},
+        "content-type": None,
+        "json": None,
     }
 
 
@@ -110,10 +119,10 @@ def test_stream(client, server):
         assert r.status_code == 200
         body = r.read()
         assert json.loads(body) == {
-            'method': 'GET',
-            'query-params': {},
-            'content-type': None,
-            'json': None,
+            "method": "GET",
+            "query-params": {},
+            "content-type": None,
+            "json": None,
         }
 
 
@@ -132,6 +141,6 @@ def test_get_with_invalid_scheme(client):
 
 def test_redirect(client):
     with httpx.Server(redirect) as server:
-        r = client.get(server.url + 'redirect')
+        r = client.get(server.url + "redirect")
         assert r.status_code == 200
-        assert r.body == b'hello, world!'
+        assert r.body == b"hello, world!"

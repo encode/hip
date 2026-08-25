@@ -1,13 +1,12 @@
 import io
-import types
 import os
+import types
 
-
-__all__ = ['Stream', 'ByteStream', 'DuplexStream', 'FileStream', 'MultiPartStream']
+__all__ = ["ByteStream", "DuplexStream", "FileStream", "MultiPartStream", "Stream"]
 
 
 class Stream:
-    def read(self, size: int=-1) -> bytes:
+    def read(self, size: int = -1) -> bytes:
         raise NotImplementedError()
 
     def write(self, data: bytes) -> None:
@@ -27,17 +26,17 @@ class Stream:
         self,
         exc_type: type[BaseException] | None = None,
         exc_value: BaseException | None = None,
-        traceback: types.TracebackType | None = None
+        traceback: types.TracebackType | None = None,
     ):
         self.close()
 
 
 class ByteStream(Stream):
-    def __init__(self, data: bytes = b''):
+    def __init__(self, data: bytes = b""):
         self._buffer = io.BytesIO(data)
         self._size = len(data)
 
-    def read(self, size: int=-1) -> bytes:
+    def read(self, size: int = -1) -> bytes:
         return self._buffer.read(size)
 
     def close(self) -> None:
@@ -56,11 +55,11 @@ class DuplexStream(Stream):
     This stream can be used for testing network parsers.
     """
 
-    def __init__(self, data: bytes = b''):
+    def __init__(self, data: bytes = b""):
         self._read_buffer = io.BytesIO(data)
         self._write_buffer = io.BytesIO()
 
-    def read(self, size: int=-1) -> bytes:
+    def read(self, size: int = -1) -> bytes:
         return self._read_buffer.read(size)
 
     def write(self, buffer: bytes):
@@ -83,13 +82,14 @@ class FileStream(Stream):
         self._fileobj = None
         self._size = None
 
-    def read(self, size: int=-1) -> bytes:
+    def read(self, size: int = -1) -> bytes:
         if self._fileobj is None:
-            raise ValueError('I/O operation on unopened file')
+            raise ValueError("I/O operation on unopened file")
         return self._fileobj.read(size)
 
     def open(self):
-        self._fileobj = open(self._path, 'rb')
+        # FileStream owns the handle until close() is called.
+        self._fileobj = open(self._path, "rb")  # noqa: SIM115
         self._size = os.path.getsize(self._path)
         return self
 
@@ -107,11 +107,13 @@ class FileStream(Stream):
 
 
 class MultiPartStream(Stream):
-    def __init__(self, form: list[tuple[str, str]], files: list[tuple[str, str]], boundary=''):
+    def __init__(
+        self, form: list[tuple[str, str]], files: list[tuple[str, str]], boundary=""
+    ):
         self._form = list(form)
         self._files = list(files)
         self._boundary = boundary or os.urandom(16).hex()
-        # Mutable state...
+        # Mutable state...
         self._form_progress = list(self._form)
         self._files_progress = list(self._files)
         self._filestream: FileStream | None = None
@@ -135,11 +137,11 @@ class MultiPartStream(Stream):
             section = self._read_next_section()
             sections.append(section)
             length += len(section)
-            if section == b'':
+            if section == b"":
                 break
 
         # If we've more data than requested, then push some back into the buffer.
-        output = b''.join(sections)
+        output = b"".join(sections)
         if size > -1 and len(output) > size:
             output, remainder = output[:size], output[size:]
             self._buffer.write(remainder)
@@ -157,7 +159,7 @@ class MultiPartStream(Stream):
                 f'Content-Disposition: form-data; name="{name}"\r\n'
                 f"\r\n"
                 f"{value}\r\n"
-            ).encode("utf-8")
+            ).encode()
         elif self._files_progress and self._filestream is None:
             # return start of a file item
             key, value = self._files_progress.pop(0)
@@ -168,10 +170,10 @@ class MultiPartStream(Stream):
                 f"--{self._boundary}\r\n"
                 f'Content-Disposition: form-data; name="{name}"; filename="{filename}"\r\n'
                 f"\r\n"
-            ).encode("utf-8")
+            ).encode()
         elif self._filestream is not None:
-            chunk = self._filestream.read(64*1024)
-            if chunk != b'':
+            chunk = self._filestream.read(64 * 1024)
+            if chunk != b"":
                 # return some bytes from file
                 return chunk
             else:
@@ -180,9 +182,9 @@ class MultiPartStream(Stream):
                 self._filestream = None
                 return b"\r\n"
         elif not self._complete:
-            # return final section of multipart
+            # return final section of multipart
             self._complete = True
-            return f"--{self._boundary}--\r\n".encode("utf-8")
+            return f"--{self._boundary}--\r\n".encode()
         # return EOF marker
         return b""
 

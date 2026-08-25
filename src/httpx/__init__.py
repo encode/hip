@@ -6,17 +6,17 @@ from ._headers import *  # Headers
 from ._network import *  # NetworkBackend, NetworkStream, timeout
 from ._parsers import *  # HTTPParser, ProtocolError
 from ._pool import *  # ConnectionPool
-from ._response import *  # StatusCode, Response
 from ._request import *  # Method, Request
-from ._streams import *  # ByteStream, DuplexStream, FileStream, Stream
-from ._server import *  # Server
+from ._response import *  # StatusCode, Response
+from ._server import *  # Server  # serve_http, run
+from ._streams import *  # ByteStream, DuplexStream, FileStream, Stream  # ByteStream, DuplexStream, FileStream, Stream
 from ._urlencode import *  # quote, unquote, urldecode, urlencode
 from ._urls import *  # QueryParams, URL
 
-
 __all__ = [
-    "__title__",
-    "__version__",
+    "HTML",
+    "JSON",
+    "URL",
     "Binary",
     "ByteStream",
     "Client",
@@ -28,28 +28,29 @@ __all__ = [
     "FileStream",
     "Files",
     "Form",
-    "Headers",
-    "HTML",
     "HTTPParser",
-    "JSON",
+    "Headers",
     "Method",
     "MultiPart",
     "NetworkBackend",
     "NetworkStream",
-    "open_connection",
     "ProtocolError",
-    "Response",
+    "QueryParams",
     "Request",
+    "Response",
     "Server",
     "StatusCode",
     "Stream",
     "Text",
-    "timeout",
     "Transport",
-    "QueryParams",
+    "__title__",
+    "__version__",
+    "open_connection",
     "quote",
+    "run",
+    "serve_http",
+    "timeout",
     "unquote",
-    "URL",
     "urldecode",
     "urlencode",
 ]

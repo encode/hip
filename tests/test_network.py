@@ -1,5 +1,6 @@
-import httpx
 import pytest
+
+import httpx
 
 
 def echo(stream):
@@ -42,14 +43,15 @@ def test_network_backend_context_managed(server):
 
 def test_network_backend_timeout(server):
     net = httpx.NetworkBackend()
-    with httpx.timeout(0.0):
-        with pytest.raises(TimeoutError):
-            with net.connect(server.host, server.port) as stream:
-                pass
+    with (
+        httpx.timeout(0.0),
+        pytest.raises(TimeoutError),
+        net.connect(server.host, server.port),
+    ):
+        pass
 
-    with httpx.timeout(10.0):
-        with net.connect(server.host, server.port) as stream:
-            pass
+    with httpx.timeout(10.0), net.connect(server.host, server.port):
+        pass
 
 
 # >>> net = httpx.NetworkBackend()

@@ -1,0 +1,8 @@
+#!/bin/sh -e
+
+SOURCE_FILES="src/httpx tests scripts"
+
+set -x
+
+uv run --no-sync ruff check $SOURCE_FILES
+uv run --no-sync ruff format --check $SOURCE_FILES

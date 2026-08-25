@@ -3,23 +3,23 @@ import json
 import os
 import typing
 
-from ._streams import Stream, ByteStream, FileStream, MultiPartStream
 from ._headers import Headers, parse_opts_header
+from ._streams import ByteStream, FileStream, MultiPartStream, Stream
 from ._urlencode import urldecode, urlencode
 
 __all__ = [
+    "HTML",
+    "JSON",
     "Binary",
     "Content",
     "Empty",
-    # Request Content Types
-    "Form",
     "File",
     "Files",
-    "JSON",
+    # Request Content Types
+    "Form",
     "MultiPart",
     # Response Content Types
     "Text",
-    "HTML",
 ]
 
 # https://github.com/nginx/nginx/blob/master/conf/mime.types
@@ -44,11 +44,13 @@ class Content:
         raise NotImplementedError()
 
     @classmethod
-    def parse(self, stream: Stream) -> 'Content':
+    def parse(self, stream: Stream) -> "Content":
         raise NotImplementedError()
 
     def __bytes__(self):
-        raise TypeError(f"Content {self.__class__.__name__} does not support a bytes interface.")
+        raise TypeError(
+            f"Content {self.__class__.__name__} does not support a bytes interface."
+        )
 
 
 class Form(typing.Mapping[str, str], Content):
@@ -96,10 +98,12 @@ class Form(typing.Mapping[str, str], Content):
 
     def headers(self) -> Headers:
         content_length = len(self._content)
-        return Headers({
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Content-Length": f"{content_length}",
-        })
+        return Headers(
+            {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Length": f"{content_length}",
+            }
+        )
 
     def __bytes__(self) -> bytes:
         return self._content
@@ -171,10 +175,9 @@ class Form(typing.Mapping[str, str], Content):
     def __hash__(self) -> int:
         return hash(str(self))
 
-    def __eq__(self, other: typing.Any) -> bool:
-        return (
-            isinstance(other, Form) and
-            sorted(self.multi_items()) == sorted(other.multi_items())
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Form) and sorted(self.multi_items()) == sorted(
+            other.multi_items()
         )
 
     def __str__(self) -> str:
@@ -203,18 +206,20 @@ class File(Content):
 
         _, ext = os.path.splitext(self._path)
         content_type = _content_types.get(ext, "application/octet-stream")
-        if content_type.startswith('text/'):
+        if content_type.startswith("text/"):
             content_type += "; charset='utf-8'"
 
-        return Headers({
-            "Content-Type": f"{content_type}",
-            "Content-Length": f"{content_length}",
-        })
+        return Headers(
+            {
+                "Content-Type": f"{content_type}",
+                "Content-Length": f"{content_length}",
+            }
+        )
 
     def __lt__(self, other: typing.Any) -> bool:
         return isinstance(other, File) and other._path < self._path
 
-    def __eq__(self, other: typing.Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, File) and other._path == self._path
 
     def __repr__(self) -> str:
@@ -233,7 +238,7 @@ class Files(typing.Mapping[str, File], Content):
             | typing.Sequence[tuple[str, File]]
             | None
         ) = None,
-        boundary: str = ''
+        boundary: str = "",
     ) -> None:
         d: dict[str, list[File]] = {}
 
@@ -283,10 +288,12 @@ class Files(typing.Mapping[str, File], Content):
 
     def headers(self) -> Headers:
         content_type = f"multipart/form-data; boundary={self._boundary}"
-        return Headers({
-            "Content-Type": f"{content_type}",
-            "Transfer-Encoding": "chunked",
-        })
+        return Headers(
+            {
+                "Content-Type": f"{content_type}",
+                "Transfer-Encoding": "chunked",
+            }
+        )
 
     # Builtins
     def __getitem__(self, key: str) -> File:
@@ -303,11 +310,10 @@ class Files(typing.Mapping[str, File], Content):
 
     def __bool__(self) -> bool:
         return bool(self._dict)
- 
-    def __eq__(self, other: typing.Any) -> bool:
-        return (
-            isinstance(other, Files) and
-            sorted(self.multi_items()) == sorted(other.multi_items())
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Files) and sorted(self.multi_items()) == sorted(
+            other.multi_items()
         )
 
     def __repr__(self) -> str:
@@ -317,12 +323,13 @@ class Files(typing.Mapping[str, File], Content):
 class JSON(Content):
     def __init__(self, data: typing.Any, source: bytes | None = None) -> None:
         self._data = data
-        self._content = json.dumps(
-            self._data,
-            ensure_ascii=False,
-            separators=(",", ":"),
-            allow_nan=False
-        ).encode("utf-8") if source is None else source
+        self._content = (
+            json.dumps(
+                self._data, ensure_ascii=False, separators=(",", ":"), allow_nan=False
+            ).encode("utf-8")
+            if source is None
+            else source
+        )
 
     def open(self) -> Stream:
         return ByteStream(self._content)
@@ -330,13 +337,15 @@ class JSON(Content):
     def headers(self) -> Headers:
         content_type = "application/json"
         content_length = len(self._content)
-        return Headers({
-            "Content-Type": f"{content_type}",
-            "Content-Length": f"{content_length}",
-        })
+        return Headers(
+            {
+                "Content-Type": f"{content_type}",
+                "Content-Length": f"{content_length}",
+            }
+        )
 
     @classmethod
-    def parse(self, stream: Stream) -> 'Content':
+    def parse(self, stream: Stream) -> "Content":
         source = stream.read()
         data = json.loads(source)
         return JSON(data, source)
@@ -346,7 +355,7 @@ class JSON(Content):
     def value(self) -> typing.Any:
         return copy.deepcopy(self._data)
 
-    # dict and list style accessors, eg. for casting.
+    # dict and list style accessors, eg. for casting.
     def keys(self) -> typing.KeysView[str]:
         return self._data.keys()
 
@@ -356,14 +365,14 @@ class JSON(Content):
     def __getitem__(self, key: typing.Any) -> typing.Any:
         return copy.deepcopy(self._data[key])
 
-    # Built-ins.
-    def __eq__(self, other: typing.Any) -> bool:
+    # Built-ins.
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, JSON):
             return self._data == other._data
         return self._data == other
 
     def __str__(self) -> str:
-        return self._content.decode('utf-8')
+        return self._content.decode("utf-8")
 
     def __bytes__(self) -> bytes:
         return self._content
@@ -383,15 +392,17 @@ class Text(Content):
     def headers(self) -> Headers:
         content_type = "text/plain; charset='utf-8'"
         content_length = len(self._content)
-        return Headers({
-            "Content-Type": f"{content_type}",
-            "Content-Length": f"{content_length}",
-        })
+        return Headers(
+            {
+                "Content-Type": f"{content_type}",
+                "Content-Length": f"{content_length}",
+            }
+        )
 
     @classmethod
     def parse(self, stream: Stream) -> Content:
         source = stream.read()
-        text = source.decode('utf-8')
+        text = source.decode("utf-8")
         return Text(text, source)
 
     def __str__(self) -> str:
@@ -415,15 +426,17 @@ class HTML(Content):
     def headers(self) -> Headers:
         content_type = "text/html; charset='utf-8'"
         content_length = len(self._content)
-        return Headers({
-            "Content-Type": f"{content_type}",
-            "Content-Length": f"{content_length}",
-        })
+        return Headers(
+            {
+                "Content-Type": f"{content_type}",
+                "Content-Length": f"{content_length}",
+            }
+        )
 
     @classmethod
     def parse(self, stream: Stream) -> Content:
         source = stream.read()
-        text = source.decode('utf-8')
+        text = source.decode("utf-8")
         return HTML(text, source)
 
     def __str__(self) -> str:
@@ -438,16 +451,14 @@ class HTML(Content):
 
 class Binary(Content):
     def __init__(self, content: bytes | None) -> None:
-        self._content = b'' if (content is None) else content
+        self._content = b"" if (content is None) else content
 
     def open(self) -> Stream:
         return ByteStream(self._content)
 
     def headers(self) -> Headers:
         content_length = len(self._content)
-        return Headers({
-            "Content-Length": f"{content_length}"
-        })
+        return Headers({"Content-Length": f"{content_length}"})
 
     @classmethod
     def parse(self, stream: Stream) -> Content:
@@ -466,16 +477,16 @@ class Empty(Content):
         pass
 
     def open(self) -> Stream:
-        return ByteStream(b'')
+        return ByteStream(b"")
 
     def headers(self) -> Headers:
         return Headers()
 
     def __bytes__(self) -> bytes:
-        return b''
+        return b""
 
     def __repr__(self) -> str:
-        return f"<Empty>"
+        return "<Empty>"
 
 
 class MultiPart(Content):
@@ -494,9 +505,9 @@ class MultiPart(Content):
             | typing.Sequence[tuple[str, File]]
             | None
         ) = None,
-        boundary: str | None = None
+        boundary: str | None = None,
     ):
-        self._form = form if isinstance(form , Form) else Form(form)
+        self._form = form if isinstance(form, Form) else Form(form)
         self._files = files if isinstance(files, Files) else Files(files)
         self._boundary = os.urandom(16).hex() if boundary is None else boundary
 
@@ -514,10 +525,12 @@ class MultiPart(Content):
         return MultiPartStream(form, files, boundary=self._boundary)
 
     def headers(self) -> Headers:
-        return Headers({
-            "Content-Type": f"multipart/form-data; boundary={self._boundary}",
-            "Transfer-Encoding": "chunked",
-        })
+        return Headers(
+            {
+                "Content-Type": f"multipart/form-data; boundary={self._boundary}",
+                "Transfer-Encoding": "chunked",
+            }
+        )
 
     def __repr__(self) -> str:
         return f"<MultiPart form={self._form.multi_items()!r}, files={self._files.multi_items()!r}>"
@@ -527,17 +540,17 @@ def select_media(choices: dict[str, type[Content]], content_type: str) -> type[C
     # Eg. multipart/form-data; boundary=398hjiun98jhhi87g98h76g8
     ct, _ = parse_opts_header(content_type)
     # Eg. application/json
-    main, _, subtype = ct.partition('/')
+    main, _, subtype = ct.partition("/")
 
-    if '+' in subtype:
+    if "+" in subtype:
         # RFC 6839. Eg. application/schema+json
-        _, _, subtype = subtype.partition('+')
+        _, _, subtype = subtype.partition("+")
 
-    primary = choices.get(f'{main}/{subtype}')
+    primary = choices.get(f"{main}/{subtype}")
     if primary is not None:
         return primary
 
-    secondary = choices.get(f'{main}/*')
+    secondary = choices.get(f"{main}/*")
     if secondary is not None:
         return secondary
 

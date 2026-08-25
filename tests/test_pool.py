@@ -1,9 +1,10 @@
-import httpx
 import pytest
+
+import httpx
 
 
 def hello_world(request):
-    content = httpx.Text('Hello, world.')
+    content = httpx.Text("Hello, world.")
     return httpx.Response(200, content=content)
 
 
@@ -53,12 +54,12 @@ def test_connection_pool_stream(server):
         assert len(pool.connections) == 1
 
 
-def test_connection_pool_cannot_request_after_closed(server):
+def test_connection_pool_cannot_request_after_closed():
     with httpx.ConnectionPool() as pool:
-        pool
+        pass
 
     with pytest.raises(RuntimeError):
-        pool.request("GET", server.url)
+        pool.request("GET", "http://example.com")
 
 
 def test_connection_pool_should_have_managed_lifespan(server):
@@ -123,4 +124,3 @@ def test_connection_stream(server):
 # #     with conn.upgrade("CONNECT", "www.encode.io:443") as stream:
 # #         stream.start_tls(ctx, hostname="www.encode.io")
 # #         ...
-

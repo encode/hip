@@ -10,13 +10,15 @@ import types
 import typing
 
 import truststore
+from typing_extensions import Self
 
 from ._streams import Stream
 
-
 __all__ = ["NetworkBackend", "NetworkStream", "timeout"]
 
-_timeout_stack: contextvars.ContextVar[list[float]] = contextvars.ContextVar("timeout_context", default=[])
+_timeout_stack: contextvars.ContextVar[tuple[float]] = contextvars.ContextVar(
+    "timeout_context", default=()
+)
 
 
 @contextlib.contextmanager
@@ -29,8 +31,7 @@ def timeout(duration: float) -> typing.Iterator[None]:
     """
     now = time.monotonic()
     until = now + duration
-    stack = typing.cast(list[float], _timeout_stack.get())
-    stack = [until] + stack
+    stack = (until, *_timeout_stack.get())
     token = _timeout_stack.set(stack)
     try:
         yield
@@ -98,9 +99,10 @@ class NetworkStream(Stream):
     def __del__(self):
         if not self._is_closed:
             import warnings
-            warnings.warn(f"NetworkStream was garbage collected without being closed.")
 
-    def __enter__(self) -> "NetworkStream":
+            warnings.warn("NetworkStream was garbage collected without being closed.")
+
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(
@@ -145,9 +147,10 @@ class NetworkListener:
     def __del__(self):
         if not self._is_closed:
             import warnings
+
             warnings.warn("NetworkListener was garbage collected without being closed.")
 
-    def __enter__(self) -> "NetworkListener":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(
@@ -160,7 +163,9 @@ class NetworkListener:
 
 
 class NetworkServer:
-    def __init__(self, listener: NetworkListener, handler: typing.Callable[[NetworkStream], None]) -> None:
+    def __init__(
+        self, listener: NetworkListener, handler: typing.Callable[[NetworkStream], None]
+    ) -> None:
         self.listener = listener
         self.handler = handler
         self._max_workers = 5
@@ -177,7 +182,9 @@ class NetworkServer:
         return self.listener.port
 
     def __enter__(self):
-        self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=self._max_workers)
+        self._executor = concurrent.futures.ThreadPoolExecutor(
+            max_workers=self._max_workers
+        )
         self._executor.submit(self._serve)
         return self
 
@@ -216,7 +223,7 @@ class NetworkBackend:
         sock = socket.create_connection(address, timeout=timeout)
         return NetworkStream(sock, address)
 
-    def connect_tls(self, host: str, port: int, hostname: str = '') -> NetworkStream:
+    def connect_tls(self, host: str, port: int, hostname: str = "") -> NetworkStream:
         """
         Connect to the given address, returning a NetworkStream instance.
         """
@@ -239,7 +246,9 @@ class NetworkBackend:
         sock.setblocking(False)
         return NetworkListener(sock, address)
 
-    def serve(self, host: str, port: int, handler: typing.Callable[[NetworkStream], None]) -> NetworkServer:
+    def serve(
+        self, host: str, port: int, handler: typing.Callable[[NetworkStream], None]
+    ) -> NetworkServer:
         listener = self.listen(host, port)
         return NetworkServer(listener, handler)
 

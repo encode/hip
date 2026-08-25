@@ -1,68 +1,70 @@
-import httpx
 import pytest
+
+import httpx
 
 
 def test_url():
-    url = httpx.URL('https://www.example.com/')
+    url = httpx.URL("https://www.example.com/")
     assert str(url) == "https://www.example.com/"
 
 
 def test_url_repr():
-    url = httpx.URL('https://www.example.com/')
+    url = httpx.URL("https://www.example.com/")
     assert repr(url) == "<URL 'https://www.example.com/'>"
 
 
 def test_url_params():
-    url = httpx.URL('https://www.example.com/', params={"a": "b", "c": "d"})
+    url = httpx.URL("https://www.example.com/", params={"a": "b", "c": "d"})
     assert str(url) == "https://www.example.com/?a=b&c=d"
 
 
 def test_url_normalisation():
-    url = httpx.URL('https://www.EXAMPLE.com:443/./path/../main')
-    assert str(url) == 'https://www.example.com/main'
+    url = httpx.URL("https://www.EXAMPLE.com:443/./path/../main")
+    assert str(url) == "https://www.example.com/main"
 
 
 def test_url_relative():
-    url = httpx.URL('/README.md')
-    assert str(url) == '/README.md'
+    url = httpx.URL("/README.md")
+    assert str(url) == "/README.md"
 
 
 def test_url_escaping():
-    url = httpx.URL('https://example.com/path to here?search=🦋')
-    assert str(url) == 'https://example.com/path%20to%20here?search=%F0%9F%A6%8B'
+    url = httpx.URL("https://example.com/path to here?search=🦋")
+    assert str(url) == "https://example.com/path%20to%20here?search=%F0%9F%A6%8B"
 
 
 def test_url_already_escaped():
-    url = httpx.URL('https://example.com/path%20to%20here?search=%F0%9F%A6%8B')
-    assert str(url) == 'https://example.com/path%20to%20here?search=%F0%9F%A6%8B'
+    url = httpx.URL("https://example.com/path%20to%20here?search=%F0%9F%A6%8B")
+    assert str(url) == "https://example.com/path%20to%20here?search=%F0%9F%A6%8B"
 
 
 def test_url_components():
     url = httpx.URL(scheme="https", host="example.com", path="/")
-    assert str(url) == 'https://example.com/'
+    assert str(url) == "https://example.com/"
 
 
 def test_url_copy_with():
-    url = httpx.URL('https://www.example.com/')
+    url = httpx.URL("https://www.example.com/")
     url = url.copy_with(path="/path.txt")
     assert str(url) == "https://www.example.com/path.txt"
 
 
 def test_url_ipv4():
-    url = httpx.URL('http://127.0.0.1/')
-    assert str(url) == 'http://127.0.0.1/'
+    url = httpx.URL("http://127.0.0.1/")
+    assert str(url) == "http://127.0.0.1/"
 
 
 def test_url_ipv6():
-    url = httpx.URL('http://[::1]/')
-    assert str(url) == 'http://[::1]/'
+    url = httpx.URL("http://[::1]/")
+    assert str(url) == "http://[::1]/"
 
 
 # QueryParams
 
+
 def test_queryparams():
     params = httpx.QueryParams({"color": "black", "size": "medium"})
-    assert str(params) == 'color=black&size=medium'
+    assert str(params) == "color=black&size=medium"
 
 
 def test_queryparams_repr():
@@ -72,22 +74,24 @@ def test_queryparams_repr():
 
 def test_queryparams_list_of_values():
     params = httpx.QueryParams({"filter": ["60GHz", "75GHz", "100GHz"]})
-    assert str(params) == 'filter=60GHz&filter=75GHz&filter=100GHz'
+    assert str(params) == "filter=60GHz&filter=75GHz&filter=100GHz"
 
 
 def test_queryparams_from_str():
     params = httpx.QueryParams("color=black&size=medium")
-    assert str(params) == 'color=black&size=medium'
+    assert str(params) == "color=black&size=medium"
 
 
 def test_queryparams_access():
     params = httpx.QueryParams("sort_by=published&author=natalie")
-    assert params["sort_by"] == 'published'
+    assert params["sort_by"] == "published"
 
 
 def test_queryparams_escaping():
-    params = httpx.QueryParams({"email": "user@example.com", "search": "How HTTP works!"})
-    assert str(params) == 'email=user%40example.com&search=How+HTTP+works%21'
+    params = httpx.QueryParams(
+        {"email": "user@example.com", "search": "How HTTP works!"}
+    )
+    assert str(params) == "email=user%40example.com&search=How+HTTP+works%21"
 
 
 def test_queryparams_empty():

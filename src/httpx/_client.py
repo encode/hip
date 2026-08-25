@@ -1,7 +1,7 @@
 import types
 import typing
 
-from ._content import Content, JSON, HTML, Text, Binary, select_media
+from ._content import HTML, JSON, Binary, Content, Text, select_media
 from ._headers import Headers
 from ._pool import ConnectionPool, Transport
 from ._request import Method, Request
@@ -30,10 +30,10 @@ class Client:
         self.transport = transport
         self.via = RedirectMiddleware(self.transport)
         self.media = {
-            'application/json': JSON,
-            'text/html': HTML,
-            'text/*': Text,
-            '*/*': Binary,
+            "application/json": JSON,
+            "text/html": HTML,
+            "text/*": Text,
+            "*/*": Binary,
         }
 
     def build_request(
@@ -59,7 +59,7 @@ class Client:
     ) -> Response:
         request = self.build_request(method, url, headers=headers, content=content)
         with self.via.send(request) as stream:
-            ct = stream.headers.get('Content-Type', 'application/octet-stream')
+            ct = stream.headers.get("Content-Type", "application/octet-stream")
             cls = select_media(self.media, ct)
             content = cls.parse(stream)
         return Response(
@@ -126,7 +126,7 @@ class Client:
         self,
         exc_type: type[BaseException] | None = None,
         exc_value: BaseException | None = None,
-        traceback: types.TracebackType | None = None
+        traceback: types.TracebackType | None = None,
     ):
         self.close()
 
@@ -138,14 +138,16 @@ class RedirectMiddleware(Transport):
     def __init__(self, transport: Transport) -> None:
         self._transport = transport
 
-    def build_redirect_request(self, request: Request, response: Response) -> Request | None:
+    def build_redirect_request(
+        self, request: Request, response: Response
+    ) -> Request | None:
         # Redirect status codes...
         if response.status_code not in (301, 302, 303, 307, 308):
             return None
 
-        # Redirects need a valid location header...
+        # Redirects need a valid location header...
         try:
-            location = URL(response.headers['Location'])
+            location = URL(response.headers["Location"])
         except (KeyError, ValueError):
             return None
 

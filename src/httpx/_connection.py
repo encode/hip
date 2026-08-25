@@ -1,15 +1,16 @@
 import types
 
+from typing_extensions import Self
+
 from ._body import ResponseContent
 from ._content import Content
 from ._headers import Headers
 from ._network import Lock, NetworkBackend
 from ._parsers import HTTPParser
-from ._response import Response
 from ._request import Method, Request
+from ._response import Response
 from ._streams import Stream
 from ._urls import URL
-
 
 __all__ = [
     "Connection",
@@ -53,7 +54,7 @@ class Connection(Transport):
         self._stream = stream
         self._origin = URL(origin) if not isinstance(origin, URL) else origin
         self._request_lock = Lock()
-        self._parser = HTTPParser(stream, mode='CLIENT')
+        self._parser = HTTPParser(stream, mode="CLIENT")
 
     # API for connection pool management...
     def origin(self) -> URL:
@@ -73,7 +74,7 @@ class Connection(Transport):
 
     # API entry points...
     def send(self, request: Request) -> Response:
-        #async with self._request_lock:
+        # async with self._request_lock:
         #    try:
         self._send_head(request)
         self._send_body(request)
@@ -113,8 +114,8 @@ class Connection(Transport):
     # Send the request...
     def _send_head(self, request: Request) -> None:
         method = bytes(request.method)
-        target = request.url.target.encode('ascii')
-        protocol = b'HTTP/1.1'
+        target = request.url.target.encode("ascii")
+        protocol = b"HTTP/1.1"
         self._parser.send_method_line(method, target, protocol)
         headers = request.headers.as_byte_pairs()
         self._parser.send_headers(headers)
@@ -123,16 +124,13 @@ class Connection(Transport):
         with request as stream:
             while data := stream.read(64 * 1024):
                 self._parser.send_body(data)
-            self._parser.send_body(b'')
+            self._parser.send_body(b"")
 
     # Receive the response...
     def _recv_head(self) -> tuple[int, Headers]:
         _, code, _ = self._parser.recv_status_line()
         h = self._parser.recv_headers()
-        headers = Headers([
-            (k.decode('ascii'), v.decode('ascii'))
-            for k, v in h
-        ])
+        headers = Headers([(k.decode("ascii"), v.decode("ascii")) for k, v in h])
         return code, headers
 
     def _recv_body(self) -> bytes:
@@ -146,7 +144,7 @@ class Connection(Transport):
     def __repr__(self) -> str:
         return f"<Connection [{self._origin} {self.description()}]>"
 
-    def __enter__(self) -> "Connection":
+    def __enter__(self) -> Self:
         return self
 
     def __exit__(
@@ -159,10 +157,10 @@ class Connection(Transport):
 
 
 def open_connection(
-        url: URL | str,
-        hostname: str = '',
-        backend: NetworkBackend | None = None,
-    ) -> Connection:
+    url: URL | str,
+    hostname: str = "",
+    backend: NetworkBackend | None = None,
+) -> Connection:
 
     if isinstance(url, str):
         url = URL(url)
