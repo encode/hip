@@ -24,7 +24,7 @@ class HTTPConnection:
         self._stream = stream
         self._endpoint = endpoint
         self._parser = HTTPParser(stream, mode='SERVER')
-        self._default_headers = Headers({"Server": "httpx/dev", "Connection": "close"})
+        self._default_headers = Headers({"Server": "httpx/dev", "Connection": "keep-alive"})
 
     # API entry points...
     def handle_requests(self):
