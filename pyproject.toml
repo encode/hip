@@ -44,6 +44,7 @@ mkdocs = { git = "https://github.com/encode/mkdocs.git" }
 [dependency-groups]
 dev = [
     "mkdocs",
+    "mypy==2.3.1",
     "pytest==8.3.5",
     "pytest-cov==7.1.0",
     "ruff",
