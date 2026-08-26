@@ -16,7 +16,7 @@ from ._streams import Stream
 
 __all__ = ["NetworkBackend", "NetworkStream", "timeout"]
 
-_timeout_stack: contextvars.ContextVar[tuple[float]] = contextvars.ContextVar(
+_timeout_stack: contextvars.ContextVar[tuple[float, ...]] = contextvars.ContextVar(
     "timeout_context", default=()
 )
 
