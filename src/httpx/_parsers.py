@@ -232,16 +232,6 @@ class HTTPParser:
             # Handle body close
             self.send_state = State.DONE
 
-    def recv_close(self) -> bool:
-        # ...
-        if self.is_closed():
-            return True
-
-        if self.parser.read_eof():
-            self.close()
-            return True
-        return False
-
     def recv_method_line(self) -> tuple[bytes, bytes, bytes]:
         """
         Receive the initial request method line:
@@ -488,18 +478,6 @@ class ReadAheadParser:
             buffer, push_back = buffer[:size], buffer[size:]
             self._push_back(bytes(push_back))
         return bytes(buffer)
-
-    def read_eof(self) -> bool:
-        """
-        Attempt to read the closing EOF.
-        Return True if the stream is EOF, or False otherwise.
-        """
-        if not self._buffer:
-            chunk = self._read_some()
-            if not chunk:
-                return True
-            self._push_back(chunk)
-        return False
 
     def read_until(self, marker: bytes, max_size: int, exc_text: str) -> bytes:
         """
