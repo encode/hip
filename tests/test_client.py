@@ -26,6 +26,22 @@ def echo(request):
     return response
 
 
+def json_response_with_content_type_options(request):
+    return httpx.Response(
+        200,
+        headers={"Content-Type": 'application/json; title="hello\\"world"'},
+        content=b'{"message":"hello"}',
+    )
+
+
+def invalid_content_type(request):
+    return httpx.Response(
+        200,
+        headers={"Content-Type": "; charset=utf-8"},
+        content=b"hello",
+    )
+
+
 @pytest.fixture
 def client():
     with httpx.Client() as client:
@@ -132,6 +148,20 @@ def test_keepalive(client, server):
 
     assert first.status_code == 200
     assert second.status_code == 200
+
+
+def test_response_content_type_with_options(client):
+    with httpx.Server(json_response_with_content_type_options) as server:
+        response = client.get(server.url)
+
+    assert response.content == {"message": "hello"}
+
+
+def test_response_invalid_content_type(client):
+    with httpx.Server(invalid_content_type) as server:
+        response = client.get(server.url)
+
+    assert response.body == b"hello"
 
 
 def test_get_with_invalid_scheme(client):
