@@ -765,3 +765,51 @@ def test_received_oversized_chunk():
     msg = "Received invalid chunk size"
     with pytest.raises(httpx.ProtocolError, match=msg):
         p.recv_body()
+
+
+def test_send_response_before_request():
+    stream = httpx.DuplexStream()
+
+    p = httpx.HTTPParser(stream, mode="SERVER")
+    msg = "Called 'send_status_line' in invalid state State.WAIT"
+    with pytest.raises(httpx.ProtocolError, match=msg):
+        p.send_status_line(b"HTTP/1.1", 200, b"OK")
+
+
+def test_server_receives_unsupported_protocol():
+    stream = httpx.DuplexStream(b"GET / HTTP/1.0\r\n")
+
+    p = httpx.HTTPParser(stream, mode="SERVER")
+    msg = "Received unsupported protocol version"
+    with pytest.raises(httpx.ProtocolError, match=msg):
+        p.recv_method_line()
+
+
+def test_server_sends_unsupported_protocol():
+    stream = httpx.DuplexStream(b"GET / HTTP/1.1\r\n")
+
+    p = httpx.HTTPParser(stream, mode="SERVER")
+    p.recv_method_line()
+    msg = "Sent unsupported protocol version"
+    with pytest.raises(httpx.ProtocolError, match=msg):
+        p.send_status_line(b"HTTP/2.0", 200, b"OK")
+
+
+def test_server_receives_method_line_twice():
+    stream = httpx.DuplexStream(b"GET / HTTP/1.1\r\n")
+
+    p = httpx.HTTPParser(stream, mode="SERVER")
+    p.recv_method_line()
+    msg = "Called 'recv_method_line' in invalid state State.RECV_HEADERS"
+    with pytest.raises(httpx.ProtocolError, match=msg):
+        p.recv_method_line()
+
+
+def test_request_missing_host_header():
+    stream = httpx.DuplexStream(b"GET / HTTP/1.1\r\n\r\n")
+
+    p = httpx.HTTPParser(stream, mode="SERVER")
+    p.recv_method_line()
+    msg = "Request missing 'Host' header"
+    with pytest.raises(httpx.ProtocolError, match=msg):
+        p.recv_headers()
