@@ -168,7 +168,7 @@ class NetworkServer:
     ) -> None:
         self.listener = listener
         self.handler = handler
-        self._max_workers = 5
+        self._max_workers = 10
         self._executor = None
         self._thread = None
         self._streams: list[NetworkStream] = []

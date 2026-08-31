@@ -30,7 +30,7 @@ class HTTPConnection:
     # API entry points...
     def handle_requests(self):
         try:
-            while not (self._parser.keepalive_expired() or self._parser.recv_close()):
+            while self._parser.is_idle():
                 method, url, headers = self._recv_head()
                 with RequestContent(self._parser).open() as stream:
                     body = stream.read()
