@@ -1,5 +1,1 @@
-cd docs
-uv run --project .. --no-sync mkdocs build
-rm -rf ../site
-mv site ..
-cd ..
+uv run --no-sync mkdocs build
