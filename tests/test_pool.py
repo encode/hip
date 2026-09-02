@@ -26,6 +26,17 @@ def test_connection_pool_request(server):
         assert len(pool.connections) == 1
 
 
+def test_transport_request_not_implemented():
+    transport = httpx.Transport()
+
+    with pytest.raises(NotImplementedError):
+        transport.request("GET", "http://example.com")
+
+
+def test_transport_close():
+    httpx.Transport().close()
+
+
 def test_connection_pool_connection_close(server):
     with httpx.ConnectionPool() as pool:
         assert repr(pool) == "<ConnectionPool [0 active]>"
@@ -93,3 +104,22 @@ def test_connection_stream_read_in_chunks(server):
         assert response.read(5) == b"Hello"
         assert response.read(5) == b", wor"
         assert response.read() == b"ld."
+
+
+class TLSBackend:
+    def connect_tls(self, host, port, hostname):
+        self.connect_tls_args = (host, port, hostname)
+        return httpx.DuplexStream()
+
+
+def test_open_https_connection():
+    backend = TLSBackend()
+
+    with httpx.open_connection(
+        "https://example.com",
+        hostname="example.com",
+        backend=backend,
+    ):
+        pass
+
+    assert backend.connect_tls_args == ("example.com", 443, "example.com")

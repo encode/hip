@@ -133,9 +133,6 @@ class Connection(Transport):
         headers = Headers([(k.decode("ascii"), v.decode("ascii")) for k, v in h])
         return code, headers
 
-    def _recv_body(self) -> bytes:
-        return self._parser.recv_body()
-
     # Request/response cycle complete...
     def _close(self) -> None:
         self._parser.close()
