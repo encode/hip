@@ -26,6 +26,22 @@ def echo(request):
     return response
 
 
+def json_response_with_content_type_options(request):
+    return httpx.Response(
+        200,
+        headers={"Content-Type": 'application/json; title="hello\\"world"'},
+        content=b'{"message":"hello"}',
+    )
+
+
+def invalid_content_type(request):
+    return httpx.Response(
+        200,
+        headers={"Content-Type": "; charset=utf-8"},
+        content=b"hello",
+    )
+
+
 @pytest.fixture
 def client():
     with httpx.Client() as client:
@@ -134,6 +150,20 @@ def test_keepalive(client, server):
     assert second.status_code == 200
 
 
+def test_response_content_type_with_options(client):
+    with httpx.Server(json_response_with_content_type_options) as server:
+        response = client.get(server.url)
+
+    assert response.content == {"message": "hello"}
+
+
+def test_response_invalid_content_type(client):
+    with httpx.Server(invalid_content_type) as server:
+        response = client.get(server.url)
+
+    assert response.body == b"hello"
+
+
 def test_get_with_invalid_scheme(client):
     with pytest.raises(ValueError):
         client.get("nope://www.example.com")
@@ -144,3 +174,18 @@ def test_redirect(client):
         r = client.get(server.url + "redirect")
         assert r.status_code == 200
         assert r.body == b"hello, world!"
+
+
+def redirect_to_invalid_url(request):
+    return httpx.Response(
+        302,
+        headers={"Location": "http://example.com:abc"},
+    )
+
+
+def test_redirect_to_invalid_url(client):
+    with httpx.Server(redirect_to_invalid_url) as server:
+        response = client.get(server.url + "redirect")
+
+        assert response.status_code == 302
+        assert response.body == b""
