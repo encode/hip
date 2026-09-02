@@ -1,21 +1,5 @@
 <h1 style="border: none"><a href="/">httpx</a></h1>
 
----
-
-* [Client](#client)
-* [Server](#server)
-* [Request](#request)
-    * [Method](#method)
-    * [URL](#url)
-    * [Headers](#headers)
-    * [Content](#content)
-* [Response](#response)
-    * [StatusCode](#statuscode)
-    * [Headers](#headers)
-    * [Content](#content)
-
----
-
 ## Client
 
 *Explicit open / close... (recommended)*

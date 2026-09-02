@@ -226,7 +226,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -258,7 +258,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "mkdocs", specifier = "==2.0.dev2" },
+    { name = "mkdocs", specifier = "==2.0.dev3" },
     { name = "mypy", specifier = "==2.3.1" },
     { name = "pytest", specifier = "==8.3.5" },
     { name = "pytest-cov", specifier = "==7.1.0" },
@@ -512,7 +512,7 @@ wheels = [
 
 [[package]]
 name = "mkdocs"
-version = "2.0.dev2"
+version = "2.0.dev3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -520,9 +520,9 @@ dependencies = [
     { name = "jinja2" },
     { name = "markdown" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9a/c0/0f7eb592c6bed445670948ffc2faea4c82aef1a22dfef0db70276697643a/mkdocs-2.0.dev2.tar.gz", hash = "sha256:284493a4e708822740b3b69df40ddcb5fada10bc5c1d6b38f81d8fb921fc116e", size = 75663, upload-time = "2026-08-29T20:44:57.496Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/84/1d/bbd90e8dd18c42110a5a02ca2b425f290be4dec9347d15cc2db846354f0a/mkdocs-2.0.dev3.tar.gz", hash = "sha256:44f92dc8675078ecaf6e47d5b042c11da0f5061e9b10c3e6ef8bc5809b3c9d98", size = 356420, upload-time = "2026-09-02T12:10:03.555Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bc/c7/bf745f7a1f741ffe5521838888210ed1feab94330ebf82a07dae1915859a/mkdocs-2.0.dev2-py3-none-any.whl", hash = "sha256:66406ce694b48e6f31791be87dd8be94009b3e772f28421b3b5ca8c9cf7e64e4", size = 10498, upload-time = "2026-08-29T20:44:56.309Z" },
+    { url = "https://files.pythonhosted.org/packages/fb/74/a7d25f1baf6ca3f975c62ed984f58c8fb12416dcb50b3270af9afe57a2ca/mkdocs-2.0.dev3-py3-none-any.whl", hash = "sha256:1bf38d13c25a88b425a23e241abc0b43de7915ac00c73249e17fcf3d3ebd4884", size = 7882, upload-time = "2026-09-02T12:10:02.192Z" },
 ]
 
 [[package]]
