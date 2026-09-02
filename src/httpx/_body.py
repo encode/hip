@@ -15,9 +15,6 @@ class RequestContent(Content):
     def open(self) -> Stream:
         return HTTPStream(self._parser, is_response=False)
 
-    def headers(self) -> Headers:
-        return Headers()
-
 
 class ResponseContent(Content):
     def __init__(self, parser: HTTPParser):

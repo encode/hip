@@ -88,39 +88,8 @@ def test_connection_stream(server):
         assert repr(conn) == f"<Connection [{server.url} idle]>"
 
 
-# # with httpx.open_connection("https://www.example.com/") as conn:
-# #     r = conn.request("GET", "/")
-
-# # >>> pool = httpx.ConnectionPool()
-# # >>> pool
-# # <ConnectionPool [0 active]>
-
-# # >>> with httpx.open_connection_pool() as pool:
-# # >>>     res = pool.request("GET", "https://www.example.com")
-# # >>>     res, pool
-# # <Response [200 OK]>, <ConnectionPool [1 idle]>
-
-# # >>> with httpx.open_connection_pool() as pool:
-# # >>>     with pool.stream("GET", "https://www.example.com") as res:
-# # >>>         res, pool
-# # <Response [200 OK]>, <ConnectionPool [1 active]>
-
-# # >>> with httpx.open_connection_pool() as pool:
-# # >>>     req = httpx.Request("GET", "https://www.example.com")
-# # >>>     with pool.send(req) as res:
-# # >>>         res.body()
-# # >>>     res, pool
-# # <Response [200 OK]>, <ConnectionPool [1 idle]>
-
-# # >>> with httpx.open_connection_pool() as pool:
-# # >>>     pool.close()
-# # <ConnectionPool [0 active]>
-
-# # with httpx.open_connection("https://www.example.com/") as conn:
-# #     with conn.upgrade("GET", "/feed", {"Upgrade": "WebSocket") as stream:
-# #         ...
-
-# # with httpx.open_connection("http://127.0.0.1:8080") as conn:
-# #     with conn.upgrade("CONNECT", "www.encode.io:443") as stream:
-# #         stream.start_tls(ctx, hostname="www.encode.io")
-# #         ...
+def test_connection_stream_read_in_chunks(server):
+    with httpx.open_connection(server.url) as conn, conn.stream("GET", "/") as response:
+        assert response.read(5) == b"Hello"
+        assert response.read(5) == b", wor"
+        assert response.read() == b"ld."
