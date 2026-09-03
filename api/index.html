@@ -12,28 +12,28 @@
         <script src="../js/theme.js"></script>
     </head>
     <body>
-        <main>
-            <h1 style="border: none"><a href="/">httpx</a></h1>
-
-<hr />
+        
+        <nav class="toc">
+            <div class="">
 <ul>
 <li><a href="#client">Client</a></li>
 <li><a href="#server">Server</a></li>
-<li><a href="#request">Request</a><ul>
+<li><a href="#request">Request</a></li>
+<li><a href="#response">Response</a></li>
 <li><a href="#method">Method</a></li>
-<li><a href="#url">URL</a></li>
-<li><a href="#headers">Headers</a></li>
-<li><a href="#content">Content</a></li>
-</ul>
-</li>
-<li><a href="#response">Response</a><ul>
 <li><a href="#statuscode">StatusCode</a></li>
 <li><a href="#headers">Headers</a></li>
+<li><a href="#url">URL</a></li>
+<li><a href="#queryparams">QueryParams</a></li>
 <li><a href="#content">Content</a></li>
 </ul>
-</li>
-</ul>
-<hr />
+</div>
+
+        </nav>
+        
+        <main>
+            <h1 style="border: none"><a href="/">httpx</a></h1>
+
 <h2 id="client"><a class="toclink" href="#client">Client</a></h2>
 <p><em>Explicit open / close... (recommended)</em></p>
 <pre><code class="language-python">&gt;&gt;&gt; with httpx.Client() as c:
@@ -91,17 +91,11 @@
 &gt;&gt;&gt; s.serve()  # Serve until Ctrl-C
 </code></pre>
 <p><em>Address...</em></p>
-<pre><code class="language-python">&gt;&gt;&gt; # Serve locally, use an unassigned port. 
-&gt;&gt;&gt; s = httpx.Server(app, addr='127.0.0.1')
+<pre><code class="language-python">&gt;&gt;&gt; # Serve locally on a fixed port.
+&gt;&gt;&gt; s = httpx.Server(app, host='127.0.0.1', port=8000)
 </code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; # Serve locally, use a fixed port.
-&gt;&gt;&gt; s = httpx.Server(app, addr='127.0.0.1:8000')
-</code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; # Serve globally, use a fixed port.
-&gt;&gt;&gt; s = httpx.Server(app, addr='0.0.0.0:8000')
-</code></pre>
-<pre><code class="language-python">&gt;&gt;&gt; # Serve globally, enforcing domain name and SSL.
-&gt;&gt;&gt; s = httpx.Server(app, addr='https://www.domainname.com')
+<pre><code class="language-python">&gt;&gt;&gt; # Serve on all interfaces on a fixed port.
+&gt;&gt;&gt; s = httpx.Server(app, host='0.0.0.0', port=8000)
 </code></pre>
 <hr />
 <h2 id="request"><a class="toclink" href="#request">Request</a></h2>
@@ -233,7 +227,6 @@ True
 <pre><code class="language-python">&gt;&gt;&gt; f = httpx.File('image.png')
 </code></pre>
 <p align="center">&mdash; 💖 &mdash;</p>
-            
         </main>
     </body>
 </html>
