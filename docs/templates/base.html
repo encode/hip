@@ -12,6 +12,11 @@
         <script src="{{ '/js/theme.js' | url }}"></script>
     </head>
     <body>
+        {% if page.url != "/" %}
+        <nav class="toc">
+            {{ page.toc.html }}
+        </nav>
+        {% endif %}
         <main>
             {{ page.html }}
         </main>
