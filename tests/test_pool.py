@@ -26,6 +26,17 @@ def test_connection_pool_request(server):
         assert len(pool.connections) == 1
 
 
+def test_transport_request_not_implemented():
+    transport = httpx.Transport()
+
+    with pytest.raises(NotImplementedError):
+        transport.request("GET", "http://example.com")
+
+
+def test_transport_close():
+    httpx.Transport().close()
+
+
 def test_connection_pool_connection_close(server):
     with httpx.ConnectionPool() as pool:
         assert repr(pool) == "<ConnectionPool [0 active]>"
@@ -88,39 +99,27 @@ def test_connection_stream(server):
         assert repr(conn) == f"<Connection [{server.url} idle]>"
 
 
-# # with httpx.open_connection("https://www.example.com/") as conn:
-# #     r = conn.request("GET", "/")
+def test_connection_stream_read_in_chunks(server):
+    with httpx.open_connection(server.url) as conn, conn.stream("GET", "/") as response:
+        assert response.read(5) == b"Hello"
+        assert response.read(5) == b", wor"
+        assert response.read() == b"ld."
 
-# # >>> pool = httpx.ConnectionPool()
-# # >>> pool
-# # <ConnectionPool [0 active]>
 
-# # >>> with httpx.open_connection_pool() as pool:
-# # >>>     res = pool.request("GET", "https://www.example.com")
-# # >>>     res, pool
-# # <Response [200 OK]>, <ConnectionPool [1 idle]>
+class TLSBackend:
+    def connect_tls(self, host, port, hostname):
+        self.connect_tls_args = (host, port, hostname)
+        return httpx.DuplexStream()
 
-# # >>> with httpx.open_connection_pool() as pool:
-# # >>>     with pool.stream("GET", "https://www.example.com") as res:
-# # >>>         res, pool
-# # <Response [200 OK]>, <ConnectionPool [1 active]>
 
-# # >>> with httpx.open_connection_pool() as pool:
-# # >>>     req = httpx.Request("GET", "https://www.example.com")
-# # >>>     with pool.send(req) as res:
-# # >>>         res.body()
-# # >>>     res, pool
-# # <Response [200 OK]>, <ConnectionPool [1 idle]>
+def test_open_https_connection():
+    backend = TLSBackend()
 
-# # >>> with httpx.open_connection_pool() as pool:
-# # >>>     pool.close()
-# # <ConnectionPool [0 active]>
+    with httpx.open_connection(
+        "https://example.com",
+        hostname="example.com",
+        backend=backend,
+    ):
+        pass
 
-# # with httpx.open_connection("https://www.example.com/") as conn:
-# #     with conn.upgrade("GET", "/feed", {"Upgrade": "WebSocket") as stream:
-# #         ...
-
-# # with httpx.open_connection("http://127.0.0.1:8080") as conn:
-# #     with conn.upgrade("CONNECT", "www.encode.io:443") as stream:
-# #         stream.start_tls(ctx, hostname="www.encode.io")
-# #         ...
+    assert backend.connect_tls_args == ("example.com", 443, "example.com")
