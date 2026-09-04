@@ -14,6 +14,7 @@ def test_response_204():
     r = httpx.Response(204)
 
     assert repr(r) == "<Response [204 No Content]>"
+    assert repr(r.content) == "<Empty>"
     assert r.status_code == 204
     assert r.headers == {}
     assert r.body == b""
@@ -24,6 +25,7 @@ def test_response_bytes():
     r = httpx.Response(200, content=content)
 
     assert repr(r) == "<Response [200 OK]>"
+    assert repr(r.content) == "<Binary b'Hello, world'>"
     assert r.headers == {
         "Content-Length": "12",
     }

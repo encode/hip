@@ -42,6 +42,22 @@ def invalid_content_type(request):
     )
 
 
+def application_problem_json_response(request):
+    return httpx.Response(
+        403,
+        headers={"Content-Type": "application/problem+json"},
+        content=b'{"detail":"Forbidden"}',
+    )
+
+
+def application_octet_stream_response(request):
+    return httpx.Response(
+        200,
+        headers={"Content-Type": "application/octet-stream"},
+        content=b"\x00\x01\x02",
+    )
+
+
 @pytest.fixture
 def client():
     with httpx.Client() as client:
@@ -162,6 +178,22 @@ def test_response_invalid_content_type(client):
         response = client.get(server.url)
 
     assert response.body == b"hello"
+
+
+def test_response_with_json_suffix(client):
+    with httpx.Server(application_problem_json_response) as server:
+        response = client.get(server.url)
+
+    assert response.status_code == 403
+    assert response.content == {"detail": "Forbidden"}
+
+
+def test_response_with_unregistered_media_type(client):
+    with httpx.Server(application_octet_stream_response) as server:
+        response = client.get(server.url)
+
+    assert isinstance(response.content, httpx.Binary)
+    assert response.body == b"\x00\x01\x02"
 
 
 def test_get_with_invalid_scheme(client):
