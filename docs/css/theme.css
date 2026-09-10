@@ -137,6 +137,10 @@ pre code {
     color: var(--code-bg-color);
 }
 
+pre code .prompt_ {
+    user-select: none;
+}
+
 h1 a {
     color: inherit;
 }
