@@ -25,7 +25,7 @@ class Method:
         if standard:
             method = method.upper()
             if method not in STANDARD_METHODS:
-                raise ValueError("Non-standard method {method!r}")
+                raise ValueError(f"Non-standard method {method!r}")
         self._method = method
 
     def has_body(self) -> bool:
@@ -41,7 +41,7 @@ class Method:
         return self._method
 
     def __repr__(self):
-        return "<Method {self._method}>"
+        return f"<Method {self._method}>"
 
 
 class Request:
