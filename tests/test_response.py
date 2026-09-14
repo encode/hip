@@ -1,3 +1,5 @@
+import pytest
+
 import httpx
 
 
@@ -6,6 +8,8 @@ def test_response():
 
     assert repr(r) == "<Response [200 OK]>"
     assert r.status_code == 200
+    assert repr(r.status_code) == "<StatusCode [200 OK]>"
+    assert r.status_code.is_2xx_success()
     assert r.headers == {"Content-Length": "0"}
     assert r.body == b""
 
@@ -18,6 +22,24 @@ def test_response_204():
     assert r.status_code == 204
     assert r.headers == {}
     assert r.body == b""
+
+
+def test_response_redirect():
+    r = httpx.Response(302)
+
+    assert r.status_code.is_3xx_redirect()
+
+
+def test_response_client_error():
+    r = httpx.Response(404)
+
+    assert r.status_code.is_4xx_client_error()
+
+
+def test_response_server_error():
+    r = httpx.Response(500)
+
+    assert r.status_code.is_5xx_server_error()
 
 
 def test_response_bytes():
@@ -42,3 +64,15 @@ def test_response_json():
         "Content-Type": "application/json",
     }
     assert r.body == b'{"msg":"Hello, world"}'
+
+
+def test_response_with_invalid_code():
+    with pytest.raises(ValueError, match="Invalid status code 80"):
+        httpx.Response(80)
+
+
+def test_response_stream_repr():
+    response = httpx.Response(200)
+
+    with response as stream:
+        assert repr(stream) == "<ResponseStream [200 OK]>"
