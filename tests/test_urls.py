@@ -43,10 +43,92 @@ def test_url_components():
     assert str(url) == "https://example.com/"
 
 
+def test_url_properties():
+    url = httpx.URL(
+        "HTTPS://jo%40email.com:a%20secret@muller.de:1234/pa%20th?search=ab#anchorlink"
+    )
+
+    assert url.scheme == "https"
+    assert url.username == "jo@email.com"
+    assert url.password == "a secret"
+    assert url.userinfo == b"jo%40email.com:a%20secret"
+    assert url.host == "muller.de"
+    assert url.netloc == "muller.de:1234"
+    assert url.port == 1234
+    assert url.path == "/pa th"
+    assert url.query == b"search=ab"
+    assert url.fragment == "anchorlink"
+    assert url.is_absolute_url
+    assert not url.is_relative_url
+
+
+def test_url_constructor_invalid_kwarg():
+    msg = "'hostname' is an invalid keyword argument for URL()"
+    with pytest.raises(TypeError, match=msg):
+        httpx.URL("https://example.com", hostname="api.example.com")
+
+
+def test_url_constructor_invalid_kwarg_type():
+    msg = "Argument 'port' must be int but got str"
+    with pytest.raises(TypeError, match=msg):
+        httpx.URL("https://example.com", port="443")
+
+
+def test_url_constructor_accepts_byte_query():
+    url = httpx.URL("https://example.com", query=b"search=httpx")
+    assert str(url) == "https://example.com?search=httpx"
+
+
+def test_url_rejects_invalid_type():
+    msg = "Invalid type for url.  Expected str or httpx.URL, got <class 'int'>: 123"
+    with pytest.raises(TypeError, match=msg):
+        httpx.URL(123)
+
+
+def test_url_target_includes_query():
+    url = httpx.URL("https://example.com/search?query=httpx")
+    assert "/search?query=httpx" == url.target
+
+
 def test_url_copy_with():
     url = httpx.URL("https://www.example.com/")
     url = url.copy_with(path="/path.txt")
     assert str(url) == "https://www.example.com/path.txt"
+
+
+def test_url_join():
+    url = httpx.URL("https://www.example.com/test")
+    assert url.join("/new/path") == "https://www.example.com/new/path"
+
+
+def test_urls_are_hashable_and_comparable():
+    urls = {httpx.URL("https://example.com/"): "example"}
+
+    assert urls[httpx.URL("https://example.com/")] == "example"
+    assert httpx.URL("https://example.com/") != "https://other.example.com/"
+
+
+def test_url_copy_set_param():
+    url = httpx.URL("https://example.com/search?a=1")
+    assert str(url.copy_set_param("a", "2")) == "https://example.com/search?a=2"
+
+
+def test_url_copy_append_param():
+    url = httpx.URL("https://example.com/search?a=1")
+    assert str(url.copy_append_param("a", "2")) == "https://example.com/search?a=1&a=2"
+
+
+def test_url_copy_remove_param():
+    url = httpx.URL("https://example.com/search?a=1&a=2")
+    assert str(url.copy_remove_param("a")) == "https://example.com/search"
+
+
+def test_url_copy_merge_params():
+    url = httpx.URL("https://example.com/search?a=1")
+    assert (
+        str(url.copy_merge_params({"page": "2"}))
+        == "https://example.com/search?a=1&page=2"
+    )
 
 
 def test_url_ipv4():
