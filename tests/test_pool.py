@@ -123,3 +123,15 @@ def test_open_https_connection():
         pass
 
     assert backend.connect_tls_args == ("example.com", 443, "example.com")
+
+
+def test_connection_pool_cleanup_removes_expired_connections(server, monkeypatch):
+    with httpx.ConnectionPool() as pool:
+        pool.request("GET", server.url)
+        connection = pool.connections[0]
+        monkeypatch.setattr(connection, "is_expired", lambda: True)
+
+        pool.request("GET", server.url)
+
+        assert connection.is_closed()
+        assert connection not in pool.connections
