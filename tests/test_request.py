@@ -1,3 +1,5 @@
+import pytest
+
 import httpx
 
 
@@ -51,3 +53,15 @@ def test_request_empty_post():
         "Content-Length": "0",
     }
     assert r.body == b""
+
+
+@pytest.mark.parametrize("method", ["CONNECT", "OPTIONS", "TRACE"])
+def test_request_supports_additional_standard_methods(method):
+    r = httpx.Request(method, "https://example.com")
+
+    assert r.method == method
+
+
+def test_request_rejects_invalid_method():
+    with pytest.raises(ValueError, match="Non-standard method"):
+        httpx.Request("INVALID METHOD", "https://example.com")
