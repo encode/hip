@@ -258,7 +258,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "mkdocs", specifier = "==2.0.dev3" },
+    { name = "mkdocs", specifier = "==2.0.dev6" },
     { name = "mypy", specifier = "==2.3.1" },
     { name = "pytest", specifier = "==8.3.5" },
     { name = "pytest-cov", specifier = "==7.1.0" },
@@ -512,7 +512,7 @@ wheels = [
 
 [[package]]
 name = "mkdocs"
-version = "2.0.dev3"
+version = "2.0.dev6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -520,9 +520,9 @@ dependencies = [
     { name = "jinja2" },
     { name = "markdown" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/84/1d/bbd90e8dd18c42110a5a02ca2b425f290be4dec9347d15cc2db846354f0a/mkdocs-2.0.dev3.tar.gz", hash = "sha256:44f92dc8675078ecaf6e47d5b042c11da0f5061e9b10c3e6ef8bc5809b3c9d98", size = 356420, upload-time = "2026-09-02T12:10:03.555Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2c/69/e37c559e40b4fe0f76f2a59e2d501595493da5858f13c003ef5a6231b33d/mkdocs-2.0.dev6.tar.gz", hash = "sha256:e2e064dea321b30601f5712d009695625ff505322753ca8e4c44ed8781dd57c0", size = 404670, upload-time = "2026-09-15T11:08:04.122Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fb/74/a7d25f1baf6ca3f975c62ed984f58c8fb12416dcb50b3270af9afe57a2ca/mkdocs-2.0.dev3-py3-none-any.whl", hash = "sha256:1bf38d13c25a88b425a23e241abc0b43de7915ac00c73249e17fcf3d3ebd4884", size = 7882, upload-time = "2026-09-02T12:10:02.192Z" },
+    { url = "https://files.pythonhosted.org/packages/6b/0c/7a01d7a4a1f21800e8dd6dddc4f3b68b255608b71f40d7062f9f25c25a7f/mkdocs-2.0.dev6-py3-none-any.whl", hash = "sha256:2cc61ed3f32fccf6b297120e2a95fa05d5438a0cae3510969c33acc6f4517ffb", size = 9552, upload-time = "2026-09-15T11:08:05.338Z" },
 ]
 
 [[package]]

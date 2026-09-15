@@ -12,7 +12,7 @@ class Method:
     def __init__(self, method: str, standard=True):
         if standard:
             method = method.upper()
-            if method not in ("GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"):
+            if method not in ("GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "CONNECT", "OPTIONS", "TRACE"):
                 raise ValueError("Non-standard method {method!r}")
         self._method = method
 

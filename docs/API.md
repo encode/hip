@@ -1,68 +1,68 @@
-<h1 style="border: none"><a href="/">httpx</a></h1>
+<h1 style="border: none"><a href="/">hipx</a></h1>
 
 ## Client
 
 *Explicit open / close... (recommended)*
 
 ```python
->>> with httpx.Client() as c:
+>>> with hipx.Client() as c:
 >>>     ...
 ```
 
 *Simple usage...*
 
 ```python
->>> c = httpx.Client()
+>>> c = hipx.Client()
 >>> c.close()
 ```
 
 *Requests...*
 
 ```python
->>> c = httpx.Client()
+>>> c = hipx.Client()
 >>> r = c.get('https://www.example.com/')
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> c = httpx.Client()
->>> u = httpx.URL('https://www.example.com/', params={'search': '...'})
+>>> c = hipx.Client()
+>>> u = hipx.URL('https://www.example.com/', params={'search': '...'})
 >>> r = c.get(u)
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> f = httpx.Form({'email': '...', 'message': '...'})
+>>> f = hipx.Form({'email': '...', 'message': '...'})
 >>> r = c.post('https://www.example.com/', content=f)
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> j = httpx.JSON({'title': ..., 'rating': ...})
+>>> j = hipx.JSON({'title': ..., 'rating': ...})
 >>> r = c.put('https://www.example.com/', content=j)
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> j = httpx.JSON({'title': ..., 'rating': ...})
+>>> j = hipx.JSON({'title': ..., 'rating': ...})
 >>> r = c.patch('https://www.example.com/', content=j)
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> c = httpx.Client()
+>>> c = hipx.Client()
 >>> r = c.delete('https://www.example.com/')
 >>> r
 <Response [200 OK]>
 ```
 
 ```python
->>> c = httpx.Client()
+>>> c = hipx.Client()
 >>> r = c.head('https://www.example.com/')
 >>> r
 <Response [200 OK]>
@@ -73,7 +73,7 @@
 *Explicit open / close... (recommended)*
 
 ```python
->>> with httpx.Server(app) as s:
+>>> with hipx.Server(app) as s:
 ...     # Serve until Ctrl-C, non-blocking
 ...     print(s.url)
 ```
@@ -81,7 +81,7 @@
 *Simple usage...*
 
 ```python
->>> s = httpx.Server(app)
+>>> s = hipx.Server(app)
 >>> s.serve()  # Serve until Ctrl-C
 ```
 
@@ -89,12 +89,12 @@
 
 ```python
 >>> # Serve locally on a fixed port.
->>> s = httpx.Server(app, host='127.0.0.1', port=8000)
+>>> s = hipx.Server(app, host='127.0.0.1', port=8000)
 ```
 
 ```python
 >>> # Serve on all interfaces on a fixed port.
->>> s = httpx.Server(app, host='0.0.0.0', port=8000)
+>>> s = hipx.Server(app, host='0.0.0.0', port=8000)
 ```
 
 ---
@@ -102,13 +102,13 @@
 ## Request
 
 ```python
->>> r = httpx.Request(method, url, headers=..., content=...)
+>>> r = hipx.Request(method, url, headers=..., content=...)
 ```
 
 *Attributes...*
 
 ```python
->>> r = httpx.Request('GET', 'https://www.example.com')
+>>> r = hipx.Request('GET', 'https://www.example.com')
 >>> r.method
 >>> r.url
 >>> r.headers
@@ -118,13 +118,13 @@
 ## Response
 
 ```python
->>> r = httpx.Response(status_code, headers=..., content=...)
+>>> r = hipx.Response(status_code, headers=..., content=...)
 ```
 
 *Attributes...*
 
 ```python
->>> r = httpx.Response(200, content=httpx.JSON({'message': 'hello, world'}))
+>>> r = hipx.Response(200, content=httpx.JSON({'message': 'hello, world'}))
 >>> r.status_code
 >>> r.headers
 >>> r.content
@@ -135,7 +135,7 @@
 ## Method
 
 ```python
->>> m = httpx.Method('GET')
+>>> m = hipx.Method('GET')
 >>> m == 'GET'
 True
 >>> str(m)
@@ -145,7 +145,7 @@ True
 ## StatusCode
 
 ```python
->>> s = httpx.StatusCode(200)
+>>> s = hipx.StatusCode(200)
 >>> s.value, s.reason
 (200, 'OK')
 >>> s == 200
@@ -155,7 +155,7 @@ True
 *Status classes...*
 
 ```python
->>> s = httpx.StatusCode(200)
+>>> s = hipx.StatusCode(200)
 >>> s.is_1xx_informational()
 False
 >>> s.is_2xx_success()
@@ -171,7 +171,7 @@ False
 ## Headers
 
 ```python
->>> h = httpx.Headers({...})
+>>> h = hipx.Headers({...})
 >>> h['Content-Type']
 ...
 >>> h.get('content-type')
@@ -197,7 +197,7 @@ False
 ## URL
 
 ```python
->>> u = httpx.URL('...')
+>>> u = hipx.URL('...')
 >>> u == '...'
 True
 ```
@@ -205,7 +205,7 @@ True
 *Query parameters...*
 
 ```python
->>> u = httpx.URL('...', params={'search': ...})
+>>> u = hipx.URL('...', params={'search': ...})
 >>> u.params
 <QueryParams ...>
 ```
@@ -228,7 +228,7 @@ True
 *Instantiate from components...*
 
 ```python
->>> u = httpx.URL(scheme='https', host='www.example.com', path='/')
+>>> u = hipx.URL(scheme='https', host='www.example.com', path='/')
 ```
 
 *Updates...*
@@ -240,14 +240,14 @@ True
 *Joins...*
 
 ```python
->>> u = httpx.URL('https://www.example.com/location')
+>>> u = hipx.URL('https://www.example.com/location')
 >>> u = u.join('/redirect')
 ```
 
 ## QueryParams
 
 ```python
->>> q = httpx.QueryParams("...")
+>>> q = hipx.QueryParams("...")
 >>> q['...']
 >>> q.get('...')
 ```
@@ -275,33 +275,33 @@ True
 *Content types for requests...*
 
 ```python
->>> j = httpx.JSON(...)
+>>> j = hipx.JSON(...)
 ```
 
 ```python
->>> f = httpx.Form(...)
+>>> f = hipx.Form(...)
 ```
 
 ```python
->>> m = httpx.MultiPart(...)
+>>> m = hipx.MultiPart(...)
 ```
 
 *Content types for responses...*
 
 ```python
->>> h = httpx.HTML('<html><body>¡Hola, mundo!</body></html>')
+>>> h = hipx.HTML('<html><body>¡Hola, mundo!</body></html>')
 ```
 
 ```python
->>> t = httpx.Text('hello, world')
+>>> t = hipx.Text('hello, world')
 ```
 
 ```python
->>> j = httpx.JSON({'content': ...})
+>>> j = hipx.JSON({'content': ...})
 ```
 
 ```python
->>> f = httpx.File('image.png')
+>>> f = hipx.File('image.png')
 ```
 
 <p align="center">&mdash; 💖 &mdash;</p>
