@@ -12,7 +12,12 @@
         <script src="{{ '/js/theme.js' | url }}"></script>
     </head>
     <body>
-        {% if page.url != "/" %}
+        {% if nav %}
+        <nav class="site">
+            {% include 'navigation.html' %}
+        </nav>
+        {% endif %}
+        {% if page.toc %}
         <nav class="toc">
             {{ page.toc.html }}
         </nav>
