@@ -7,12 +7,24 @@ from ._urls import URL
 
 __all__ = ["Method", "Request"]
 
+STANDARD_METHODS = (
+    "CONNECT",
+    "DELETE",
+    "GET",
+    "HEAD",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+    "TRACE",
+)
+
 
 class Method:
     def __init__(self, method: str, standard=True):
         if standard:
             method = method.upper()
-            if method not in ("GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "CONNECT", "OPTIONS", "TRACE"):
+            if method not in STANDARD_METHODS:
                 raise ValueError("Non-standard method {method!r}")
         self._method = method
 
