@@ -1,10 +1,10 @@
 <p align="center">
-  <img width="350" height="208" src="https://raw.githubusercontent.com/encode/httpx/master/docs/img/butterfly.png" alt='hipx'>
+  <img width="350" height="208" src="https://raw.githubusercontent.com/encode/httpx/master/docs/img/butterfly.png" alt='httpx'>
 </p>
 
-# [hipx](README.md)
+# [httpx](README.md)
 
-Engineered for simplicity, `hipx` provides a complete Python web suite&hellip;
+Engineered for simplicity, `httpx` provides a complete Python web suite&hellip;
 
 * Supports both client and server functionality.
 * Presents a clear, simple, and tightly constrained API.
@@ -17,7 +17,7 @@ Engineered for simplicity, `hipx` provides a complete Python web suite&hellip;
 Install the package from PyPI&hellip;
 
 ```bash
-$ uv add hipx --pre
+$ uv add httpx --pre
 ```
 
 ## Client
@@ -25,9 +25,9 @@ $ uv add hipx --pre
 Sending HTTP requests&hellip;
 
 ```python
->>> import hipx
+>>> import httpx
 
->>> cli = hipx.Client()
+>>> cli = httpx.Client()
 >>> r = cli.get('https://www.example.com/')
 >>> r
 <Response [200 OK]>
@@ -38,13 +38,13 @@ Sending HTTP requests&hellip;
 Creating web apps&hellip;
 
 ```python
->>> import hipx
+>>> import httpx
 
 >>> def app(request):
-...     content = hipx.HTML('<html><body>¡Hola, mundo!</body></html>')
-...     return hipx.Response(200, content=content)
+...     content = httpx.HTML('<html><body>¡Hola, mundo!</body></html>')
+...     return httpx.Response(200, content=content)
 
->>> s = hipx.Server(app)
+>>> s = httpx.Server(app)
 >>> s.serve()
 ```
 
@@ -54,12 +54,12 @@ Creating web apps&hellip;
 
 A clean modern design, with [a focused API](API.md) and an exceptionally light installation footprint.
 
-For comparison, see `hipx` <small>vs</small> `requests`&hellip;
+For comparison, see `httpx` <small>vs</small> `requests`&hellip;
 
 ```bash
-$ uv add hipx
-$ uv tree --show-sizes --package hipx
-hipx v1.0.dev5 (33.5KiB)
+$ uv add httpx
+$ uv tree --show-sizes --package httpx
+httpx v1.0.dev5 (33.5KiB)
 └── truststore v0.10.0 (17.8KiB)
 ```
 
@@ -77,7 +77,7 @@ requests v2.33.1 (63.4KiB)
 
 ## Contribution
 
-The `hipx` redesign is currently in early development.
+The `httpx` redesign is currently in early development.
 
 We are currently [seeking sponsorship](https://github.com/sponsors/encode), and looking to expand our team.
 
