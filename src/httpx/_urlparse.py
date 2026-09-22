@@ -215,7 +215,7 @@ def urlparse(url: str = "", **kwargs: str | None) -> ParseResult:
 
     # Hard limit the maximum allowable URL length.
     if len(url) > MAX_URL_LENGTH:
-        raise InvalidURL("URL too long")
+        raise InvalidURL("URL too long!")
 
     # If a URL includes any ASCII control characters including \t, \r, \n,
     # then treat it as invalid.

@@ -4,15 +4,13 @@
 
 # [httpx](README.md)
 
-<p style="text-align: center">An HTTP toolkit for folks who give a damn.</p>
-
-<br/>
-
 Engineered for simplicity, `httpx` provides a complete Python web suite&hellip;
 
 * Supports both client and server functionality.
 * Presents a clear, simple, and tightly constrained API.
-* A miminal, easily readable implementation.
+* Exceptionally light installation footprint.
+
+...we're currently in early stages design, and would love for you to get involved.
 
 ## Installation
 
