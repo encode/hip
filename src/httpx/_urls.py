@@ -10,21 +10,6 @@ __all__ = ["URL", "QueryParams"]
 
 class URL:
     """
-    url = httpx.URL("HTTPS://jo%40email.com:a%20secret@müller.de:1234/pa%20th?search=ab#anchorlink")
-
-    assert url.scheme == "https"
-    assert url.username == "jo@email.com"
-    assert url.password == "a secret"
-    assert url.userinfo == b"jo%40email.com:a%20secret"
-    assert url.host == "müller.de"
-    assert url.raw_host == b"xn--mller-kva.de"
-    assert url.port == 1234
-    assert url.netloc == b"xn--mller-kva.de:1234"
-    assert url.path == "/pa th"
-    assert url.query == b"?search=ab"
-    assert url.raw_path == b"/pa%20th?search=ab"
-    assert url.fragment == "anchorlink"
-
     The components of a URL are broken down like this:
 
        https://jo%40email.com:a%20secret@müller.de:1234/pa%20th?search=ab#anchorlink
