@@ -193,6 +193,8 @@ class Headers(typing.Mapping[str, str]):
         return bool(self._dict)
 
     def __eq__(self, other: object) -> bool:
+        if not isinstance(other, (typing.Mapping, typing.Sequence)):
+            return False
         self_lower = {k.lower(): v for k, v in self.items()}
         other_lower = {k.lower(): v for k, v in Headers(other).items()}
         return self_lower == other_lower

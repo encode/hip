@@ -7,13 +7,25 @@ from ._urls import URL
 
 __all__ = ["Method", "Request"]
 
+STANDARD_METHODS = (
+    "CONNECT",
+    "DELETE",
+    "GET",
+    "HEAD",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+    "TRACE",
+)
+
 
 class Method:
     def __init__(self, method: str, standard=True):
         if standard:
             method = method.upper()
-            if method not in ("GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"):
-                raise ValueError("Non-standard method {method!r}")
+            if method not in STANDARD_METHODS:
+                raise ValueError(f"Non-standard method {method!r}")
         self._method = method
 
     def has_body(self) -> bool:
@@ -29,7 +41,7 @@ class Method:
         return self._method
 
     def __repr__(self):
-        return "<Method {self._method}>"
+        return f"<Method {self._method}>"
 
 
 class Request:

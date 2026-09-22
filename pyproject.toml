@@ -38,12 +38,10 @@ include = [
 [tool.hatch.version]
 path = "src/httpx/__version__.py"
 
-[tool.uv.sources]
-mkdocs = { git = "https://github.com/encode/mkdocs.git" }
-
 [dependency-groups]
 dev = [
-    "mkdocs",
+    "mkdocs==2.0.dev6",
+    "mypy==2.3.1",
     "pytest==8.3.5",
     "pytest-cov==7.1.0",
     "ruff",

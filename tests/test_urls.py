@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 import httpx
@@ -28,6 +30,24 @@ def test_url_relative():
     assert str(url) == "/README.md"
 
 
+def test_url_rejects_absolute_url_path_without_leading_slash():
+    msg = "For absolute URLs, path must be empty or begin with '/'"
+    with pytest.raises(ValueError, match=msg):
+        httpx.URL(scheme="https", host="example.com", path="relative")
+
+
+def test_url_rejects_relative_path_starting_with_double_slash():
+    msg = "Relative URLs cannot have a path starting with '//'"
+    with pytest.raises(ValueError, match=msg):
+        httpx.URL(path="//relative/path")
+
+
+def test_url_rejects_relative_path_starting_with_colon():
+    msg = "Relative URLs cannot have a path starting with ':'"
+    with pytest.raises(ValueError, match=msg):
+        httpx.URL(path=":relative")
+
+
 def test_url_escaping():
     url = httpx.URL("https://example.com/path to here?search=🦋")
     assert str(url) == "https://example.com/path%20to%20here?search=%F0%9F%A6%8B"
@@ -43,10 +63,150 @@ def test_url_components():
     assert str(url) == "https://example.com/"
 
 
+def test_url_properties():
+    url = httpx.URL(
+        "HTTPS://jo%40email.com:a%20secret@muller.de:1234/pa%20th?search=ab#anchorlink"
+    )
+
+    assert url.scheme == "https"
+    assert url.username == "jo@email.com"
+    assert url.password == "a secret"
+    assert url.userinfo == b"jo%40email.com:a%20secret"
+    assert url.host == "muller.de"
+    assert url.netloc == "muller.de:1234"
+    assert url.port == 1234
+    assert url.path == "/pa th"
+    assert url.query == b"search=ab"
+    assert url.fragment == "anchorlink"
+    assert url.is_absolute_url
+    assert not url.is_relative_url
+
+
+def test_url_constructor_invalid_kwarg():
+    msg = "'hostname' is an invalid keyword argument for URL()"
+    with pytest.raises(TypeError, match=msg):
+        httpx.URL("https://example.com", hostname="api.example.com")
+
+
+def test_url_constructor_invalid_kwarg_type():
+    msg = "Argument 'port' must be int but got str"
+    with pytest.raises(TypeError, match=msg):
+        httpx.URL("https://example.com", port="443")
+
+
+def test_url_constructor_accepts_byte_query():
+    url = httpx.URL("https://example.com", query=b"search=httpx")
+    assert str(url) == "https://example.com?search=httpx"
+
+
+def test_url_rejects_invalid_type():
+    msg = "Invalid type for url.  Expected str or httpx.URL, got <class 'int'>: 123"
+    with pytest.raises(TypeError, match=msg):
+        httpx.URL(123)
+
+
+def test_url_target_includes_query():
+    url = httpx.URL("https://example.com/search?query=httpx")
+    assert "/search?query=httpx" == url.target
+
+
+def test_url_constructor_rejects_invalid_scheme():
+    msg = "Invalid URL component 'scheme'"
+    with pytest.raises(ValueError, match=msg):
+        httpx.URL(scheme="1http")
+
+
+def test_url_rejects_too_long_url():
+    url = "https://example.com/" + ("a" * 65536)
+    msg = "URL too long!"
+    with pytest.raises(ValueError, match=msg):
+        httpx.URL(url)
+
+
+def test_url_rejects_non_printable_ascii_character():
+    msg = "Invalid non-printable ASCII character in URL, '\\n' at position 24."
+    with pytest.raises(ValueError, match=re.escape(msg)):
+        httpx.URL("https://example.com/path\nname")
+
+
+def test_url_constructor_accepts_netloc():
+    url = httpx.URL(netloc="example.com:8080")
+    assert url.host == "example.com"
+    assert url.port == 8080
+    assert str(url) == "//example.com:8080"
+
+
+def test_url_constructor_builds_userinfo_from_username_and_password():
+    url = httpx.URL(
+        host="example.com", port=8080, username="user@example.com", password="a secret"
+    )
+    assert url.userinfo == b"user%40example.com:a%20secret"
+
+
+def test_url_constructor_accepts_raw_path():
+    url = httpx.URL(host="example.com", raw_path=b"/search?query=httpx")
+    assert url.path == "/search"
+    assert url.query == b"query=httpx"
+
+
+def test_url_constructor_accepts_raw_path_without_query():
+    url = httpx.URL(host="example.com", raw_path=b"/search")
+    assert url.path == "/search"
+    assert url.query == b""
+    assert str(url) == "//example.com/search"
+
+
+def test_url_constructor_rejects_too_long_component():
+    msg = "URL component 'path' too long"
+    with pytest.raises(ValueError, match=msg):
+        httpx.URL(path="a" * 65537)
+
+
+def test_url_constructor_rejects_non_printable_ascii_component():
+    msg = "Invalid non-printable ASCII character in URL path component, '\\n' at position 7."
+    with pytest.raises(ValueError, match=re.escape(msg)):
+        httpx.URL(path="/search\nresults")
+
+
 def test_url_copy_with():
     url = httpx.URL("https://www.example.com/")
     url = url.copy_with(path="/path.txt")
     assert str(url) == "https://www.example.com/path.txt"
+
+
+def test_url_join():
+    url = httpx.URL("https://www.example.com/test")
+    assert url.join("/new/path") == "https://www.example.com/new/path"
+
+
+def test_urls_are_hashable_and_comparable():
+    urls = {httpx.URL("https://example.com/"): "example"}
+
+    assert urls[httpx.URL("https://example.com/")] == "example"
+    assert httpx.URL("https://example.com/") != "https://other.example.com/"
+
+
+def test_url_copy_set_param():
+    url = httpx.URL("https://example.com/search?a=1")
+    assert str(url.copy_set_param("a", "2")) == "https://example.com/search?a=2"
+
+
+def test_url_copy_append_param():
+    url = httpx.URL("https://example.com/search?a=1")
+    assert str(url.copy_append_param("a", "2")) == "https://example.com/search?a=1&a=2"
+
+
+def test_url_copy_remove_param():
+    url = httpx.URL("https://example.com/search?a=1&a=2")
+    assert str(url.copy_remove_param("a")) == "https://example.com/search"
+
+
+def test_url_copy_merge_params():
+    url = httpx.URL("https://example.com/search?a=1")
+    assert (
+        str(url.copy_merge_params({"page": "2"}))
+        == "https://example.com/search?a=1&page=2"
+    )
 
 
 def test_url_ipv4():
@@ -54,9 +214,26 @@ def test_url_ipv4():
     assert str(url) == "http://127.0.0.1/"
 
 
+def test_url_rejects_invalid_ipv4_address():
+    msg = re.escape("Invalid IPv4 address: '999.999.999.999'")
+    with pytest.raises(ValueError, match=msg):
+        httpx.URL(host="999.999.999.999")
+
+
 def test_url_ipv6():
     url = httpx.URL("http://[::1]/")
     assert str(url) == "http://[::1]/"
+
+
+def test_url_constructor_escapes_ipv6_host():
+    url = httpx.URL(scheme="http", host="::1")
+    assert str(url) == "http://[::1]"
+
+
+def test_url_rejects_invalid_ipv6_address():
+    msg = re.escape("Invalid IPv6 address: '[not-an-ip]'")
+    with pytest.raises(ValueError, match=msg):
+        httpx.URL(host="[not-an-ip]")
 
 
 # QueryParams

@@ -16,18 +16,15 @@ class Client:
         self,
         url: URL | str | None = None,
         headers: Headers | typing.Mapping[str, str] | None = None,
-        transport: Transport | None = None,
     ):
         if url is None:
             url = ""
         if headers is None:
             headers = {"User-Agent": "dev"}
-        if transport is None:
-            transport = ConnectionPool()
+        self.transport = ConnectionPool()
 
         self.url = URL(url)
         self.headers = Headers(headers)
-        self.transport = transport
         self.via = RedirectMiddleware(self.transport)
         self.media = {
             "application/json": JSON,
@@ -117,7 +114,7 @@ class Client:
         return self.request("DELETE", url, headers=headers)
 
     def close(self):
-        self.transport.close()
+        self.via.close()
 
     def __enter__(self):
         return self
@@ -180,4 +177,4 @@ class RedirectMiddleware(Transport):
             request = redirect
 
     def close(self):
-        pass
+        self._transport.close()

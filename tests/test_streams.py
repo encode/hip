@@ -11,6 +11,9 @@ def test_stream():
     with pytest.raises(NotImplementedError):
         i.close()
 
+    with pytest.raises(NotImplementedError):
+        i.write(b"hello")
+
     assert i.size == None
 
 
@@ -43,6 +46,14 @@ def test_filestream(tmp_path):
 
     with httpx.FileStream(path) as s:
         assert s.read(5) == b"hello"
+
+
+def test_filestream_unopened_file(tmp_path):
+    path = tmp_path / "example.txt"
+    path.write_bytes(b"hello world")
+    msg = "I/O operation on unopened file"
+    with pytest.raises(ValueError, match=msg):
+        httpx.FileStream(path).read()
 
 
 def test_multipartstream(tmp_path):

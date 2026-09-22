@@ -1,1 +1,1 @@
-uv run --no-sync coverage report
+uv run --no-sync coverage report --fail-under=95

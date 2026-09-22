@@ -28,11 +28,13 @@ jobs:
           allow-prereleases: true
       - name: "Install dependencies"
         run: scripts/install
+      - name: "Run type checking"
+        run: scripts/check
       - name: "Run lint"
         run: scripts/lint
       - name: "Run tests"
         run: scripts/test
-      - name: "Report coverage"
+      - name: "Enforce coverage"
         run: scripts/coverage
       - name: "Build package"
         run: scripts/build

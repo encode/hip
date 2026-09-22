@@ -112,3 +112,12 @@ def test_header_invalid_name():
 def test_header_invalid_value():
     with pytest.raises(ValueError):
         httpx.Headers({"Accept": "*/*\n"})
+
+
+def test_header_empty_value():
+    with pytest.raises(ValueError):
+        httpx.Headers({""})
+
+
+def test_headers_not_equal_to_unrelated_type():
+    assert httpx.Headers() != object()

@@ -4,21 +4,19 @@
 
 # [httpx](README.md)
 
-<p style="text-align: center">An HTTP toolkit for folks who give a damn.</p>
-
-<br/>
-
 Engineered for simplicity, `httpx` provides a complete Python web suite&hellip;
 
 * Supports both client and server functionality.
 * Presents a clear, simple, and tightly constrained API.
 * A minimal, easily readable implementation.
 
+...we're currently in early stages design, and would love for you to get involved.
+
 ## Installation
 
 Install the package from PyPI&hellip;
 
-```bash
+```shell
 $ uv add httpx --pre
 ```
 
@@ -58,7 +56,7 @@ A clean modern design, with [a focused API](API.md) and an exceptionally light i
 
 For comparison, see `httpx` <small>vs</small> `requests`&hellip;
 
-```bash
+```shell
 $ uv add httpx
 $ uv tree --show-sizes --package httpx
 httpx v1.0.dev5 (33.5KiB)
@@ -67,7 +65,7 @@ httpx v1.0.dev5 (33.5KiB)
 
 <p></p>
 
-```bash
+```shell
 $ uv add requests
 $ uv tree --show-sizes --package requests
 requests v2.33.1 (63.4KiB)
@@ -79,7 +77,11 @@ requests v2.33.1 (63.4KiB)
 
 ## Contribution
 
-The `httpx` redesign is currently in early development and not yet public.
+The `httpx` redesign is currently in early development.
+
+We are currently [seeking sponsorship](https://github.com/sponsors/encode), and looking to expand our team.
+
+If you'd like to discuss getting involved, please [book in some time](https://calendly.com/encode-oss).
 
 ---
 

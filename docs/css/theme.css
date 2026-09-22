@@ -28,7 +28,7 @@
 /* Layout... */
 
 main {
-    margin-left: 20%;
+    margin: 0 auto 0 auto;
     width: 60%;
     padding: 1rem;
 }
@@ -37,7 +37,10 @@ main {
     main {
         padding: 1.5rem 1rem;
         width: 75%;
-        margin-left: 25%;
+    }
+
+    nav.toc {
+        display: none;
     }
 }
 
@@ -45,7 +48,10 @@ main {
     main {
         padding: 1.5rem 1rem;
         width: 100%;
-        margin-left: 0;
+    }
+
+    nav.toc {
+        display: none;
     }
 }
 
@@ -131,6 +137,10 @@ pre code {
     color: var(--code-bg-color);
 }
 
+pre code .prompt_ {
+    user-select: none;
+}
+
 h1 a {
     color: inherit;
 }
@@ -205,5 +215,84 @@ div.pagination a.previous {
 
 div.pagination a.next {
     float: right;
+    text-decoration: none;
+}
+
+/* Navigation styling */
+
+nav.site {
+    position: fixed;
+    width : 20%;
+    padding: 2rem;
+    height: 100%;
+    overflow-y: scroll;
+}
+
+nav.site ul {
+    padding: 0;
+    margin: 0;
+}
+
+nav.site li {
+    padding: 0;
+    margin: 0.5rem 0;
+    display: block;
+}
+
+nav.site li a.active {
+    color: var(--link-color);
+}
+
+nav.site li a:hover {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+nav.site li a {
+    color: var(--muted-fg-color);
+}
+
+nav.site li a:hover {
+    color: var(--fg-color);
+    text-decoration: none;
+}
+
+/* Table of contents styling */
+
+nav.toc {
+    position: fixed;
+    margin-left: 80%;
+    width : 20%;
+    padding: 2rem;
+    height: 100%;
+    overflow-y: scroll;
+}
+
+nav.toc ul {
+    padding: 0;
+    margin: 0;
+}
+
+nav.toc li {
+    padding: 0;
+    margin: 0.5rem 0;
+    display: block;
+}
+
+nav.toc li a.active {
+    color: var(--link-color);
+}
+
+nav.toc li a:hover {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+nav.toc li a {
+    color: var(--muted-fg-color);
+}
+
+nav.toc li a:hover {
+    color: var(--fg-color);
     text-decoration: none;
 }

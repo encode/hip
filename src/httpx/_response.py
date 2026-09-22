@@ -79,7 +79,7 @@ class StatusCode:
 
     def __init__(self, status_code: int):
         if status_code < 100 or status_code > 999:
-            raise ValueError("Invalid status code {status_code!r}")
+            raise ValueError(f"Invalid status code {status_code!r}")
         self.value = status_code
         self.reason_phrase = self._codes.get(status_code, "Unknown Status Code")
 
@@ -204,4 +204,4 @@ class ResponseStream(Stream):
         self._stream.close()
 
     def __repr__(self):
-        return f"<RequestStream [{self.status_code}]>"
+        return f"<ResponseStream [{self.status_code}]>"

@@ -1,6 +1,8 @@
 import os
 import tempfile
 
+import pytest
+
 import httpx
 
 # HTML
@@ -46,7 +48,17 @@ def test_json():
     data = httpx.JSON({"data": 123})
 
     assert repr(data) == "<JSON {'data': 123}>"
+    assert list(data.keys()) == ["data"]
+    assert len(data) == 1
+    assert data["data"] == 123
+    assert data == httpx.JSON({"data": 123})
+    assert str(data) == '{"data":123}'
     assert bytes(data) == b'{"data":123}'
+
+    value = data.value
+    value["data"] = 456
+
+    assert data.value == {"data": 123}
     assert data.headers() == {
         "Content-Type": "application/json",
         "Content-Length": "12",
@@ -54,6 +66,13 @@ def test_json():
     with data.open() as stream:
         b = stream.read()
         assert b == b'{"data":123}'
+
+
+def test_json_unicode_serialization():
+    data = httpx.JSON({"name": "Çağdaş"})
+
+    assert str(data) == '{"name":"Çağdaş"}'
+    assert bytes(data) == '{"name":"Çağdaş"}'.encode()
 
 
 # Form
@@ -152,13 +171,12 @@ def test_file():
     with tempfile.NamedTemporaryFile(suffix=".txt") as temp:
         temp.write(b"Hello, world")
         temp.seek(0)
-
-        print(temp.name)
         file = httpx.File(temp.name)
         assert file.headers() == {
             "Content-Type": "text/plain; charset='utf-8'",
             "Content-Length": "12",
         }
+        assert file.name() == os.path.basename(temp.name)
         with file.open() as stream:
             b = stream.read()
             assert b == b"Hello, world"
@@ -167,10 +185,16 @@ def test_file():
 # Files
 
 
-def test_files():
-    f = httpx.Files()
-    assert f.multi_dict() == {}
-    assert repr(f) == "<Files []>"
+def test_empty_files():
+    files = httpx.Files(boundary="BOUNDARY")
+    assert files.multi_dict() == {}
+    assert repr(files) == "<Files []>"
+    assert files.headers() == {
+        "Content-Type": "multipart/form-data; boundary=BOUNDARY",
+        "Transfer-Encoding": "chunked",
+    }
+    with files.open() as stream:
+        assert stream.read() == b"--BOUNDARY--\r\n"
 
 
 def test_files_from_dict():
@@ -335,3 +359,28 @@ def test_multipart():
             b"Hello, world\r\n"
             b"--BOUNDARY--\r\n"
         )
+
+
+def test_multipart_repr():
+    multipart = httpx.MultiPart(form={"name": "Alice"})
+
+    assert repr(multipart) == "<MultiPart form=[('name', 'Alice')], files=[]>"
+
+
+# Content
+
+
+def test_content():
+    content = httpx.Content()
+
+    with pytest.raises(NotImplementedError):
+        content.open()
+
+    with pytest.raises(NotImplementedError):
+        content.headers()
+
+    with pytest.raises(NotImplementedError):
+        content.parse(httpx.ByteStream(b".."))
+
+    with pytest.raises(TypeError):
+        bytes(content)

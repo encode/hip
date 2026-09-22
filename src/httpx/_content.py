@@ -284,7 +284,7 @@ class Files(typing.Mapping[str, File], Content):
 
     # Content interface
     def open(self) -> Stream:
-        return MultiPart(files=self).open()
+        return MultiPart(files=self, boundary=self._boundary).open()
 
     def headers(self) -> Headers:
         content_type = f"multipart/form-data; boundary={self._boundary}"
