@@ -90,7 +90,7 @@ class ConnectionPool(Transport):
 
             warnings.warn("ConnectionPool was garbage collected without being closed.")
 
-    def __enter__(self) -> Self:
+    def __enter__(self) -> "Self":
         return self
 
     def __exit__(

@@ -144,7 +144,7 @@ class Connection(Transport):
     def __repr__(self) -> str:
         return f"<Connection [{self._origin} {self.description()}]>"
 
-    def __enter__(self) -> Self:
+    def __enter__(self) -> "Self":
         return self
 
     def __exit__(

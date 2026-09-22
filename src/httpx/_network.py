@@ -105,7 +105,7 @@ class NetworkStream(Stream):
 
             warnings.warn("NetworkStream was garbage collected without being closed.")
 
-    def __enter__(self) -> Self:
+    def __enter__(self) -> "Self":
         return self
 
     def __exit__(
@@ -153,7 +153,7 @@ class NetworkListener:
 
             warnings.warn("NetworkListener was garbage collected without being closed.")
 
-    def __enter__(self) -> Self:
+    def __enter__(self) -> "Self":
         return self
 
     def __exit__(
