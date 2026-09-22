@@ -46,12 +46,12 @@
 <ul>
 <li>Supports both client and server functionality.</li>
 <li>Presents a clear, simple, and tightly constrained API.</li>
-<li>Exceptionally light installation footprint.</li>
+<li>A minimal, easily readable implementation.</li>
 </ul>
 <p>...we're currently in early stages design, and would love for you to get involved.</p>
 <h2 id="installation"><a class="toclink" href="#installation">Installation</a></h2>
 <p>Install the package from PyPI&hellip;</p>
-<pre><code class="language-bash">$ uv add httpx --pre
+<pre><code class="language-shell">$ uv add httpx --pre
 </code></pre>
 <h2 id="client"><a class="toclink" href="#client">Client</a></h2>
 <p>Sending HTTP requests&hellip;</p>
@@ -77,14 +77,14 @@
 <h2 id="motivation"><a class="toclink" href="#motivation">Motivation</a></h2>
 <p>A clean modern design, with <a href="api/">a focused API</a> and an exceptionally light installation footprint.</p>
 <p>For comparison, see <code>httpx</code> <small>vs</small> <code>requests</code>&hellip;</p>
-<pre><code class="language-bash">$ uv add httpx
+<pre><code class="language-shell">$ uv add httpx
 $ uv tree --show-sizes --package httpx
 httpx v1.0.dev5 (33.5KiB)
 └── truststore v0.10.0 (17.8KiB)
 </code></pre>
 <p></p>
 
-<pre><code class="language-bash">$ uv add requests
+<pre><code class="language-shell">$ uv add requests
 $ uv tree --show-sizes --package requests
 requests v2.33.1 (63.4KiB)
 ├── certifi v2026.2.25 (150.1KiB)
