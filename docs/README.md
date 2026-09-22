@@ -8,7 +8,7 @@ Engineered for simplicity, `httpx` provides a complete Python web suite&hellip;
 
 * Supports both client and server functionality.
 * Presents a clear, simple, and tightly constrained API.
-* Exceptionally light installation footprint.
+* A minimal, easily readable implementation.
 
 ...we're currently in early stages design, and would love for you to get involved.
 
