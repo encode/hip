@@ -16,7 +16,7 @@ Engineered for simplicity, `httpx` provides a complete Python web suite&hellip;
 
 Install the package from PyPI&hellip;
 
-```bash
+```shell
 $ uv add httpx --pre
 ```
 
@@ -56,7 +56,7 @@ A clean modern design, with [a focused API](API.md) and an exceptionally light i
 
 For comparison, see `httpx` <small>vs</small> `requests`&hellip;
 
-```bash
+```shell
 $ uv add httpx
 $ uv tree --show-sizes --package httpx
 httpx v1.0.dev5 (33.5KiB)
@@ -65,7 +65,7 @@ httpx v1.0.dev5 (33.5KiB)
 
 <p></p>
 
-```bash
+```shell
 $ uv add requests
 $ uv tree --show-sizes --package requests
 requests v2.33.1 (63.4KiB)
