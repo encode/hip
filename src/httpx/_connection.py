@@ -1,6 +1,9 @@
 import types
+import typing
 
-from typing_extensions import Self
+if typing.TYPE_CHECKING:
+    # Once we drop 3.10 support, we can use 'typing.Self'.
+    from typing_extensions import Self
 
 from ._body import ResponseContent
 from ._content import Content

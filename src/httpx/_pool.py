@@ -1,7 +1,10 @@
 import time
 import types
+import typing
 
-from typing_extensions import Self
+if typing.TYPE_CHECKING:
+    # Once we drop 3.10 support, we can use 'typing.Self'.
+    from typing_extensions import Self
 
 from ._connection import Connection, Transport, open_connection
 from ._network import NetworkBackend, Semaphore
