@@ -32,6 +32,74 @@ def test_network_backend_connect(server):
         stream.close()
 
 
+class FakeSSLContext:
+    def __init__(self, tls_socket):
+        self.tls_socket = tls_socket
+        self.wrap_socket_args = None
+
+    def wrap_socket(self, socket, server_hostname):
+        self.wrap_socket_args = (socket, server_hostname)
+        return self.tls_socket
+
+
+class FakeSocket:
+    def __init__(self):
+        self.shutdown_args = None
+        self.closed = False
+
+    def shutdown(self, how):
+        self.shutdown_args = how
+
+    def close(self):
+        self.closed = True
+
+
+class FailingShutdownSocket(FakeSocket):
+    def shutdown(self, how):
+        raise OSError
+
+
+def test_network_stream_close_ignores_shutdown_errors():
+    sock = FailingShutdownSocket()
+    stream = httpx.NetworkStream(sock, ("example.com", 443))
+
+    stream.close()
+
+    assert sock.closed
+
+
+def test_network_backend_connect_tls(monkeypatch):
+    raw_socket = FakeSocket()
+    tls_socket = FakeSocket()
+    ssl_context = FakeSSLContext(tls_socket)
+    backend = httpx.NetworkBackend(ssl_ctx=ssl_context)
+
+    create_connection_args = []
+
+    def create_connection(address, timeout):
+        create_connection_args.append((address, timeout))
+        return raw_socket
+
+    monkeypatch.setattr("httpx._network.socket.create_connection", create_connection)
+
+    stream = backend.connect_tls("example.com", 443)
+    try:
+        assert repr(stream) == "<NetworkStream [example.com:443]>"
+        assert create_connection_args == [(("example.com", 443), None)]
+        assert ssl_context.wrap_socket_args == (raw_socket, "example.com")
+    finally:
+        stream.close()
+
+
+def test_network_listener_context_managed():
+    backend = httpx.NetworkBackend()
+
+    with backend.listen("127.0.0.1", 0) as listener:
+        assert listener.host == "127.0.0.1"
+
+    assert listener.accept() is None
+
+
 def test_network_backend_context_managed(server):
     net = httpx.NetworkBackend()
     with net.connect(server.host, server.port) as stream:
@@ -52,52 +120,3 @@ def test_network_backend_timeout(server):
 
     with httpx.timeout(10.0), net.connect(server.host, server.port):
         pass
-
-
-# >>> net = httpx.NetworkBackend()
-# >>> stream = net.connect("dev.encode.io", 80)
-# >>> try:
-# >>>     ...
-# >>> finally:
-# >>>     stream.close()
-# >>> stream
-# <NetworkStream ["168.0.0.1:80" CLOSED]>
-
-# import httpx
-# import ssl
-# import truststore
-
-# net = httpx.NetworkBackend()
-# ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-# req = b'\r\n'.join([
-#     b'GET / HTTP/1.1',
-#     b'Host: www.example.com',
-#     b'User-Agent: python/dev',
-#     b'Connection: close',
-#     b'',
-# ])
-
-# # Use a 10 second overall timeout for the entire request/response.
-# with timeout(10.0):
-#     # Use a 3 second timeout for the initial connection.
-#     with timeout(3.0) as t:
-#         # Open the connection & establish SSL.
-#         with net.open_stream("www.example.com", 443) as stream:
-#             stream.start_tls(ctx, hostname="www.example.com")
-#             t.cancel()
-#             # Send the request & read the response.
-#             stream.write(req)
-#             buffer = []
-#             while part := stream.read():
-#                 buffer.append(part)
-#             resp = b''.join(buffer)
-
-
-# def test_fixture(tcp_echo_server):
-#     host, port = (tcp_echo_server.host, tcp_echo_server.port)
-
-#     net = httpx.NetworkBackend()
-#     with net.connect(host, port) as stream:
-#         stream.write(b"123")
-#         buffer = stream.read()
-#         assert buffer == b"123"
