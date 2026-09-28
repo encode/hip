@@ -99,12 +99,6 @@ class NetworkStream(Stream):
         description += " CLOSED" if self._is_closed else ""
         return f"<NetworkStream [{self.host}:{self.port}{description}]>"
 
-    def __del__(self):
-        if not self._is_closed:
-            import warnings
-
-            warnings.warn("NetworkStream was garbage collected without being closed.")
-
     def __enter__(self) -> "Self":
         return self
 
@@ -146,12 +140,6 @@ class NetworkListener:
     def close(self):
         self._is_closed = True
         self._server_socket.close()
-
-    def __del__(self):
-        if not self._is_closed:
-            import warnings
-
-            warnings.warn("NetworkListener was garbage collected without being closed.")
 
     def __enter__(self) -> "Self":
         return self
