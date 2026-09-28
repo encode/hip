@@ -10,7 +10,10 @@ import types
 import typing
 
 import truststore
-from typing_extensions import Self
+
+if typing.TYPE_CHECKING:
+    # Once we drop 3.10 support, we can use 'typing.Self'.
+    from typing_extensions import Self
 
 from ._streams import Stream
 
@@ -96,7 +99,7 @@ class NetworkStream(Stream):
         description += " CLOSED" if self._is_closed else ""
         return f"<NetworkStream [{self.host}:{self.port}{description}]>"
 
-    def __enter__(self) -> Self:
+    def __enter__(self) -> "Self":
         return self
 
     def __exit__(
@@ -138,7 +141,7 @@ class NetworkListener:
         self._is_closed = True
         self._server_socket.close()
 
-    def __enter__(self) -> Self:
+    def __enter__(self) -> "Self":
         return self
 
     def __exit__(

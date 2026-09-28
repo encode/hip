@@ -1,6 +1,9 @@
 import types
+import typing
 
-from typing_extensions import Self
+if typing.TYPE_CHECKING:
+    # Once we drop 3.10 support, we can use 'typing.Self'.
+    from typing_extensions import Self
 
 from ._body import ResponseContent
 from ._content import Content
@@ -141,7 +144,7 @@ class Connection(Transport):
     def __repr__(self) -> str:
         return f"<Connection [{self._origin} {self.description()}]>"
 
-    def __enter__(self) -> Self:
+    def __enter__(self) -> "Self":
         return self
 
     def __exit__(
