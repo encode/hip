@@ -265,3 +265,15 @@ def test_client_receives_mixed_case_gzip_response(client):
         response = client.get(server.url)
 
     assert response.body == b"Hello, world."
+
+
+def test_client_streams_gzip_response(client):
+    with (
+        hip.Server(gzip_response) as server,
+        client.stream("GET", server.url) as response,
+    ):
+        assert response.read(5) == b"Hello"
+        assert response.read(5) == b", wor"
+        assert response.read(5) == b"ld."
+        assert response.read(5) == b""
+        assert response.read(5) == b""
