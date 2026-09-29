@@ -30,5 +30,3 @@ You can also book in time to [introduce yourself](https://calendly.com/encode-os
 ## This is bad work and you're stupid.
 
 There's [a lot](https://news.ycombinator.com/item?id=47515096) of [junk](https://news.ycombinator.com/item?id=47524008) out [there](https://squidfunk.github.io/mkdocs-material/blog/2026/02/18/mkdocs-2.0/#we-raised-concerns-early) on [the internet](https://fpgmaas.com/blog/collapse-of-mkdocs/), kids. Don't feed the trolls.
-
-This right here is the good stuff.
