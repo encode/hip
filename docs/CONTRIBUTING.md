@@ -8,13 +8,13 @@ All experience levels are welcome, whether you're new to development, or a veter
 
 We think this is a lovely little piece of work.
 
-The package is significantly less complex than other Python HTTP implementations, while supporting both Client and Server side use cases. It already encompasses a decent amount of the functionality covered by alternatives such as Requests, Flask, and Gunicorn, all within a single implementation.
+The package is significantly less complex than other Python HTTP implementations, while supporting both Client and Server side use cases.
 
 The typing is neatly constrained, the API is minimal, and immutability is a core design concern.
 
 We're hoping for a fresh start to community work on the project, and looking forward to nuturing healthy working environments.
 
-There's plenty of good work to be done here - on technical, educational, and community fronts, although we need your help.
+There's plenty of good work to be done here - on technical, educational, and community fronts.
 
 ## How can I get involved?
 
@@ -29,4 +29,4 @@ You can also book in time to [introduce yourself](https://calendly.com/encode-os
 
 ## This is bad work and you're stupid.
 
-There's [a lot](https://news.ycombinator.com/item?id=47515096) of [junk](https://news.ycombinator.com/item?id=47524008) out [there](https://squidfunk.github.io/mkdocs-material/blog/2026/02/18/mkdocs-2.0/#we-raised-concerns-early) on [the internet](https://fpgmaas.com/blog/collapse-of-mkdocs/), kids. Don't feed the trolls.
+There's a lot of junk out there on the internet, kids. Don't feed the trolls.
