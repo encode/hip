@@ -82,7 +82,7 @@ class Connection(Transport):
         self._send_head(request)
         self._send_body(request)
         code, headers = self._recv_head()
-        content = ResponseContent(self._parser)
+        content = ResponseContent(self._parser, headers)
         return Response(code, headers=headers, content=content)
 
     def close(self) -> None:

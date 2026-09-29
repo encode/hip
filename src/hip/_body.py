@@ -1,4 +1,5 @@
 import io
+import zlib
 
 from ._content import Content
 from ._headers import Headers
@@ -17,11 +18,16 @@ class RequestContent(Content):
 
 
 class ResponseContent(Content):
-    def __init__(self, parser: HTTPParser):
+    def __init__(self, parser: HTTPParser, headers: Headers):
         self._parser = parser
+        self._headers = headers
 
     def open(self) -> Stream:
-        return HTTPStream(self._parser, is_response=True)
+        stream = HTTPStream(self._parser, is_response=True)
+        content_encoding = self._headers.get("Content-Encoding", "")
+        if content_encoding.lower() == "gzip":
+            return GZipStream(stream)
+        return stream
 
     def headers(self) -> Headers:
         return Headers()
@@ -71,3 +77,35 @@ class HTTPStream(Stream):
         self._buffer.close()
         if self._is_response:
             self._parser.complete()
+
+
+class GZipStream(Stream):
+    def __init__(self, stream: Stream):
+        self._stream = stream
+        # Adding 16 enables gzip header and trailer handling.
+        self._decoder = zlib.decompressobj(wbits=16 + zlib.MAX_WBITS)
+        self._finished = False
+        self._buffer = bytearray()
+
+    def read(self, size=-1) -> bytes:
+        while (size < 0 or len(self._buffer) < size) and not self._finished:
+            compressed = self._stream.read(8192)
+
+            if compressed:
+                decoded = self._decoder.decompress(compressed)
+                self._buffer.extend(decoded)
+            else:
+                decoded = self._decoder.flush()
+                self._buffer.extend(decoded)
+                self._finished = True
+        if size < 0:
+            output = bytes(self._buffer)
+            self._buffer.clear()
+        else:
+            output = bytes(self._buffer[:size])
+            del self._buffer[:size]
+
+        return output
+
+    def close(self) -> None:
+        self._stream.close()

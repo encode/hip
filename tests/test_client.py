@@ -1,3 +1,4 @@
+import gzip
 import json
 
 import pytest
@@ -228,3 +229,39 @@ def test_redirect_to_invalid_url(client):
 
         assert response.status_code == 302
         assert response.body == b""
+
+
+def gzip_response(request):
+    assert request.headers["Accept-Encoding"] == "gzip"
+    return hip.Response(
+        200,
+        headers={
+            "Content-Type": "text/plain",
+            "Content-Encoding": "gzip",
+        },
+        content=gzip.compress(b"Hello, world."),
+    )
+
+
+def test_client_receives_gzip_response(client):
+    with hip.Server(gzip_response) as server:
+        response = client.get(server.url)
+
+    assert response.body == b"Hello, world."
+
+
+def test_client_receives_mixed_case_gzip_response(client):
+    def app(request):
+        return hip.Response(
+            200,
+            headers={
+                "Content-Type": "text/plain",
+                "Content-Encoding": "GZip",
+            },
+            content=gzip.compress(b"Hello, world."),
+        )
+
+    with hip.Server(app) as server:
+        response = client.get(server.url)
+
+    assert response.body == b"Hello, world."
