@@ -1,5 +1,6 @@
 import gzip
 import json
+import random
 
 import pytest
 
@@ -314,3 +315,25 @@ def test_client_rejects_invalid_gzip_response(client):
         pytest.raises(ValueError, match=r"Invalid gzip response content\."),
     ):
         client.get(server.url)
+
+
+def test_client_streams_gzip_response_in_multiple_chunks(client):
+    source = random.Random(0).randbytes(20_000)
+    gzipped = gzip.compress(source)
+    assert len(gzipped) > 8192
+
+    def app(request):
+        return hip.Response(
+            200,
+            headers={
+                "Content-Type": "application/octet-stream",
+                "Content-Encoding": "gzip",
+            },
+            content=gzipped,
+        )
+
+    with (
+        hip.Server(app) as server,
+        client.stream("GET", server.url) as response,
+    ):
+        assert response.read() == source
