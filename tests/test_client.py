@@ -277,3 +277,40 @@ def test_client_streams_gzip_response(client):
         assert response.read(5) == b"ld."
         assert response.read(5) == b""
         assert response.read(5) == b""
+
+
+def test_client_rejects_truncated_gzip_response(client):
+    def app(request):
+        content = gzip.compress(b"Hello, world.")[:-8]
+        return hip.Response(
+            200,
+            headers={
+                "Content-Type": "text/plain",
+                "Content-Encoding": "gzip",
+            },
+            content=content,
+        )
+
+    with (
+        hip.Server(app) as server,
+        pytest.raises(ValueError, match=r"Invalid gzip response content\."),
+    ):
+        client.get(server.url)
+
+
+def test_client_rejects_invalid_gzip_response(client):
+    def app(request):
+        return hip.Response(
+            200,
+            headers={
+                "Content-Type": "text/plain",
+                "Content-Encoding": "gzip",
+            },
+            content=b"not gzip content",
+        )
+
+    with (
+        hip.Server(app) as server,
+        pytest.raises(ValueError, match=r"Invalid gzip response content\."),
+    ):
+        client.get(server.url)

@@ -91,13 +91,20 @@ class GZipStream(Stream):
         while (size < 0 or len(self._buffer) < size) and not self._finished:
             compressed = self._stream.read(8192)
 
-            if compressed:
-                decoded = self._decoder.decompress(compressed)
-                self._buffer.extend(decoded)
-            else:
-                decoded = self._decoder.flush()
-                self._buffer.extend(decoded)
+            try:
+                if compressed:
+                    decoded = self._decoder.decompress(compressed)
+                else:
+                    decoded = self._decoder.flush()
+            except zlib.error as exc:
+                raise ValueError("Invalid gzip response content.") from exc
+
+            if not compressed:
+                if not self._decoder.eof:
+                    raise ValueError("Invalid gzip response content.")
                 self._finished = True
+
+            self._buffer.extend(decoded)
         if size < 0:
             output = bytes(self._buffer)
             self._buffer.clear()
