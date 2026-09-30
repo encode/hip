@@ -158,6 +158,13 @@ def test_stream(client, server):
         }
 
 
+def test_stream_read_after_eof(client, server):
+    with client.stream("GET", server.url) as response:
+        assert response.read()
+        assert response.read() == b""
+        assert response.read() == b""
+
+
 def test_keepalive(client, server):
     first = client.get(server.url)
     second = client.get(server.url)

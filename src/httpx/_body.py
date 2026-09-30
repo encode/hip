@@ -32,8 +32,12 @@ class HTTPStream(Stream):
         self._parser = parser
         self._is_response = is_response
         self._buffer = io.BytesIO()
+        self._finished = False
 
     def read(self, size=-1) -> bytes:
+        if self._finished:
+            return b""
+
         sections = []
         length = 0
 
@@ -51,6 +55,7 @@ class HTTPStream(Stream):
             sections.append(section)
             length += len(section)
             if section == b"":
+                self._finished = True
                 break
 
         # If we've more data than requested, then push some back into the buffer.
