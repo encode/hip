@@ -2,7 +2,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>httpx</title>
+        <title>hip</title>
         <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;text y=&quot;.9em&quot; font-size=&quot;90&quot;&gt;🦋&lt;/text&gt;&lt;/svg&gt;">
         <link rel="stylesheet" href="css/highlightjs.min.css">
         <link rel="stylesheet" href="css/highlightjs-copy.min.css">
@@ -23,7 +23,7 @@
         <nav class="toc">
             <div class="">
 <ul>
-<li><a href="#httpx">httpx</a><ul>
+<li><a href="#hip">hip</a><ul>
 <li><a href="#installation">Installation</a></li>
 <li><a href="#client">Client</a></li>
 <li><a href="#server">Server</a></li>
@@ -38,11 +38,11 @@
         
         <main>
             <p align="center">
-  <img width="350" height="208" src="https://raw.githubusercontent.com/encode/httpx/master/docs/img/butterfly.png" alt='httpx'>
+  <img width="350" height="208" src="img/butterfly.png" alt='hip'>
 </p>
 
-<h1 id="httpx"><a class="toclink" href="#httpx"><a href=".">httpx</a></a></h1>
-<p>Engineered for simplicity, <code>httpx</code> provides a complete Python web suite&hellip;</p>
+<h1 id="hip"><a class="toclink" href="#hip"><a href=".">hip</a></a></h1>
+<p>Engineered for simplicity, <code>hip</code> provides a complete Python web suite&hellip;</p>
 <ul>
 <li>Supports both client and server functionality.</li>
 <li>Presents a clear, simple, and tightly constrained API.</li>
@@ -51,35 +51,35 @@
 <p>...we're currently in early stages design, and would love for you to get involved.</p>
 <h2 id="installation"><a class="toclink" href="#installation">Installation</a></h2>
 <p>Install the package from PyPI&hellip;</p>
-<pre><code class="language-shell">$ uv add httpx --pre
+<pre><code class="language-shell">$ uv add hip --dev
 </code></pre>
 <h2 id="client"><a class="toclink" href="#client">Client</a></h2>
 <p>Sending HTTP requests&hellip;</p>
-<pre><code class="language-python">&gt;&gt;&gt; import httpx
+<pre><code class="language-python">&gt;&gt;&gt; import hip
 
-&gt;&gt;&gt; cli = httpx.Client()
+&gt;&gt;&gt; cli = hip.Client()
 &gt;&gt;&gt; r = cli.get('https://www.example.com/')
 &gt;&gt;&gt; r
 &lt;Response [200 OK]&gt;
 </code></pre>
 <h2 id="server"><a class="toclink" href="#server">Server</a></h2>
 <p>Creating web apps&hellip;</p>
-<pre><code class="language-python">&gt;&gt;&gt; import httpx
+<pre><code class="language-python">&gt;&gt;&gt; import hip
 
 &gt;&gt;&gt; def app(request):
-...     content = httpx.HTML('&lt;html&gt;&lt;body&gt;¡Hola, mundo!&lt;/body&gt;&lt;/html&gt;')
-...     return httpx.Response(200, content=content)
+...     content = hip.HTML('&lt;html&gt;&lt;body&gt;¡Hola, mundo!&lt;/body&gt;&lt;/html&gt;')
+...     return hip.Response(200, content=content)
 
-&gt;&gt;&gt; s = httpx.Server(app)
+&gt;&gt;&gt; s = hip.Server(app)
 &gt;&gt;&gt; s.serve()
 </code></pre>
 <hr />
 <h2 id="motivation"><a class="toclink" href="#motivation">Motivation</a></h2>
 <p>A clean modern design, with <a href="api/">a focused API</a> and an exceptionally light installation footprint.</p>
-<p>For comparison, see <code>httpx</code> <small>vs</small> <code>requests</code>&hellip;</p>
-<pre><code class="language-shell">$ uv add httpx
-$ uv tree --show-sizes --package httpx
-httpx v1.0.dev5 (33.5KiB)
+<p>For comparison, see <code>hip</code> <small>vs</small> <code>requests</code>&hellip;</p>
+<pre><code class="language-shell">$ uv add hip
+$ uv tree --show-sizes --package hip
+hip v0.2 (33.5KiB)
 └── truststore v0.10.0 (17.8KiB)
 </code></pre>
 <p></p>
@@ -93,7 +93,7 @@ requests v2.33.1 (63.4KiB)
 └── urllib3 v2.6.3 (128.5KiB)
 </code></pre>
 <h2 id="contribution"><a class="toclink" href="#contribution">Contribution</a></h2>
-<p>The <code>httpx</code> redesign is currently in early development.</p>
+<p>The <code>hip</code> redesign is currently in early development.</p>
 <p>We are currently <a href="https://github.com/sponsors/encode">seeking sponsorship</a>, and looking to expand our team.</p>
 <p>If you'd like to discuss getting involved, please <a href="https://calendly.com/encode-oss">book in some time</a>.</p>
 <hr />
