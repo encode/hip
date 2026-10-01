@@ -23,25 +23,25 @@ class URL:
     * `url.host` is normalized to always be lowercased. Internationalized domain
       names are represented in unicode, without IDNA encoding applied. For instance:
 
-      url = httpx.URL("http://中国.icom.museum")
+      url = hip.URL("http://中国.icom.museum")
       assert url.host == "中国.icom.museum"
-      url = httpx.URL("http://xn--fiqs8s.icom.museum")
+      url = hip.URL("http://xn--fiqs8s.icom.museum")
       assert url.host == "中国.icom.museum"
 
     * `url.raw_host` is normalized to always be lowercased, and is IDNA encoded.
 
-      url = httpx.URL("http://中国.icom.museum")
+      url = hip.URL("http://中国.icom.museum")
       assert url.raw_host == b"xn--fiqs8s.icom.museum"
-      url = httpx.URL("http://xn--fiqs8s.icom.museum")
+      url = hip.URL("http://xn--fiqs8s.icom.museum")
       assert url.raw_host == b"xn--fiqs8s.icom.museum"
 
     * `url.port` is either None or an integer. URLs that include the default port for
       "http", "https", "ws", "wss", and "ftp" schemes have their port
       normalized to `None`.
 
-      assert httpx.URL("http://example.com") == httpx.URL("http://example.com:80")
-      assert httpx.URL("http://example.com").port is None
-      assert httpx.URL("http://example.com:80").port is None
+      assert hip.URL("http://example.com") == hip.URL("http://example.com:80")
+      assert hip.URL("http://example.com").port is None
+      assert hip.URL("http://example.com:80").port is None
 
     * `url.userinfo` is raw bytes, without URL escaping. Usually you'll want to work
       with `url.username` and `url.password` instead, which handle the URL escaping.
@@ -100,7 +100,7 @@ class URL:
             self._uri_reference = url._uri_reference.copy_with(**kwargs)
         else:
             raise TypeError(
-                "Invalid type for url.  Expected str or httpx.URL,"
+                "Invalid type for url.  Expected str or hip.URL,"
                 f" got {type(url)}: {url!r}"
             )
 
@@ -146,16 +146,16 @@ class URL:
 
         Examples:
 
-        url = httpx.URL("http://www.EXAMPLE.org")
+        url = hip.URL("http://www.EXAMPLE.org")
         assert url.host == "www.example.org"
 
-        url = httpx.URL("http://中国.icom.museum")
+        url = hip.URL("http://中国.icom.museum")
         assert url.host == "xn--fiqs8s"
 
-        url = httpx.URL("http://xn--fiqs8s.icom.museum")
+        url = hip.URL("http://xn--fiqs8s.icom.museum")
         assert url.host == "xn--fiqs8s"
 
-        url = httpx.URL("https://[::ffff:192.168.0.1]")
+        url = hip.URL("https://[::ffff:192.168.0.1]")
         assert url.host == "::ffff:192.168.0.1"
         """
         return self._uri_reference.host
@@ -171,8 +171,8 @@ class URL:
 
         For example:
 
-        assert httpx.URL("http://www.example.com") == httpx.URL("http://www.example.com:80")
-        assert httpx.URL("http://www.example.com:80").port is None
+        assert hip.URL("http://www.example.com") == hip.URL("http://www.example.com:80")
+        assert hip.URL("http://www.example.com:80").port is None
         """
         return self._uri_reference.port
 
@@ -194,7 +194,7 @@ class URL:
 
         For example:
 
-        url = httpx.URL("https://example.com/pa%20th")
+        url = hip.URL("https://example.com/pa%20th")
         assert url.path == "/pa th"
         """
         path = self._uri_reference.path or "/"
@@ -211,7 +211,7 @@ class URL:
 
         For example:
 
-        url = httpx.URL("https://example.com/?filter=some%20search%20terms")
+        url = hip.URL("https://example.com/?filter=some%20search%20terms")
         assert url.query == b"filter=some%20search%20terms"
         """
         query = self._uri_reference.query or ""
@@ -278,7 +278,7 @@ class URL:
 
         For example:
 
-        url = httpx.URL("https://www.example.com").copy_with(
+        url = hip.URL("https://www.example.com").copy_with(
             username="jo@gmail.com", password="a secret"
         )
         assert url == "https://jo%40email.com:a%20secret@www.example.com"
@@ -306,7 +306,7 @@ class URL:
 
         Eg.
 
-        url = httpx.URL("https://www.example.com/test")
+        url = hip.URL("https://www.example.com/test")
         url = url.join("/new/path")
         assert url == "https://www.example.com/new/path"
         """
@@ -372,7 +372,7 @@ class QueryParams(typing.Mapping[str, str]):
 
         Usage:
 
-        q = httpx.QueryParams("a=123&a=456&b=789")
+        q = hip.QueryParams("a=123&a=456&b=789")
         assert list(q.keys()) == ["a", "b"]
         """
         return self._dict.keys()
@@ -384,7 +384,7 @@ class QueryParams(typing.Mapping[str, str]):
 
         Usage:
 
-        q = httpx.QueryParams("a=123&a=456&b=789")
+        q = hip.QueryParams("a=123&a=456&b=789")
         assert list(q.values()) == ["123", "789"]
         """
         return {k: v[0] for k, v in self._dict.items()}.values()
@@ -396,7 +396,7 @@ class QueryParams(typing.Mapping[str, str]):
 
         Usage:
 
-        q = httpx.QueryParams("a=123&a=456&b=789")
+        q = hip.QueryParams("a=123&a=456&b=789")
         assert list(q.items()) == [("a", "123"), ("b", "789")]
         """
         return {k: v[0] for k, v in self._dict.items()}.items()
@@ -407,7 +407,7 @@ class QueryParams(typing.Mapping[str, str]):
 
         Usage:
 
-        q = httpx.QueryParams("a=123&a=456&b=789")
+        q = hip.QueryParams("a=123&a=456&b=789")
         assert list(q.multi_items()) == [("a", "123"), ("a", "456"), ("b", "789")]
         """
         multi_items: list[tuple[str, str]] = []
@@ -425,7 +425,7 @@ class QueryParams(typing.Mapping[str, str]):
 
         Usage:
 
-        q = httpx.QueryParams("a=123&a=456&b=789")
+        q = hip.QueryParams("a=123&a=456&b=789")
         assert q.get("a") == "123"
         """
         if key in self._dict:
@@ -438,7 +438,7 @@ class QueryParams(typing.Mapping[str, str]):
 
         Usage:
 
-        q = httpx.QueryParams("a=123&a=456&b=789")
+        q = hip.QueryParams("a=123&a=456&b=789")
         assert q.get_list("a") == ["123", "456"]
         """
         return list(self._dict.get(key, []))
@@ -449,9 +449,9 @@ class QueryParams(typing.Mapping[str, str]):
 
         Usage:
 
-        q = httpx.QueryParams("a=123")
+        q = hip.QueryParams("a=123")
         q = q.set("a", "456")
-        assert q == httpx.QueryParams("a=456")
+        assert q == hip.QueryParams("a=456")
         """
         q = QueryParams()
         q._dict = dict(self._dict)
@@ -464,9 +464,9 @@ class QueryParams(typing.Mapping[str, str]):
 
         Usage:
 
-        q = httpx.QueryParams("a=123")
+        q = hip.QueryParams("a=123")
         q = q.append("a", "456")
-        assert q == httpx.QueryParams("a=123&a=456")
+        assert q == hip.QueryParams("a=123&a=456")
         """
         q = QueryParams()
         q._dict = dict(self._dict)
@@ -479,9 +479,9 @@ class QueryParams(typing.Mapping[str, str]):
 
         Usage:
 
-        q = httpx.QueryParams("a=123")
+        q = hip.QueryParams("a=123")
         q = q.remove("a")
-        assert q == httpx.QueryParams("")
+        assert q == hip.QueryParams("")
         """
         q = QueryParams()
         q._dict = dict(self._dict)
@@ -499,13 +499,13 @@ class QueryParams(typing.Mapping[str, str]):
 
         Usage:
 
-        q = httpx.QueryParams("a=123")
+        q = hip.QueryParams("a=123")
         q = q.copy_update({"b": "456"})
-        assert q == httpx.QueryParams("a=123&b=456")
+        assert q == hip.QueryParams("a=123&b=456")
 
-        q = httpx.QueryParams("a=123")
+        q = hip.QueryParams("a=123")
         q = q.copy_update({"a": "456", "b": "789"})
-        assert q == httpx.QueryParams("a=456&b=789")
+        assert q == hip.QueryParams("a=456&b=789")
         """
         q = QueryParams(params)
         q._dict = {**self._dict, **q._dict}

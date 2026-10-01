@@ -234,7 +234,7 @@ wheels = [
 ]
 
 [[package]]
-name = "httpx"
+name = "hip"
 source = { editable = "." }
 dependencies = [
     { name = "truststore" },
@@ -261,6 +261,19 @@ dev = [
     { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "ruff" },
     { name = "typing-extensions", specifier = ">=4.0" },
+]
+
+[[package]]
+name = "httpx"
+version = "1.0.dev6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "truststore" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fb/cf/b69904e914caa43e662c2275612a347c8a3f084cba7ecbcab45bb0487d63/httpx-1.0.dev6.tar.gz", hash = "sha256:918d99857fb7b841e6d79a7cda909125df8b2466e6959c3ca4c23130052b6e6a", size = 29938, upload-time = "2026-08-31T17:59:55.135Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/74/bc/dc055edab7b3aad9da517f4b4581ee233b1b3a4df4ec9d5f84407f74bc08/httpx-1.0.dev6-py3-none-any.whl", hash = "sha256:516cd76d86f016b2bc25d544d892a3ecce8db263459b3084894753fec322c841", size = 37878, upload-time = "2026-08-31T17:59:54.19Z" },
 ]
 
 [[package]]

@@ -1,6 +1,6 @@
 import pytest
 
-import httpx
+import hip
 
 
 def echo(stream):
@@ -10,18 +10,18 @@ def echo(stream):
 
 @pytest.fixture
 def server():
-    net = httpx.NetworkBackend()
+    net = hip.NetworkBackend()
     with net.serve("127.0.0.1", 8080, echo) as server:
         yield server
 
 
 def test_network_backend():
-    net = httpx.NetworkBackend()
+    net = hip.NetworkBackend()
     assert repr(net) in ["<NetworkBackend [trio]>", "<NetworkBackend [threaded]>"]
 
 
 def test_network_backend_connect(server):
-    net = httpx.NetworkBackend()
+    net = hip.NetworkBackend()
     stream = net.connect(server.host, server.port)
     try:
         assert repr(stream) == f"<NetworkStream [{server.host}:{server.port}]>"
@@ -61,7 +61,7 @@ class FailingShutdownSocket(FakeSocket):
 
 def test_network_stream_close_ignores_shutdown_errors():
     sock = FailingShutdownSocket()
-    stream = httpx.NetworkStream(sock, ("example.com", 443))
+    stream = hip.NetworkStream(sock, ("example.com", 443))
 
     stream.close()
 
@@ -72,7 +72,7 @@ def test_network_backend_connect_tls(monkeypatch):
     raw_socket = FakeSocket()
     tls_socket = FakeSocket()
     ssl_context = FakeSSLContext(tls_socket)
-    backend = httpx.NetworkBackend(ssl_ctx=ssl_context)
+    backend = hip.NetworkBackend(ssl_ctx=ssl_context)
 
     create_connection_args = []
 
@@ -80,7 +80,7 @@ def test_network_backend_connect_tls(monkeypatch):
         create_connection_args.append((address, timeout))
         return raw_socket
 
-    monkeypatch.setattr("httpx._network.socket.create_connection", create_connection)
+    monkeypatch.setattr("hip._network.socket.create_connection", create_connection)
 
     stream = backend.connect_tls("example.com", 443)
     try:
@@ -92,7 +92,7 @@ def test_network_backend_connect_tls(monkeypatch):
 
 
 def test_network_listener_context_managed():
-    backend = httpx.NetworkBackend()
+    backend = hip.NetworkBackend()
 
     with backend.listen("127.0.0.1", 0) as listener:
         assert listener.host == "127.0.0.1"
@@ -101,7 +101,7 @@ def test_network_listener_context_managed():
 
 
 def test_network_backend_context_managed(server):
-    net = httpx.NetworkBackend()
+    net = hip.NetworkBackend()
     with net.connect(server.host, server.port) as stream:
         stream.write(b"Hello, world.")
         content = stream.read()
@@ -110,13 +110,13 @@ def test_network_backend_context_managed(server):
 
 
 def test_network_backend_timeout(server):
-    net = httpx.NetworkBackend()
+    net = hip.NetworkBackend()
     with (
-        httpx.timeout(0.0),
+        hip.timeout(0.0),
         pytest.raises(TimeoutError),
         net.connect(server.host, server.port),
     ):
         pass
 
-    with httpx.timeout(10.0), net.connect(server.host, server.port):
+    with hip.timeout(10.0), net.connect(server.host, server.port):
         pass

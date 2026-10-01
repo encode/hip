@@ -1,1 +1,1 @@
-uv run --no-sync pytest --cov="httpx" --no-cov-on-fail --cov-report=term-missing tests
+uv run --no-sync pytest --cov="hip" --no-cov-on-fail --cov-report=term-missing tests
