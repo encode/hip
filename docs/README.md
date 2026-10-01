@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="350" height="208" src="https://raw.githubusercontent.com/encode/hip/master/docs/img/butterfly.png" alt='hip'>
+  <img width="350" height="208" src="img/butterfly.png" alt='hip'>
 </p>
 
 # [hip](README.md)
