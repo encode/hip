@@ -59,7 +59,7 @@ For comparison, see `hip` <small>vs</small> `requests`&hellip;
 ```shell
 $ uv add hip
 $ uv tree --show-sizes --package hip
-hip v0.1 (33.5KiB)
+hip v0.2 (33.5KiB)
 └── truststore v0.10.0 (17.8KiB)
 ```
 
