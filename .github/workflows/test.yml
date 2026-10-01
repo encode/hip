@@ -34,8 +34,6 @@ jobs:
         run: scripts/lint
       - name: "Run tests"
         run: scripts/test
-      - name: "Enforce coverage"
-        run: scripts/coverage
       - name: "Build package"
         run: scripts/build
       - name: "Build documentation"

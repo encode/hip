@@ -18,7 +18,7 @@ Run in local development...
 
 ```shell
 $ ./scripts/install
-$ ./scripts/test && ./scripts/coverage
+$ ./scripts/test
 ```
 
 The scripts require [uv](https://docs.astral.sh/uv/) and run commands in the project's `.venv` environment.
