@@ -1,21 +1,21 @@
 import pytest
 
-import httpx
+import hip
 
 
 def hello_world(request):
-    content = httpx.Text("Hello, world.")
-    return httpx.Response(200, content=content)
+    content = hip.Text("Hello, world.")
+    return hip.Response(200, content=content)
 
 
 @pytest.fixture
 def server():
-    with httpx.Server(hello_world) as server:
+    with hip.Server(hello_world) as server:
         yield server
 
 
 def test_connection_pool_request(server):
-    with httpx.ConnectionPool() as pool:
+    with hip.ConnectionPool() as pool:
         assert repr(pool) == "<ConnectionPool [0 active]>"
         assert len(pool.connections) == 0
 
@@ -27,18 +27,18 @@ def test_connection_pool_request(server):
 
 
 def test_transport_request_not_implemented():
-    transport = httpx.Transport()
+    transport = hip.Transport()
 
     with pytest.raises(NotImplementedError):
         transport.request("GET", "http://example.com")
 
 
 def test_transport_close():
-    httpx.Transport().close()
+    hip.Transport().close()
 
 
 def test_connection_pool_connection_close(server):
-    with httpx.ConnectionPool() as pool:
+    with hip.ConnectionPool() as pool:
         assert repr(pool) == "<ConnectionPool [0 active]>"
         assert len(pool.connections) == 0
 
@@ -51,7 +51,7 @@ def test_connection_pool_connection_close(server):
 
 
 def test_connection_pool_stream(server):
-    with httpx.ConnectionPool() as pool:
+    with hip.ConnectionPool() as pool:
         assert repr(pool) == "<ConnectionPool [0 active]>"
         assert len(pool.connections) == 0
 
@@ -66,7 +66,7 @@ def test_connection_pool_stream(server):
 
 
 def test_connection_pool_cannot_request_after_closed():
-    with httpx.ConnectionPool() as pool:
+    with hip.ConnectionPool() as pool:
         pass
 
     with pytest.raises(RuntimeError):
@@ -74,13 +74,13 @@ def test_connection_pool_cannot_request_after_closed():
 
 
 def test_connection_pool_should_have_managed_lifespan(server):
-    pool = httpx.ConnectionPool()
+    pool = hip.ConnectionPool()
     with pytest.warns(UserWarning):
         del pool
 
 
 def test_connection_request(server):
-    with httpx.open_connection(server.url) as conn:
+    with hip.open_connection(server.url) as conn:
         assert repr(conn) == f"<Connection [{server.url} idle]>"
 
         r = conn.request("GET", "/")
@@ -90,7 +90,7 @@ def test_connection_request(server):
 
 
 def test_connection_stream(server):
-    with httpx.open_connection(server.url) as conn:
+    with hip.open_connection(server.url) as conn:
         assert repr(conn) == f"<Connection [{server.url} idle]>"
         with conn.stream("GET", "/") as r:
             assert r.status_code == 200
@@ -100,7 +100,7 @@ def test_connection_stream(server):
 
 
 def test_connection_stream_read_in_chunks(server):
-    with httpx.open_connection(server.url) as conn, conn.stream("GET", "/") as response:
+    with hip.open_connection(server.url) as conn, conn.stream("GET", "/") as response:
         assert response.read(5) == b"Hello"
         assert response.read(5) == b", wor"
         assert response.read() == b"ld."
@@ -109,13 +109,13 @@ def test_connection_stream_read_in_chunks(server):
 class TLSBackend:
     def connect_tls(self, host, port, hostname):
         self.connect_tls_args = (host, port, hostname)
-        return httpx.DuplexStream()
+        return hip.DuplexStream()
 
 
 def test_open_https_connection():
     backend = TLSBackend()
 
-    with httpx.open_connection(
+    with hip.open_connection(
         "https://example.com",
         hostname="example.com",
         backend=backend,

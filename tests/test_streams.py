@@ -1,10 +1,10 @@
 import pytest
 
-import httpx
+import hip
 
 
 def test_stream():
-    i = httpx.Stream()
+    i = hip.Stream()
     with pytest.raises(NotImplementedError):
         i.read()
 
@@ -19,11 +19,11 @@ def test_stream():
 
 def test_bytestream():
     data = b"abc"
-    s = httpx.ByteStream(data)
+    s = hip.ByteStream(data)
     assert s.size == 3
     assert s.read() == b"abc"
 
-    s = httpx.ByteStream(data)
+    s = hip.ByteStream(data)
     assert s.read(1) == b"a"
     assert s.read(1) == b"b"
     assert s.read(1) == b"c"
@@ -34,17 +34,17 @@ def test_filestream(tmp_path):
     path = tmp_path / "example.txt"
     path.write_bytes(b"hello world")
 
-    with httpx.FileStream(path) as s:
+    with hip.FileStream(path) as s:
         assert s.size == 11
         assert s.read() == b"hello world"
 
-    with httpx.FileStream(path) as s:
+    with hip.FileStream(path) as s:
         assert s.read(5) == b"hello"
         assert s.read(5) == b" worl"
         assert s.read(5) == b"d"
         assert s.read(5) == b""
 
-    with httpx.FileStream(path) as s:
+    with hip.FileStream(path) as s:
         assert s.read(5) == b"hello"
 
 
@@ -53,7 +53,7 @@ def test_filestream_unopened_file(tmp_path):
     path.write_bytes(b"hello world")
     msg = "I/O operation on unopened file"
     with pytest.raises(ValueError, match=msg):
-        httpx.FileStream(path).read()
+        hip.FileStream(path).read()
 
 
 def test_multipartstream(tmp_path):
@@ -76,18 +76,18 @@ def test_multipartstream(tmp_path):
 
     form = [("email", "heya@example.com")]
     files = [("upload", str(path))]
-    with httpx.MultiPartStream(form, files, boundary="boundary") as s:
+    with hip.MultiPartStream(form, files, boundary="boundary") as s:
         assert s.size is None
         assert s.read() == expected
 
-    with httpx.MultiPartStream(form, files, boundary="boundary") as s:
+    with hip.MultiPartStream(form, files, boundary="boundary") as s:
         assert s.read(50) == expected[:50]
         assert s.read(50) == expected[50:100]
         assert s.read(50) == expected[100:150]
         assert s.read(50) == expected[150:200]
         assert s.read(50) == expected[200:250]
 
-    with httpx.MultiPartStream(form, files, boundary="boundary") as s:
+    with hip.MultiPartStream(form, files, boundary="boundary") as s:
         assert s.read(50) == expected[:50]
         assert s.read(50) == expected[50:100]
         assert s.read(50) == expected[100:150]

@@ -1,10 +1,10 @@
 import pytest
 
-import httpx
+import hip
 
 
 def test_headers_from_dict():
-    headers = httpx.Headers(
+    headers = hip.Headers(
         {
             "Content-Length": "1024",
             "Content-Type": "text/plain; charset=utf-8",
@@ -15,7 +15,7 @@ def test_headers_from_dict():
 
 
 def test_headers_from_list():
-    headers = httpx.Headers(
+    headers = hip.Headers(
         [
             ("Location", "https://www.example.com"),
             ("Set-Cookie", "session_id=3498jj489jhb98jn"),
@@ -26,98 +26,98 @@ def test_headers_from_list():
 
 
 def test_header_keys():
-    h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
+    h = hip.Headers({"Accept": "*/*", "User-Agent": "python/hip"})
     assert list(h.keys()) == ["Accept", "User-Agent"]
 
 
 def test_header_values():
-    h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
-    assert list(h.values()) == ["*/*", "python/httpx"]
+    h = hip.Headers({"Accept": "*/*", "User-Agent": "python/hip"})
+    assert list(h.values()) == ["*/*", "python/hip"]
 
 
 def test_header_items():
-    h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
-    assert list(h.items()) == [("Accept", "*/*"), ("User-Agent", "python/httpx")]
+    h = hip.Headers({"Accept": "*/*", "User-Agent": "python/hip"})
+    assert list(h.items()) == [("Accept", "*/*"), ("User-Agent", "python/hip")]
 
 
 def test_header_get():
-    h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
-    assert h.get("User-Agent") == "python/httpx"
-    assert h.get("user-agent") == "python/httpx"
+    h = hip.Headers({"Accept": "*/*", "User-Agent": "python/hip"})
+    assert h.get("User-Agent") == "python/hip"
+    assert h.get("user-agent") == "python/hip"
     assert h.get("missing") is None
 
 
 def test_header_copy_set():
-    h = httpx.Headers({"Expires": "0"})
+    h = hip.Headers({"Expires": "0"})
     h = h.copy_set("Expires", "Wed, 21 Oct 2015 07:28:00 GMT")
-    assert h == httpx.Headers({"Expires": "Wed, 21 Oct 2015 07:28:00 GMT"})
+    assert h == hip.Headers({"Expires": "Wed, 21 Oct 2015 07:28:00 GMT"})
 
-    h = httpx.Headers({"Expires": "0"})
+    h = hip.Headers({"Expires": "0"})
     h = h.copy_set("expires", "Wed, 21 Oct 2015 07:28:00 GMT")
-    assert h == httpx.Headers({"Expires": "Wed, 21 Oct 2015 07:28:00 GMT"})
+    assert h == hip.Headers({"Expires": "Wed, 21 Oct 2015 07:28:00 GMT"})
 
 
 def test_header_copy_remove():
-    h = httpx.Headers({"Accept": "*/*"})
+    h = hip.Headers({"Accept": "*/*"})
     h = h.copy_remove("Accept")
-    assert h == httpx.Headers({})
+    assert h == hip.Headers({})
 
-    h = httpx.Headers({"Accept": "*/*"})
+    h = hip.Headers({"Accept": "*/*"})
     h = h.copy_remove("accept")
-    assert h == httpx.Headers({})
+    assert h == hip.Headers({})
 
 
 def test_header_getitem():
-    h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
-    assert h["User-Agent"] == "python/httpx"
-    assert h["user-agent"] == "python/httpx"
+    h = hip.Headers({"Accept": "*/*", "User-Agent": "python/hip"})
+    assert h["User-Agent"] == "python/hip"
+    assert h["user-agent"] == "python/hip"
     with pytest.raises(KeyError):
         h["missing"]
 
 
 def test_header_contains():
-    h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
+    h = hip.Headers({"Accept": "*/*", "User-Agent": "python/hip"})
     assert "User-Agent" in h
     assert "user-agent" in h
     assert "missing" not in h
 
 
 def test_header_bool():
-    h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
+    h = hip.Headers({"Accept": "*/*", "User-Agent": "python/hip"})
     assert bool(h)
-    h = httpx.Headers()
+    h = hip.Headers()
     assert not bool(h)
 
 
 def test_header_iter():
-    h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
+    h = hip.Headers({"Accept": "*/*", "User-Agent": "python/hip"})
     assert [k for k in h] == ["Accept", "User-Agent"]
 
 
 def test_header_len():
-    h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
+    h = hip.Headers({"Accept": "*/*", "User-Agent": "python/hip"})
     assert len(h) == 2
 
 
 def test_header_repr():
-    h = httpx.Headers({"Accept": "*/*", "User-Agent": "python/httpx"})
-    assert repr(h) == "<Headers {'Accept': '*/*', 'User-Agent': 'python/httpx'}>"
+    h = hip.Headers({"Accept": "*/*", "User-Agent": "python/hip"})
+    assert repr(h) == "<Headers {'Accept': '*/*', 'User-Agent': 'python/hip'}>"
 
 
 def test_header_invalid_name():
     with pytest.raises(ValueError):
-        httpx.Headers({"Accept\n": "*/*"})
+        hip.Headers({"Accept\n": "*/*"})
 
 
 def test_header_invalid_value():
     with pytest.raises(ValueError):
-        httpx.Headers({"Accept": "*/*\n"})
+        hip.Headers({"Accept": "*/*\n"})
 
 
 def test_header_empty_value():
     with pytest.raises(ValueError):
-        httpx.Headers({""})
+        hip.Headers({""})
 
 
 def test_headers_not_equal_to_unrelated_type():
-    assert httpx.Headers() != object()
+    assert hip.Headers() != object()

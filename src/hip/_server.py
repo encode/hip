@@ -11,7 +11,7 @@ from ._response import Response
 
 __all__ = ["Server"]
 
-logger = logging.getLogger("httpx.server")
+logger = logging.getLogger("hip.server")
 
 
 class ConnectionClosed(Exception):
@@ -24,7 +24,7 @@ class HTTPConnection:
         self._endpoint = endpoint
         self._parser = HTTPParser(stream, mode="SERVER")
         self._default_headers = Headers(
-            {"Server": "httpx/dev", "Connection": "keep-alive"}
+            {"Server": "hip/dev", "Connection": "keep-alive"}
         )
 
     # API entry points...

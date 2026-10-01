@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "httpx"
+name = "hip"
 description = "HTTP, for Python."
 readme = "docs/README.md"
 requires-python = ">=3.10"
@@ -35,7 +35,7 @@ include = [
 ]
 
 [tool.hatch.version]
-path = "src/httpx/__version__.py"
+path = "src/hip/__version__.py"
 
 [dependency-groups]
 dev = [
