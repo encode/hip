@@ -17,7 +17,7 @@ Engineered for simplicity, `hip` provides a complete Python web suite&hellip;
 Install the package from PyPI&hellip;
 
 ```shell
-$ uv add hip --pre
+$ uv add hip --dev
 ```
 
 ## Client
