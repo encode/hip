@@ -20,11 +20,13 @@ class Client:
         if url is None:
             url = ""
         if headers is None:
-            headers = {"User-Agent": "dev"}
-        self.transport = ConnectionPool()
-
-        self.url = URL(url)
+            headers = {
+                "User-Agent": "dev",
+                "Accept-Encoding": "gzip",
+            }
         self.headers = Headers(headers)
+        self.transport = ConnectionPool()
+        self.url = URL(url)
         self.via = RedirectMiddleware(self.transport)
         self.media = {
             "application/json": JSON,

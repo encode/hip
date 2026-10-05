@@ -1,4 +1,6 @@
+import gzip
 import json
+import random
 
 import pytest
 
@@ -228,3 +230,110 @@ def test_redirect_to_invalid_url(client):
 
         assert response.status_code == 302
         assert response.body == b""
+
+
+def gzip_response(request):
+    assert request.headers["Accept-Encoding"] == "gzip"
+    return hip.Response(
+        200,
+        headers={
+            "Content-Type": "text/plain",
+            "Content-Encoding": "gzip",
+        },
+        content=gzip.compress(b"Hello, world."),
+    )
+
+
+def test_client_receives_gzip_response(client):
+    with hip.Server(gzip_response) as server:
+        response = client.get(server.url)
+
+    assert response.body == b"Hello, world."
+
+
+def test_client_receives_mixed_case_gzip_response(client):
+    def app(request):
+        return hip.Response(
+            200,
+            headers={
+                "Content-Type": "text/plain",
+                "Content-Encoding": "GZip",
+            },
+            content=gzip.compress(b"Hello, world."),
+        )
+
+    with hip.Server(app) as server:
+        response = client.get(server.url)
+
+    assert response.body == b"Hello, world."
+
+
+def test_client_streams_gzip_response(client):
+    with (
+        hip.Server(gzip_response) as server,
+        client.stream("GET", server.url) as response,
+    ):
+        assert response.read(5) == b"Hello"
+        assert response.read(5) == b", wor"
+        assert response.read(5) == b"ld."
+        assert response.read(5) == b""
+        assert response.read(5) == b""
+
+
+def test_client_rejects_truncated_gzip_response(client):
+    def app(request):
+        content = gzip.compress(b"Hello, world.")[:-8]
+        return hip.Response(
+            200,
+            headers={
+                "Content-Type": "text/plain",
+                "Content-Encoding": "gzip",
+            },
+            content=content,
+        )
+
+    with (
+        hip.Server(app) as server,
+        pytest.raises(ValueError, match=r"Invalid gzip response content\."),
+    ):
+        client.get(server.url)
+
+
+def test_client_rejects_invalid_gzip_response(client):
+    def app(request):
+        return hip.Response(
+            200,
+            headers={
+                "Content-Type": "text/plain",
+                "Content-Encoding": "gzip",
+            },
+            content=b"not gzip content",
+        )
+
+    with (
+        hip.Server(app) as server,
+        pytest.raises(ValueError, match=r"Invalid gzip response content\."),
+    ):
+        client.get(server.url)
+
+
+def test_client_streams_gzip_response_in_multiple_chunks(client):
+    source = random.Random(0).randbytes(20_000)
+    gzipped = gzip.compress(source)
+    assert len(gzipped) > 8192
+
+    def app(request):
+        return hip.Response(
+            200,
+            headers={
+                "Content-Type": "application/octet-stream",
+                "Content-Encoding": "gzip",
+            },
+            content=gzipped,
+        )
+
+    with (
+        hip.Server(app) as server,
+        client.stream("GET", server.url) as response,
+    ):
+        assert response.read() == source
