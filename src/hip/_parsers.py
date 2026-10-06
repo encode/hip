@@ -6,27 +6,6 @@ from ._streams import Stream
 __all__ = ["HTTPParser", "Mode", "ProtocolError"]
 
 
-# TODO...
-
-# * Upgrade
-# * CONNECT
-
-# * Support 'Expect: 100 Continue'
-# * Add 'Error' state transitions
-# * Add tests to trickle data
-# * Add type annotations
-
-# * Optional... HTTP/1.0 support
-# * Read trailing headers on Transfer-Encoding: chunked. Not just '\r\n'.
-# * When writing Transfer-Encoding: chunked, split large writes into buffer size.
-# * When reading Transfer-Encoding: chunked, handle incomplete reads from large chunk sizes.
-# * .read() doesn't document if will always return maximum available.
-
-# * validate method, target, protocol in request line
-# * validate protocol, status_code, reason_phrase in response line
-# * validate name, value on headers
-
-
 class State(enum.Enum):
     WAIT = 0
     SEND_METHOD_LINE = 1
