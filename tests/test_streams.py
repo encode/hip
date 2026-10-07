@@ -14,13 +14,10 @@ def test_stream():
     with pytest.raises(NotImplementedError):
         i.write(b"hello")
 
-    assert i.size == None
-
 
 def test_bytestream():
     data = b"abc"
     s = hip.ByteStream(data)
-    assert s.size == 3
     assert s.read() == b"abc"
 
     s = hip.ByteStream(data)
@@ -35,7 +32,6 @@ def test_filestream(tmp_path):
     path.write_bytes(b"hello world")
 
     with hip.FileStream(path) as s:
-        assert s.size == 11
         assert s.read() == b"hello world"
 
     with hip.FileStream(path) as s:
@@ -77,7 +73,6 @@ def test_multipartstream(tmp_path):
     form = [("email", "heya@example.com")]
     files = [("upload", str(path))]
     with hip.MultiPartStream(form, files, boundary="boundary") as s:
-        assert s.size is None
         assert s.read() == expected
 
     with hip.MultiPartStream(form, files, boundary="boundary") as s:

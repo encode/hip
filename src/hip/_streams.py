@@ -15,10 +15,6 @@ class Stream:
     def close(self) -> None:
         raise NotImplementedError()
 
-    @property
-    def size(self) -> int | None:
-        return None
-
     def __enter__(self):
         return self
 
@@ -41,10 +37,6 @@ class ByteStream(Stream):
 
     def close(self) -> None:
         self._buffer.close()
-
-    @property
-    def size(self) -> int | None:
-        return self._size
 
 
 class DuplexStream(Stream):
@@ -96,10 +88,6 @@ class FileStream(Stream):
     def close(self) -> None:
         if self._fileobj is not None:
             self._fileobj.close()
-
-    @property
-    def size(self) -> int | None:
-        return self._size
 
     def __enter__(self):
         self.open()
@@ -193,7 +181,3 @@ class MultiPartStream(Stream):
             self._filestream.close()
             self._filestream = None
         self._buffer.close()
-
-    @property
-    def size(self) -> int | None:
-        return None
