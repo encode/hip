@@ -1,5 +1,6 @@
-import pytest
 import io
+
+import pytest
 
 import hip
 
@@ -368,15 +369,17 @@ def test_parser_invalid_transitions():
         p = hip.HTTPParser(stream, mode="CLIENT")
         p.send_body(b"")
 
+    stream = DuplexStream(b"HTTP/1.1 200 OK\r\n")
     with pytest.raises(hip.ProtocolError):
-        with hip.Binary(b"HTTP/1.1 200 OK\r\n") as stream:
-            p = hip.HTTPParser(stream, mode="CLIENT")
-            p.recv_status_line()
+        p = hip.HTTPParser(stream, mode="CLIENT")
+        p.recv_status_line()
 
+    stream = DuplexStream(b"HTTP/1.1 200 OK\r\n")
     with pytest.raises(hip.ProtocolError):
         p = hip.HTTPParser(stream, mode="CLIENT")
         p.recv_headers()
 
+    stream = DuplexStream(b"HTTP/1.1 200 OK\r\n")
     with pytest.raises(hip.ProtocolError):
         p = hip.HTTPParser(stream, mode="CLIENT")
         p.recv_body()

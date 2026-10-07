@@ -379,9 +379,8 @@ def test_content():
     with pytest.raises(NotImplementedError):
         content.headers()
 
-    with pytest.raises(NotImplementedError):
-        with hip.Binary(b"..") as stream:
-            content.parse(stream)
+    with pytest.raises(NotImplementedError), hip.Binary(b"..") as stream:
+        content.parse(stream)
 
     with pytest.raises(TypeError):
         bytes(content)

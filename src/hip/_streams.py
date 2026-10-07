@@ -46,7 +46,7 @@ class FileStream(Stream):
         self._size = None
 
     def read(self, size: int = -1) -> bytes:
-        return self._fileobj.read(size) if self._fileobj is not None else b''
+        return self._fileobj.read(size) if self._fileobj is not None else b""
 
     def open(self):
         # FileStream owns the handle until close() is called.
