@@ -17,39 +17,31 @@ def test_stream():
 
 def test_bytestream():
     data = b"abc"
-    s = hip.ByteStream(data)
-    assert s.read() == b"abc"
+    with hip.Binary(data) as s:
+        assert s.read() == b"abc"
 
-    s = hip.ByteStream(data)
-    assert s.read(1) == b"a"
-    assert s.read(1) == b"b"
-    assert s.read(1) == b"c"
-    assert s.read(1) == b""
+    with hip.Binary(data) as s:
+        assert s.read(1) == b"a"
+        assert s.read(1) == b"b"
+        assert s.read(1) == b"c"
+        assert s.read(1) == b""
 
 
 def test_filestream(tmp_path):
     path = tmp_path / "example.txt"
     path.write_bytes(b"hello world")
 
-    with hip.FileStream(path) as s:
+    with hip.File(path) as s:
         assert s.read() == b"hello world"
 
-    with hip.FileStream(path) as s:
+    with hip.File(path) as s:
         assert s.read(5) == b"hello"
         assert s.read(5) == b" worl"
         assert s.read(5) == b"d"
         assert s.read(5) == b""
 
-    with hip.FileStream(path) as s:
+    with hip.File(path) as s:
         assert s.read(5) == b"hello"
-
-
-def test_filestream_unopened_file(tmp_path):
-    path = tmp_path / "example.txt"
-    path.write_bytes(b"hello world")
-    msg = "I/O operation on unopened file"
-    with pytest.raises(ValueError, match=msg):
-        hip.FileStream(path).read()
 
 
 def test_multipartstream(tmp_path):
@@ -71,20 +63,20 @@ def test_multipartstream(tmp_path):
     )
 
     form = [("email", "heya@example.com")]
-    files = [("upload", str(path))]
-    with hip.MultiPartStream(form, files, boundary="boundary") as s:
+    files = [("upload", hip.File(str(path)))]
+    with hip.MultiPart(form, files, boundary="boundary") as s:
         assert s.read() == expected
 
-    with hip.MultiPartStream(form, files, boundary="boundary") as s:
+    with hip.MultiPart(form, files, boundary="boundary") as s:
         assert s.read(50) == expected[:50]
         assert s.read(50) == expected[50:100]
         assert s.read(50) == expected[100:150]
         assert s.read(50) == expected[150:200]
         assert s.read(50) == expected[200:250]
 
-    with hip.MultiPartStream(form, files, boundary="boundary") as s:
+    with hip.MultiPart(form, files, boundary="boundary") as s:
         assert s.read(50) == expected[:50]
         assert s.read(50) == expected[50:100]
         assert s.read(50) == expected[100:150]
         assert s.read(50) == expected[150:200]
-        s.close()  # test close during open file
+        s.close()

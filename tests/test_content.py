@@ -176,7 +176,7 @@ def test_file():
             "Content-Type": "text/plain; charset='utf-8'",
             "Content-Length": "12",
         }
-        assert file.name() == os.path.basename(temp.name)
+        assert file.name == os.path.basename(temp.name)
         with file.open() as stream:
             b = stream.read()
             assert b == b"Hello, world"
@@ -380,7 +380,8 @@ def test_content():
         content.headers()
 
     with pytest.raises(NotImplementedError):
-        content.parse(hip.ByteStream(b".."))
+        with hip.Binary(b"..") as stream:
+            content.parse(stream)
 
     with pytest.raises(TypeError):
         bytes(content)
