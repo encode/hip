@@ -1,6 +1,8 @@
 import copy
 import json
 import os
+import pathlib
+import types
 import typing
 
 from ._headers import Headers, parse_opts_header
@@ -46,6 +48,17 @@ class Content:
     @classmethod
     def parse(self, stream: Stream) -> "Content":
         raise NotImplementedError()
+
+    def __enter__(self) -> Stream:
+        return self.open()
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None = None,
+        exc_value: BaseException | None = None,
+        traceback: types.TracebackType | None = None,
+    ):
+        return None
 
     def __bytes__(self):
         raise TypeError(
@@ -195,8 +208,13 @@ class File(Content):
     def __init__(self, path: str):
         self._path = path
 
+    @property
     def name(self) -> str:
         return os.path.basename(self._path)
+
+    @property
+    def path(self) -> str:
+        return self._path
 
     def open(self) -> Stream:
         return FileStream(self._path).open()
@@ -520,8 +538,8 @@ class MultiPart(Content):
         return self._files
 
     def open(self) -> Stream:
-        form = [(key, value) for key, value in self._form.items()]
-        files = [(key, file._path) for key, file in self._files.items()]
+        form = [(key, value) for key, value in self._form.multi_items()]
+        files = [(key, file.path) for key, file in self._files.multi_items()]
         return MultiPartStream(form, files, boundary=self._boundary)
 
     def headers(self) -> Headers:

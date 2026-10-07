@@ -9,7 +9,7 @@ from ._pool import *  # ConnectionPool
 from ._request import *  # Method, Request
 from ._response import *  # StatusCode, Response
 from ._server import *  # Server  # serve_http, run
-from ._streams import *  # ByteStream, DuplexStream, FileStream, Stream  # ByteStream, DuplexStream, FileStream, Stream
+from ._streams import *  # Stream
 from ._urlencode import *  # quote, unquote, urldecode, urlencode
 from ._urls import *  # QueryParams, URL
 
@@ -18,14 +18,11 @@ __all__ = [
     "JSON",
     "URL",
     "Binary",
-    "ByteStream",
     "Client",
     "Connection",
     "ConnectionPool",
     "Content",
-    "DuplexStream",
     "File",
-    "FileStream",
     "Files",
     "Form",
     "HTTPParser",
