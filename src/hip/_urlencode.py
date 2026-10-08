@@ -1,6 +1,5 @@
 import re
 
-
 # Matchs a sequence of one or more '%xx' escapes.
 PERCENT_ENCODED_REGEX = re.compile("(%[A-Fa-f0-9][A-Fa-f0-9])+")
 
