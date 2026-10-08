@@ -9,7 +9,6 @@ from ._request import *  # Method, Request
 from ._response import *  # StatusCode, Response
 from ._server import *  # Server
 from ._streams import *  # ByteStream, DuplexStream, FileStream, Stream  # ByteStream, DuplexStream, FileStream, Stream
-from ._urlencode import *  # quote, unquote, urldecode, urlencode
 from ._urls import *  # QueryParams, URL
 
 __all__ = [
@@ -43,9 +42,5 @@ __all__ = [
     "Text",
     "Transport",
     "open_connection",
-    "quote",
     "timeout",
-    "unquote",
-    "urldecode",
-    "urlencode",
 ]

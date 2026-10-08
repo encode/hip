@@ -360,3 +360,30 @@ def test_queryparams_misc(source):
 
     q = hip.QueryParams([("a", "123"), ("a", "456")])
     assert hip.QueryParams(q) == q
+
+
+# Tests previously from 'test_urlencode.py'...
+# If we can clean these up without reducing coverage, we should.
+
+def test_urlencode():
+    qs = "a=name%40example.com&a=456&b=7+8+9&c"
+    qp = hip.QueryParams(qs)
+    assert qp.multi_dict() == {"a": ["name@example.com", "456"], "b": ["7 8 9"], "c": [""]}
+
+
+def test_urldecode():
+    qp = hip.QueryParams({"a": ["name@example.com", "456"], "b": ["7 8 9"], "c": [""]})
+    qs = str(qp)
+    assert qs == "a=name%40example.com&a=456&b=7+8+9&c="
+
+
+def test_urlencode_empty():
+    qs = ""
+    qp = hip.QueryParams(qs)
+    assert qp.multi_dict() == {}
+
+
+def test_urldecode_empty():
+    qp = hip.QueryParams({})
+    qs = str(qp)
+    assert qs == ""
