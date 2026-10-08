@@ -365,10 +365,15 @@ def test_queryparams_misc(source):
 # Tests previously from 'test_urlencode.py'...
 # If we can clean these up without reducing coverage, we should.
 
+
 def test_urlencode():
     qs = "a=name%40example.com&a=456&b=7+8+9&c"
     qp = hip.QueryParams(qs)
-    assert qp.multi_dict() == {"a": ["name@example.com", "456"], "b": ["7 8 9"], "c": [""]}
+    assert qp.multi_dict() == {
+        "a": ["name@example.com", "456"],
+        "b": ["7 8 9"],
+        "c": [""],
+    }
 
 
 def test_urldecode():
