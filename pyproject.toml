@@ -4,6 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hip"
+version = "0.2"
 description = "HTTP, for Python."
 readme = "docs/README.md"
 requires-python = ">=3.10"
@@ -25,17 +26,11 @@ classifiers = [
 dependencies = [
     "truststore",
 ]
-dynamic = [
-    "version"
-]
 
 [tool.hatch.build.targets.sdist]
 include = [
     "/src",
 ]
-
-[tool.hatch.version]
-path = "src/hip/__version__.py"
 
 [dependency-groups]
 dev = [
