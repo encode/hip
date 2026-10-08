@@ -4,10 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hip"
+version = "0.2"
 description = "HTTP, for Python."
 readme = "docs/README.md"
 requires-python = ">=3.10"
-version = "0.2"
 authors = [
     { name = "Kim Christie", email = "noreply@lovelydinosaur.com" },
 ]
