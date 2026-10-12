@@ -53,9 +53,6 @@ class HTTPConnection:
         except BaseException:
             logger.exception("Internal Server Error")
 
-    def close(self):
-        self._parser.close()
-
     # Receive the request...
     def _recv_head(self) -> tuple[str, str, list[tuple[str, str]]]:
         method, target, _ = self._parser.recv_method_line()
@@ -64,9 +61,6 @@ class HTTPConnection:
         headers = self._parser.recv_headers()
         h = [(k.decode("latin-1"), v.decode("latin-1")) for k, v in headers]
         return m, t, h
-
-    def _recv_body(self):
-        return self._parser.recv_body()
 
     # Return the response...
     def _send_head(self, response: Response):
@@ -118,6 +112,6 @@ class Server:
         connection.handle_requests()
 
     def serve(self):
-        with self:
+        with self:  # pragma: no cover
             while True:
                 sleep(1)
