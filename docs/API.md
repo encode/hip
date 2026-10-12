@@ -70,31 +70,30 @@
 
 ## Server
 
-*Explicit open / close... (recommended)*
+*Context-managed server...*
 
 ```python
 >>> with hip.Server(app) as s:
-...     # Serve until Ctrl-C, non-blocking
 ...     print(s.url)
+...     s.until_interrupt()
 ```
 
-*Simple usage...*
-
-```python
->>> s = hip.Server(app)
->>> s.serve()  # Serve until Ctrl-C
-```
+The context manager starts the server on entry and shuts it down on exit.
 
 *Address...*
 
 ```python
 >>> # Serve locally on a fixed port.
->>> s = hip.Server(app, host='127.0.0.1', port=8000)
+>>> with hip.Server(app, host='127.0.0.1', port=8000) as s:
+...     print(s.url)
+...     s.until_interrupt()
 ```
 
 ```python
 >>> # Serve on all interfaces on a fixed port.
->>> s = hip.Server(app, host='0.0.0.0', port=8000)
+>>> with hip.Server(app, host='0.0.0.0', port=8000) as s:
+...     print(s.url)
+...     s.until_interrupt()
 ```
 
 ---
