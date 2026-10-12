@@ -44,9 +44,9 @@ Creating web apps&hellip;
 ...     content = hip.HTML('<html><body>¡Hola, mundo!</body></html>')
 ...     return hip.Response(200, content=content)
 
->>> with hip.Server(app) as s:
-...     print(s.url)
-...     s.until_interrupt()
+>>> with hip.Server(app) as server:
+...     print(server.url)
+...     server.until_interrupt()
 ```
 
 ---

@@ -73,9 +73,9 @@
 *Context-managed server...*
 
 ```python
->>> with hip.Server(app) as s:
-...     print(s.url)
-...     s.until_interrupt()
+>>> with hip.Server(app) as server:
+...     print(server.url)
+...     server.until_interrupt()
 ```
 
 The context manager starts the server on entry and shuts it down on exit.
@@ -84,16 +84,16 @@ The context manager starts the server on entry and shuts it down on exit.
 
 ```python
 >>> # Serve locally on a fixed port.
->>> with hip.Server(app, host='127.0.0.1', port=8000) as s:
-...     print(s.url)
-...     s.until_interrupt()
+>>> with hip.Server(app, host='127.0.0.1', port=8000) as server:
+...     print(server.url)
+...     server.until_interrupt()
 ```
 
 ```python
 >>> # Serve on all interfaces on a fixed port.
->>> with hip.Server(app, host='0.0.0.0', port=8000) as s:
-...     print(s.url)
-...     s.until_interrupt()
+>>> with hip.Server(app, host='0.0.0.0', port=8000) as server:
+...     print(server.url)
+...     server.until_interrupt()
 ```
 
 ---
