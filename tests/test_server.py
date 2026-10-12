@@ -28,3 +28,15 @@ def test_server_defaults_headers():
         assert response.headers["Server"] == "hip/dev"
         assert response.headers["Connection"] == "keep-alive"
         assert response.headers["Date"].endswith("GMT")
+
+
+def error_app(request):
+    raise RuntimeError("Something went wrong")
+
+
+def test_server_internal_server_error():
+    with hip.Server(error_app) as server, hip.Client() as client:
+        response = client.get(server.url)
+
+    assert response.status_code == 500
+    assert response.body == b"Internal Server Error"
