@@ -114,6 +114,27 @@ def test_parser_server():
     assert p.is_idle()
 
 
+def test_incomplete_request_line_raises_protocol_error_on_eof():
+    stream = hip.DuplexStream(b"GE")
+    parser = hip.HTTPParser(stream, mode="SERVER")
+
+    with pytest.raises(
+        hip.ProtocolError, match=r"Stream closed early reading request method line\."
+    ):
+        parser.recv_method_line()
+
+
+def test_server_headers_eof_remains_protocol_error():
+    stream = hip.DuplexStream(b"GET / HTTP/1.1\r\nHost: example.com\r\n")
+    parser = hip.HTTPParser(stream, mode="SERVER")
+    parser.recv_method_line()
+
+    with pytest.raises(
+        hip.ProtocolError, match="Stream closed early reading response headers"
+    ):
+        parser.recv_headers()
+
+
 def test_parser_trickle():
     stream = hip.DuplexStream(
         b"HTTP/1.1 200 OK\r\n"

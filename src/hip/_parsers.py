@@ -71,6 +71,10 @@ class ProtocolError(Exception):
     pass
 
 
+class ConnectionClosed(Exception):
+    pass
+
+
 class HTTPParser:
     """
     Usage...
@@ -249,7 +253,13 @@ class HTTPParser:
 
         # Read initial response line, eg. "GET / HTTP/1.1"
         exc_text = "reading request method line"
-        line = self.parser.read_until(b"\r\n", max_size=4096, exc_text=exc_text)
+        line = self.parser.read_until(
+            b"\r\n",
+            max_size=4096,
+            exc_text=exc_text,
+            allow_empty_eof=True,
+        )
+
         method, target, protocol = line.split(b" ", 2)
         if protocol != b"HTTP/1.1":
             raise ProtocolError("Received unsupported protocol version")
@@ -479,21 +489,31 @@ class ReadAheadParser:
             self._push_back(bytes(push_back))
         return bytes(buffer)
 
-    def read_until(self, marker: bytes, max_size: int, exc_text: str) -> bytes:
+    def read_until(
+        self,
+        marker: bytes,
+        max_size: int,
+        exc_text: str,
+        allow_empty_eof: bool = False,
+    ) -> bytes:
         """
         Read and return bytes from the stream, delimited by marker.
 
         * The marker is not included in the return bytes.
         * The marker is consumed from the I/O stream.
-        * Raises `ProtocolError` if the stream closes before a marker occurance.
+        * Raises `ProtocolError` if the stream closes before a marker occurrence.
         * Raises `ProtocolError` if marker did not occur within 'max_size + len(marker)' bytes.
+        * Raises `ConnectionClosed` for empty EOF when `allow_empty_eof` is set.
         """
         buffer = bytearray()
         while len(buffer) <= max_size:
             chunk = self._read_some()
             if not chunk:
+                # EOF is only clean if no part of the line has arrived.
+                if allow_empty_eof and not buffer:
+                    raise ConnectionClosed
                 # stream closed before marker found.
-                raise ProtocolError(f"Stream closed early {exc_text}")
+                raise ProtocolError(f"Stream closed early {exc_text}.")
             start_search = max(len(buffer) - len(marker), 0)
             buffer.extend(chunk)
             index = buffer.find(marker, start_search)
