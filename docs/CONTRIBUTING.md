@@ -26,7 +26,3 @@ We currently have two inaugral sprints planned...
 We're also looking at booking in further sprints, and starting regular open office hours.
 
 You can also book in time to [introduce yourself](https://calendly.com/encode-oss) and discuss working together.
-
-## This is bad work and you're stupid.
-
-There's a lot of junk out there on the internet, kids. Don't feed the trolls.
