@@ -107,11 +107,14 @@ class Server:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._tcp_server.__exit__(exc_type, exc_val, exc_tb)
 
+    def until_interrupt(self):  # pragma: no cover
+        """Keep a context-managed server alive until Ctrl+C is pressed."""
+        try:
+            while True:
+                sleep(1)
+        except KeyboardInterrupt:
+            pass
+
     def handle_stream(self, stream):
         connection = HTTPConnection(stream, self.app)
         connection.handle_requests()
-
-    def serve(self):
-        with self:  # pragma: no cover
-            while True:
-                sleep(1)
