@@ -235,7 +235,7 @@ wheels = [
 
 [[package]]
 name = "hip"
-version = "0.2"
+version = "0.3"
 source = { editable = "." }
 dependencies = [
     { name = "truststore" },
