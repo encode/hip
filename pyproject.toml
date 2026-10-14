@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hip"
-version = "0.2"
+version = "0.3"
 description = "HTTP, for Python."
 readme = "docs/README.md"
 requires-python = ">=3.10"

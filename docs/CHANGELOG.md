@@ -1,4 +1,4 @@
-## Unreleased
+## 0.3
 
 Gzip response decompression. [#70](https://github.com/encode/hip/pull/70)
 
@@ -7,3 +7,7 @@ Gzip response decompression. [#70](https://github.com/encode/hip/pull/70)
 Initial release of Hip.
 
 HTTP client and server support.
+
+## 0.1
+
+Placeholder.
