@@ -184,12 +184,12 @@ def test_file():
 
 def test_file_close():
     with tempfile.NamedTemporaryFile(suffix=".txt") as temp:
-        temp.write("¡Hola, mundo!".encode('utf-8'))
+        temp.write("¡Hola, mundo!".encode())
         temp.seek(0)
         file = hip.File(temp.name)
         with file.open() as stream:
             b = stream.read(5)
-            assert b == "¡Hola, mundo!".encode('utf-8')[:5]
+            assert b == "¡Hola, mundo!".encode()[:5]
         with pytest.raises(ValueError):
             stream.read()
 
