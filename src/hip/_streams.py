@@ -136,7 +136,7 @@ class MultiPartStream(Stream):
         elif self._files_progress and self._fileobj is None:
             # return start of a file item
             key, value = self._files_progress.pop(0)
-            self._fileobj = open(value, "rb")
+            self._fileobj = open(value, "rb")  # noqa: SIM115
             name = key.translate({10: "%0A", 13: "%0D", 34: "%22"})
             filename = os.path.basename(value)
             return (

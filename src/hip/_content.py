@@ -199,7 +199,7 @@ class File(Content):
         return os.path.basename(self._path)
 
     def open(self) -> Stream:
-        fileobj = open(self._path, "rb")
+        fileobj = open(self._path, "rb")  # noqa: SIM115
         return FileStream(fileobj)
 
     def headers(self) -> Headers:
