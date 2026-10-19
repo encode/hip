@@ -21,6 +21,21 @@ $ ./scripts/install
 $ ./scripts/test
 ```
 
+## Pre-commit
+
+Install and enable the pre-commit hooks:
+
+```shell
+$ uv tool install pre-commit
+$ pre-commit install
+```
+
+Run all hooks manually:
+
+```shell
+$ pre-commit run --all-files
+```
+
 The scripts require [uv](https://docs.astral.sh/uv/) and run commands in the project's `.venv` environment.
 
 Or from the project workflows...
