@@ -153,14 +153,15 @@ class Connection(Transport):
         self._parser.send_body(b"")
 
     # Receive the response...
-    def _recv_head(self) -> tuple[int, Headers]:
+    def _recv_head(self) -> tuple[StatusCode, Headers]:
         _, code, _ = self._parser.recv_status_line()
         h = self._parser.recv_headers()
+        status_code = StatusCode(code)
         headers = Headers([(k.decode("ascii"), v.decode("ascii")) for k, v in h])
-        return code, headers
+        return status_code, headers
 
     def _recv_body(self, headers) -> Stream:
-        stream = HTTPStream(self._parser, is_response=True)
+        stream: Stream = HTTPStream(self._parser, is_response=True)
         content_encoding = headers.get("Content-Encoding", "")
         if content_encoding.lower() == "gzip":
             stream = GZipStream(stream)
