@@ -61,11 +61,11 @@ class Client:
         with self.via.send(request) as stream:
             ct = stream.headers.get("Content-Type", "application/octet-stream")
             cls = select_media(self.media, ct)
-            parsed = cls.parse(stream)
+            content = cls.parse(stream)
         return Response(
             status_code=stream.status_code,
             headers=stream.headers,
-            content=parsed,
+            content=content,
         )
 
     def stream(
