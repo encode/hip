@@ -5,7 +5,7 @@ from ._body import RequestContent
 from ._content import Text
 from ._headers import Headers
 from ._network import NetworkBackend, sleep
-from ._parsers import ConnectionClosed, HTTPParser
+from ._parsers import HTTPParser
 from ._request import Request
 from ._response import Response
 
@@ -27,7 +27,11 @@ class HTTPConnection:
     def handle_requests(self):
         try:
             while self._parser.is_idle():
-                method, url, headers = self._recv_head()
+                try:
+                    method, url, headers = self._recv_head()
+                except EOFError:
+                    # The client closed while waiting for a request line.
+                    return
                 with RequestContent(self._parser).open() as stream:
                     body = stream.read()
                 request = Request(method, url, headers=headers, content=body)
@@ -46,9 +50,6 @@ class HTTPConnection:
                 else:
                     self._send_head(response)
                     self._send_body(response)
-        except ConnectionClosed:
-            # The client stopped sending after the previous request.
-            pass
         except BaseException:
             logger.exception("Internal Server Error")
 

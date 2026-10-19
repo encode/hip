@@ -71,10 +71,6 @@ class ProtocolError(Exception):
     pass
 
 
-class ConnectionClosed(Exception):
-    pass
-
-
 class HTTPParser:
     """
     Usage...
@@ -240,9 +236,15 @@ class HTTPParser:
         """
         Receive the initial request method line:
 
-        >>> method, target, protocol = p.recv_status_line()
+        >>> method, target, protocol = p.recv_method_line()
 
         Receive state will switch to RECV_HEADERS.
+
+        Raises:
+
+        EOFError: The connection closes before any request-line bytes arrive.
+        ProtocolError: The parser is in an invalid state, a started line ends before
+            CRLF, the line is too long, or the protocol version is unsupported.
         """
         # Scrub connection keepalive
         self.keepalive_until = None
@@ -501,9 +503,10 @@ class ReadAheadParser:
 
         * The marker is not included in the return bytes.
         * The marker is consumed from the I/O stream.
-        * Raises `ProtocolError` if the stream closes before a marker occurrence.
+        * Raises `EOFError` if the stream closes before any bytes are read and
+          `allow_empty_eof` is set.
+        * Raises `ProtocolError` if the stream closes before the marker otherwise.
         * Raises `ProtocolError` if marker did not occur within 'max_size + len(marker)' bytes.
-        * Raises `ConnectionClosed` for empty EOF when `allow_empty_eof` is set.
         """
         buffer = bytearray()
         while len(buffer) <= max_size:
@@ -511,7 +514,7 @@ class ReadAheadParser:
             if not chunk:
                 # EOF is only clean if no part of the line has arrived.
                 if allow_empty_eof and not buffer:
-                    raise ConnectionClosed
+                    raise EOFError
                 # stream closed before marker found.
                 raise ProtocolError(f"Stream closed early {exc_text}.")
             start_search = max(len(buffer) - len(marker), 0)
