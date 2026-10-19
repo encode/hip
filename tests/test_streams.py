@@ -31,25 +31,17 @@ def test_filestream(tmp_path):
     path = tmp_path / "example.txt"
     path.write_bytes(b"hello world")
 
-    with hip.FileStream(path) as s:
+    with hip.File(path).open() as s:
         assert s.read() == b"hello world"
 
-    with hip.FileStream(path) as s:
+    with hip.File(path).open() as s:
         assert s.read(5) == b"hello"
         assert s.read(5) == b" worl"
         assert s.read(5) == b"d"
         assert s.read(5) == b""
 
-    with hip.FileStream(path) as s:
+    with hip.File(path).open() as s:
         assert s.read(5) == b"hello"
-
-
-def test_filestream_unopened_file(tmp_path):
-    path = tmp_path / "example.txt"
-    path.write_bytes(b"hello world")
-    msg = "I/O operation on unopened file"
-    with pytest.raises(ValueError, match=msg):
-        hip.FileStream(path).read()
 
 
 def test_multipartstream(tmp_path):

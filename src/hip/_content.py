@@ -199,7 +199,8 @@ class File(Content):
         return os.path.basename(self._path)
 
     def open(self) -> Stream:
-        return FileStream(self._path).open()
+        fileobj = open(self._path, "rb")
+        return FileStream(fileobj)
 
     def headers(self) -> Headers:
         content_length = os.path.getsize(self._path)
