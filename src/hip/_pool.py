@@ -8,7 +8,7 @@ if typing.TYPE_CHECKING:
 
 from ._connection import Connection, Transport, open_connection
 from ._network import NetworkBackend, Semaphore
-from ._request import Request, RequestContext
+from ._request import Request
 from ._response import Response, ResponseContext
 from ._urls import URL
 

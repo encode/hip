@@ -1,11 +1,8 @@
-import types
-
 from ._content import Binary, Content, Empty
 from ._headers import Headers
-from ._streams import Stream
 from ._urls import URL
 
-__all__ = ["Method", "Request", "RequestContext"]
+__all__ = ["Method", "Request"]
 
 STANDARD_METHODS = (
     "CONNECT",
@@ -82,32 +79,5 @@ class Request:
     def body(self) -> bytes:
         return bytes(self.content)
 
-    def open(self) -> "RequestContext":
-        return RequestContext(self.method, self.url, self.headers, self.content.open())
-
     def __repr__(self):
         return f"<Request [{self.method} {str(self.url)!r}]>"
-
-
-class RequestContext:
-    def __init__(
-        self, method: Method, url: URL, headers: Headers, stream: Stream
-    ) -> None:
-        self.method = method
-        self.url = url
-        self.headers = headers
-        self.stream = stream
-
-    def __enter__(self) -> "RequestContext":
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None = None,
-        exc_value: BaseException | None = None,
-        traceback: types.TracebackType | None = None,
-    ) -> None:
-        self.stream.close()
-
-    def __repr__(self):
-        return f"<Request OPEN [{self.method} {str(self.url)!r}]>"
