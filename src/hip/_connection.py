@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-class ResponseContext:
+class ResponseStream(Stream):
     def __init__(
         self, status_code: StatusCode, headers: Headers, stream: Stream
     ) -> None:
@@ -33,6 +33,9 @@ class ResponseContext:
     def read(self, size: int = -1) -> bytes:
         return self.stream.read(size)
 
+    def close(self):
+        self.stream.close()
+
     def __enter__(self):
         return self
 
@@ -42,11 +45,11 @@ class ResponseContext:
         exc_value: BaseException | None = None,
         traceback: types.TracebackType | None = None,
     ) -> None:
-        self.stream.close()
+        self.close()
 
 
 class Transport:
-    def send(self, request: Request) -> ResponseContext:
+    def send(self, request: Request) -> ResponseStream:
         raise NotImplementedError()
 
     def close(self):
@@ -60,9 +63,9 @@ class Transport:
         content: Content | bytes | None = None,
     ) -> Response:
         request = Request(method, url, headers=headers, content=content)
-        with self.send(request) as res_ctx:
-            body = res_ctx.read()
-        return Response(res_ctx.status_code, headers=res_ctx.headers, content=body)
+        with self.send(request) as stream:
+            body = stream.read()
+        return Response(stream.status_code, headers=stream.headers, content=body)
 
     def stream(
         self,
@@ -70,7 +73,7 @@ class Transport:
         url: URL | str,
         headers: Headers | dict[str, str] | None = None,
         content: Content | bytes | None = None,
-    ) -> ResponseContext:
+    ) -> ResponseStream:
         request = Request(method, url, headers=headers, content=content)
         return self.send(request)
 
@@ -99,14 +102,14 @@ class Connection(Transport):
         return self._parser.description()
 
     # API entry points...
-    def send(self, request: Request) -> ResponseContext:
+    def send(self, request: Request) -> ResponseStream:
         # async with self._request_lock:
         #    try:
         self._send_head(request)
         self._send_body(request)
         code, headers = self._recv_head()
         stream = self._recv_body(headers)
-        return ResponseContext(code, headers=headers, stream=stream)
+        return ResponseStream(code, headers, stream)
 
     def close(self) -> None:
         with self._request_lock:
@@ -122,9 +125,9 @@ class Connection(Transport):
     ) -> Response:
         url = self._origin.join(url)
         request = Request(method, url, headers=headers, content=content)
-        with self.send(request) as res_ctx:
-            body = res_ctx.read()
-        return Response(res_ctx.status_code, headers=res_ctx.headers, content=body)
+        with self.send(request) as stream:
+            body = stream.read()
+        return Response(stream.status_code, headers=stream.headers, content=body)
 
     def stream(
         self,
@@ -132,7 +135,7 @@ class Connection(Transport):
         url: URL | str,
         headers: Headers | dict[str, str] | None = None,
         content: Content | bytes | None = None,
-    ) -> ResponseContext:
+    ) -> ResponseStream:
         url = self._origin.join(url)
         request = Request(method, url, headers=headers, content=content)
         return self.send(request)
