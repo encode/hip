@@ -5,13 +5,13 @@ if typing.TYPE_CHECKING:
     # Once we drop 3.10 support, we can use 'typing.Self'.
     from typing_extensions import Self
 
-from ._body import ResponseContent
+from ._body import HTTPStream, GZipStream
 from ._content import Content
 from ._headers import Headers
 from ._network import Lock, NetworkBackend
 from ._parsers import HTTPParser
-from ._request import Method, Request
-from ._response import Response
+from ._request import Method, Request, RequestContext
+from ._response import Response, ResponseContext
 from ._streams import Stream
 from ._urls import URL
 
@@ -23,7 +23,7 @@ __all__ = [
 
 
 class Transport:
-    def send(self, request: Request) -> Response:
+    def send(self, request: Request) -> ResponseContext:
         raise NotImplementedError()
 
     def close(self):
@@ -37,9 +37,9 @@ class Transport:
         content: Content | bytes | None = None,
     ) -> Response:
         request = Request(method, url, headers=headers, content=content)
-        with self.send(request) as stream:
-            body = stream.read()
-        return Response(stream.status_code, headers=stream.headers, content=body)
+        with self.send(request) as res_ctx:
+            body = res_ctx.read()
+        return Response(res_ctx.status_code, headers=res_ctx.headers, content=body)
 
     def stream(
         self,
@@ -47,9 +47,10 @@ class Transport:
         url: URL | str,
         headers: Headers | dict[str, str] | None = None,
         content: Content | bytes | None = None,
-    ) -> Response:
+    ) -> ResponseContext:
         request = Request(method, url, headers=headers, content=content)
         return self.send(request)
+
 
 
 class Connection(Transport):
@@ -76,14 +77,14 @@ class Connection(Transport):
         return self._parser.description()
 
     # API entry points...
-    def send(self, request: Request) -> Response:
+    def send(self, request: Request) -> ResponseContext:
         # async with self._request_lock:
         #    try:
         self._send_head(request)
         self._send_body(request)
         code, headers = self._recv_head()
-        content = ResponseContent(self._parser, headers)
-        return Response(code, headers=headers, content=content)
+        stream = self._recv_body(headers)
+        return ResponseContext(code, headers=headers, stream=stream)
 
     def close(self) -> None:
         with self._request_lock:
@@ -99,9 +100,9 @@ class Connection(Transport):
     ) -> Response:
         url = self._origin.join(url)
         request = Request(method, url, headers=headers, content=content)
-        with self.send(request) as stream:
-            body = stream.read()
-        return Response(stream.status_code, headers=stream.headers, content=body)
+        with self.send(request) as res_ctx:
+            body = res_ctx.read()
+        return Response(res_ctx.status_code, headers=res_ctx.headers, content=body)
 
     def stream(
         self,
@@ -109,7 +110,7 @@ class Connection(Transport):
         url: URL | str,
         headers: Headers | dict[str, str] | None = None,
         content: Content | bytes | None = None,
-    ) -> Response:
+    ) -> ResponseContext:
         url = self._origin.join(url)
         request = Request(method, url, headers=headers, content=content)
         return self.send(request)
@@ -124,10 +125,10 @@ class Connection(Transport):
         self._parser.send_headers(headers)
 
     def _send_body(self, request: Request) -> None:
-        with request as stream:
+        with request.content.open() as stream:
             while data := stream.read(64 * 1024):
                 self._parser.send_body(data)
-            self._parser.send_body(b"")
+        self._parser.send_body(b"")
 
     # Receive the response...
     def _recv_head(self) -> tuple[int, Headers]:
@@ -135,6 +136,13 @@ class Connection(Transport):
         h = self._parser.recv_headers()
         headers = Headers([(k.decode("ascii"), v.decode("ascii")) for k, v in h])
         return code, headers
+
+    def _recv_body(self, headers) -> Stream:
+        stream = HTTPStream(self._parser, is_response=True)
+        content_encoding = headers.get("Content-Encoding", "")
+        if content_encoding.lower() == "gzip":
+            stream = GZipStream(stream)
+        return stream
 
     # Request/response cycle complete...
     def _close(self) -> None:

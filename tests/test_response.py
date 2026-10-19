@@ -74,5 +74,5 @@ def test_response_with_invalid_code():
 def test_response_stream_repr():
     response = hip.Response(200)
 
-    with response as stream:
-        assert repr(stream) == "<ResponseStream [200 OK]>"
+    with response.open() as res:
+        assert repr(res) == "<Response OPEN [200 OK]>"

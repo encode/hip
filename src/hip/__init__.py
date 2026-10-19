@@ -5,8 +5,8 @@ from ._headers import *  # Headers
 from ._network import *  # NetworkBackend, NetworkStream, timeout
 from ._parsers import *  # HTTPParser, ProtocolError
 from ._pool import *  # ConnectionPool
-from ._request import *  # Method, Request
-from ._response import *  # StatusCode, Response
+from ._request import *  # Method, Request, RequestContext
+from ._response import *  # StatusCode, Response, ResponseContext
 from ._server import *  # Server
 from ._streams import *  # ByteStream, DuplexStream, Stream
 from ._urls import *  # QueryParams, URL

@@ -71,5 +71,5 @@ def test_request_rejects_invalid_method():
 def test_request_stream_repr():
     request = hip.Request("GET", "https://example.com")
 
-    with request as stream:
-        assert repr(stream) == "<RequestStream [GET 'https://example.com']>"
+    with request.open() as req:
+        assert repr(req) == "<Request OPEN [GET 'https://example.com']>"

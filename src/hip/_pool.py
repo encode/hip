@@ -8,8 +8,8 @@ if typing.TYPE_CHECKING:
 
 from ._connection import Connection, Transport, open_connection
 from ._network import NetworkBackend, Semaphore
-from ._request import Request
-from ._response import Response
+from ._request import Request, RequestContext
+from ._response import Response, ResponseContext
 from ._urls import URL
 
 __all__ = [
@@ -28,15 +28,14 @@ class ConnectionPool(Transport):
         self._closed = False
 
     # Public API...
-    def send(self, request: Request) -> Response:
+    def send(self, request: Request) -> ResponseContext:
         if self._closed:
             raise RuntimeError("ConnectionPool is closed.")
 
         # TODO: concurrency limiting
         self._cleanup()
         connection = self._get_connection(request)
-        response = connection.send(request)
-        return response
+        return connection.send(request)
 
     def close(self):
         self._closed = True

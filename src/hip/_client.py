@@ -4,8 +4,8 @@ import typing
 from ._content import HTML, JSON, Binary, Content, Text, select_media
 from ._headers import Headers
 from ._pool import ConnectionPool, Transport
-from ._request import Method, Request
-from ._response import Response
+from ._request import Method, Request, RequestContext
+from ._response import Response, ResponseContext
 from ._urls import URL
 
 __all__ = ["Client"]
@@ -57,14 +57,14 @@ class Client:
         content: Content | bytes | None = None,
     ) -> Response:
         request = self.build_request(method, url, headers=headers, content=content)
-        with self.via.send(request) as stream:
-            ct = stream.headers.get("Content-Type", "application/octet-stream")
+        with self.via.send(request) as res_ctx:
+            ct = res_ctx.headers.get("Content-Type", "application/octet-stream")
             cls = select_media(self.media, ct)
-            content = cls.parse(stream)
+            parsed = cls.parse(res_ctx.stream)
         return Response(
-            status_code=stream.status_code,
-            headers=stream.headers,
-            content=content,
+            status_code=res_ctx.status_code,
+            headers=res_ctx.headers,
+            content=parsed,
         )
 
     def stream(
@@ -73,7 +73,7 @@ class Client:
         url: URL | str,
         headers: Headers | dict[str, str] | None = None,
         content: Content | bytes | None = None,
-    ) -> Response:
+    ) -> ResponseContext:
         request = self.build_request(method, url, headers=headers, content=content)
         return self.via.send(request)
 
@@ -138,7 +138,7 @@ class RedirectMiddleware(Transport):
         self._transport = transport
 
     def build_redirect_request(
-        self, request: Request, response: Response
+        self, request: Request, response: ResponseContext
     ) -> Request | None:
         # Redirect status codes...
         if response.status_code not in (301, 302, 303, 307, 308):
@@ -158,22 +158,22 @@ class RedirectMiddleware(Transport):
 
         return Request(method, url, headers, content)
 
-    def send(self, request: Request) -> Response:
+    def send(self, request: Request) -> ResponseContext:
         while True:
-            response = self._transport.send(request)
+            res_ctx = self._transport.send(request)
 
             # Determine if we have a redirect or not.
-            redirect = self.build_redirect_request(request, response)
+            redirect = self.build_redirect_request(request, res_ctx)
 
             # If we don't have a redirect, we're done.
             if redirect is None:
-                return response
+                return res_ctx
 
             # If we have a redirect, then we read the body of the response.
             # Ensures that the HTTP connection is available for a new
             # request/response cycle.
-            with response as stream:
-                stream.read()
+            with res_ctx:
+                res_ctx.read()
 
             # Make the next request
             request = redirect

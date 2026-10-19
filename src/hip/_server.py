@@ -1,7 +1,7 @@
 import datetime
 import logging
 
-from ._body import RequestContent
+from ._body import HTTPStream
 from ._content import Text
 from ._headers import Headers
 from ._network import NetworkBackend, sleep
@@ -32,7 +32,7 @@ class HTTPConnection:
                 except EOFError:
                     # The client closed while waiting for a request line.
                     return
-                with RequestContent(self._parser).open() as stream:
+                with HTTPStream(self._parser, is_response=False) as stream:
                     body = stream.read()
                 request = Request(method, url, headers=headers, content=body)
                 # TODO: Handle endpoint exceptions
@@ -77,7 +77,7 @@ class HTTPConnection:
         self._parser.send_headers(headers.as_byte_pairs())
 
     def _send_body(self, response: Response):
-        with response as stream:
+        with response.content.open() as stream:
             while data := stream.read(64 * 1024):
                 self._parser.send_body(data)
             self._parser.send_body(b"")

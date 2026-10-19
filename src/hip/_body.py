@@ -1,36 +1,10 @@
 import io
 import zlib
 
-from ._content import Content
-from ._headers import Headers
 from ._parsers import HTTPParser
 from ._streams import Stream
 
-__all__ = ["HTTPStream", "RequestContent", "ResponseContent"]
-
-
-class RequestContent(Content):
-    def __init__(self, parser: HTTPParser):
-        self._parser = parser
-
-    def open(self) -> Stream:
-        return HTTPStream(self._parser, is_response=False)
-
-
-class ResponseContent(Content):
-    def __init__(self, parser: HTTPParser, headers: Headers):
-        self._parser = parser
-        self._headers = headers
-
-    def open(self) -> Stream:
-        stream = HTTPStream(self._parser, is_response=True)
-        content_encoding = self._headers.get("Content-Encoding", "")
-        if content_encoding.lower() == "gzip":
-            return GZipStream(stream)
-        return stream
-
-    def headers(self) -> Headers:
-        return Headers()
+__all__ = ["HTTPStream", "GZipStream"]
 
 
 class HTTPStream(Stream):
