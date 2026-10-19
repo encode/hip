@@ -5,7 +5,7 @@ if typing.TYPE_CHECKING:
     # Once we drop 3.10 support, we can use 'typing.Self'.
     from typing_extensions import Self
 
-from ._body import HTTPStream, GZipStream
+from ._body import GZipStream, HTTPStream
 from ._content import Content
 from ._headers import Headers
 from ._network import Lock, NetworkBackend
@@ -33,7 +33,7 @@ class ResponseContext:
     def read(self, size: int = -1) -> bytes:
         return self.stream.read(size)
 
-    def __enter__(self) -> "ResponseContext":
+    def __enter__(self):
         return self
 
     def __exit__(
@@ -73,7 +73,6 @@ class Transport:
     ) -> ResponseContext:
         request = Request(method, url, headers=headers, content=content)
         return self.send(request)
-
 
 
 class Connection(Transport):

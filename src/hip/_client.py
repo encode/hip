@@ -3,7 +3,7 @@ import typing
 
 from ._content import HTML, JSON, Binary, Content, Text, select_media
 from ._headers import Headers
-from ._pool import ConnectionPool, Transport, ResponseContext
+from ._pool import ConnectionPool, ResponseContext, Transport
 from ._request import Method, Request
 from ._response import Response
 from ._urls import URL

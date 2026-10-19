@@ -4,7 +4,7 @@ import zlib
 from ._parsers import HTTPParser
 from ._streams import Stream
 
-__all__ = ["HTTPStream", "GZipStream"]
+__all__ = ["GZipStream", "HTTPStream"]
 
 
 class HTTPStream(Stream):

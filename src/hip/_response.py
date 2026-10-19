@@ -3,7 +3,7 @@ import typing
 from ._content import Binary, Content, Empty
 from ._headers import Headers
 
-__all__ = ["StatusCode", "Response"]
+__all__ = ["Response", "StatusCode"]
 
 
 class StatusCode:
