@@ -3,9 +3,9 @@ import typing
 
 from ._content import HTML, JSON, Binary, Content, Text, select_media
 from ._headers import Headers
-from ._pool import ConnectionPool, Transport
+from ._pool import ConnectionPool, Transport, ResponseContext
 from ._request import Method, Request
-from ._response import Response, ResponseContext
+from ._response import Response
 from ._urls import URL
 
 __all__ = ["Client"]

@@ -11,7 +11,7 @@ from ._headers import Headers
 from ._network import Lock, NetworkBackend
 from ._parsers import HTTPParser
 from ._request import Method, Request
-from ._response import Response, ResponseContext
+from ._response import Response, StatusCode
 from ._streams import Stream
 from ._urls import URL
 
@@ -20,6 +20,29 @@ __all__ = [
     "Transport",
     "open_connection",
 ]
+
+
+class ResponseContext:
+    def __init__(
+        self, status_code: StatusCode, headers: Headers, stream: Stream
+    ) -> None:
+        self.status_code = status_code
+        self.headers = headers
+        self.stream = stream
+
+    def read(self, size: int = -1) -> bytes:
+        return self.stream.read(size)
+
+    def __enter__(self) -> "ResponseContext":
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None = None,
+        exc_value: BaseException | None = None,
+        traceback: types.TracebackType | None = None,
+    ) -> None:
+        self.stream.close()
 
 
 class Transport:

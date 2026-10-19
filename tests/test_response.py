@@ -69,10 +69,3 @@ def test_response_json():
 def test_response_with_invalid_code():
     with pytest.raises(ValueError, match="Invalid status code 80"):
         hip.Response(80)
-
-
-def test_response_stream_repr():
-    response = hip.Response(200)
-
-    with response.open() as res:
-        assert repr(res) == "<Response OPEN [200 OK]>"
