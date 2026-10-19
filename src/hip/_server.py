@@ -5,17 +5,13 @@ from ._body import RequestContent
 from ._content import Text
 from ._headers import Headers
 from ._network import NetworkBackend, sleep
-from ._parsers import HTTPParser
+from ._parsers import ConnectionClosed, HTTPParser
 from ._request import Request
 from ._response import Response
 
 __all__ = ["Server"]
 
 logger = logging.getLogger("hip.server")
-
-
-class ConnectionClosed(Exception):
-    pass
 
 
 class HTTPConnection:
@@ -50,6 +46,9 @@ class HTTPConnection:
                 else:
                     self._send_head(response)
                     self._send_body(response)
+        except ConnectionClosed:
+            # The client stopped sending after the previous request.
+            pass
         except BaseException:
             logger.exception("Internal Server Error")
 
