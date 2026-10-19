@@ -139,15 +139,15 @@ class RedirectMiddleware(Transport):
         self._transport = transport
 
     def build_redirect_request(
-        self, request: Request, response_stream: ResponseStream
+        self, request: Request, response: ResponseStream
     ) -> Request | None:
         # Redirect status codes...
-        if response_stream.status_code not in (301, 302, 303, 307, 308):
+        if response.status_code not in (301, 302, 303, 307, 308):
             return None
 
         # Redirects need a valid location header...
         try:
-            location = URL(response_stream.headers["Location"])
+            location = URL(response.headers["Location"])
         except (KeyError, ValueError):
             return None
 
@@ -161,20 +161,20 @@ class RedirectMiddleware(Transport):
 
     def send(self, request: Request) -> ResponseStream:
         while True:
-            response_stream = self._transport.send(request)
+            response = self._transport.send(request)
 
             # Determine if we have a redirect or not.
-            redirect = self.build_redirect_request(request, response_stream)
+            redirect = self.build_redirect_request(request, response)
 
             # If we don't have a redirect, we're done.
             if redirect is None:
-                return response_stream
+                return response
 
             # If we have a redirect, then we read the body of the response.
             # Ensures that the HTTP connection is available for a new
             # request/response cycle.
-            with response_stream:
-                response_stream.read()
+            with response:
+                response.read()
 
             # Make the next request
             request = redirect
