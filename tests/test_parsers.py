@@ -114,6 +114,13 @@ def test_parser_server():
     assert p.is_idle()
 
 
+def test_empty_request_line_raises_eof_error():
+    parser = hip.HTTPParser(hip.DuplexStream(b""), mode="SERVER")
+
+    with pytest.raises(EOFError):
+        parser.recv_method_line()
+
+
 def test_incomplete_request_line_raises_protocol_error_on_eof():
     stream = hip.DuplexStream(b"GE")
     parser = hip.HTTPParser(stream, mode="SERVER")
