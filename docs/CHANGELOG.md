@@ -6,6 +6,11 @@ Since we are currently on [an 0.x series](https://semver.org/#spec-item-4) you s
 
 At this point in time, only documented functionality should be consider "Public API". 
 
+## Unreleased
+
+The server closes quietly when a client disconnects between requests, instead of
+logging an internal server error. [#94](https://github.com/encode/hip/pull/94)
+
 ## 0.3
 
 Gzip response decompression. [#70](https://github.com/encode/hip/pull/70)
