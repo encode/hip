@@ -8,7 +8,7 @@ from ._pool import *  # ConnectionPool
 from ._request import *  # Method, Request
 from ._response import *  # StatusCode, Response
 from ._server import *  # Server
-from ._streams import *  # ByteStream, DuplexStream, Stream
+from ._streams import *  # Stream
 from ._urls import *  # QueryParams, URL
 
 __all__ = [
@@ -16,12 +16,10 @@ __all__ = [
     "JSON",
     "URL",
     "Binary",
-    "ByteStream",
     "Client",
     "Connection",
     "ConnectionPool",
     "Content",
-    "DuplexStream",
     "File",
     "Files",
     "Form",

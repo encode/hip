@@ -2,7 +2,7 @@ import io
 import os
 import types
 
-__all__ = ["ByteStream", "DuplexStream", "FileStream", "MultiPartStream", "Stream"]
+__all__ = ["Stream"]
 
 
 class Stream:
@@ -37,35 +37,6 @@ class ByteStream(Stream):
 
     def close(self) -> None:
         self._buffer.close()
-
-
-class DuplexStream(Stream):
-    """
-    DuplexStream supports both `read` and `write` operations,
-    which are applied to seperate buffers.
-
-    This stream can be used for testing network parsers.
-    """
-
-    def __init__(self, data: bytes = b""):
-        self._read_buffer = io.BytesIO(data)
-        self._write_buffer = io.BytesIO()
-
-    def read(self, size: int = -1) -> bytes:
-        return self._read_buffer.read(size)
-
-    def write(self, buffer: bytes):
-        return self._write_buffer.write(buffer)
-
-    def close(self) -> None:
-        self._read_buffer.close()
-        self._write_buffer.close()
-
-    def input_bytes(self) -> bytes:
-        return self._read_buffer.getvalue()
-
-    def output_bytes(self) -> bytes:
-        return self._write_buffer.getvalue()
 
 
 class FileStream(Stream):
