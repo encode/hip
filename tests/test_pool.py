@@ -109,7 +109,7 @@ def test_connection_stream_read_in_chunks(server):
 class TLSBackend:
     def connect_tls(self, host, port, hostname):
         self.connect_tls_args = (host, port, hostname)
-        return hip.Binary(b'').open()
+        return hip.Binary(b"").open()
 
 
 def test_open_https_connection():
