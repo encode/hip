@@ -344,8 +344,9 @@ def test_multipart():
             "Transfer-Encoding": "chunked",
         }
 
-        stream = multipart.open()
-        content = stream.read()
+        with multipart.open() as stream:
+            content = stream.read()
+
         assert content == (
             b"--BOUNDARY\r\n"
             b'Content-Disposition: form-data; name="email"\r\n'
@@ -380,7 +381,7 @@ def test_content():
         content.headers()
 
     with pytest.raises(NotImplementedError):
-        content.parse(hip.ByteStream(b".."))
+        content.parse(hip.Stream())
 
     with pytest.raises(TypeError):
         bytes(content)

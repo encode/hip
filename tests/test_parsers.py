@@ -1,3 +1,4 @@
+import io
 import pytest
 
 import hip
@@ -17,8 +18,37 @@ class TrickleIO(hip.Stream):
         self._stream.close()
 
 
+class DuplexStream(hip.Stream):
+    """
+    DuplexStream supports both `read` and `write` operations,
+    which are applied to seperate buffers.
+
+    This stream can be used for testing network parsers.
+    """
+
+    def __init__(self, data: bytes = b""):
+        self._read_buffer = io.BytesIO(data)
+        self._write_buffer = io.BytesIO()
+
+    def read(self, size: int = -1) -> bytes:
+        return self._read_buffer.read(size)
+
+    def write(self, buffer: bytes):
+        return self._write_buffer.write(buffer)
+
+    def close(self) -> None:
+        self._read_buffer.close()
+        self._write_buffer.close()
+
+    def input_bytes(self) -> bytes:
+        return self._read_buffer.getvalue()
+
+    def output_bytes(self) -> bytes:
+        return self._write_buffer.getvalue()
+
+
 def test_parser():
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Length: 12\r\n"
         b"Content-Type: text/plain\r\n"
@@ -75,7 +105,7 @@ def test_parser():
 
 
 def test_parser_server():
-    stream = hip.DuplexStream(b"GET / HTTP/1.1\r\nHost: www.example.com\r\n\r\n")
+    stream = DuplexStream(b"GET / HTTP/1.1\r\nHost: www.example.com\r\n\r\n")
 
     p = hip.HTTPParser(stream, mode="SERVER")
     method, target, protocol = p.recv_method_line()
@@ -115,14 +145,14 @@ def test_parser_server():
 
 
 def test_empty_request_line_raises_eof_error():
-    parser = hip.HTTPParser(hip.DuplexStream(b""), mode="SERVER")
+    parser = hip.HTTPParser(DuplexStream(b""), mode="SERVER")
 
     with pytest.raises(EOFError):
         parser.recv_method_line()
 
 
 def test_incomplete_request_line_raises_protocol_error_on_eof():
-    stream = hip.DuplexStream(b"GE")
+    stream = DuplexStream(b"GE")
     parser = hip.HTTPParser(stream, mode="SERVER")
 
     with pytest.raises(
@@ -132,7 +162,7 @@ def test_incomplete_request_line_raises_protocol_error_on_eof():
 
 
 def test_server_headers_eof_remains_protocol_error():
-    stream = hip.DuplexStream(b"GET / HTTP/1.1\r\nHost: example.com\r\n")
+    stream = DuplexStream(b"GET / HTTP/1.1\r\nHost: example.com\r\n")
     parser = hip.HTTPParser(stream, mode="SERVER")
     parser.recv_method_line()
 
@@ -143,7 +173,7 @@ def test_server_headers_eof_remains_protocol_error():
 
 
 def test_parser_trickle():
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Length: 12\r\n"
         b"Content-Type: text/plain\r\n"
@@ -196,7 +226,7 @@ def test_parser_trickle():
 
 
 def test_parser_transfer_encoding_chunked():
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Type: text/plain\r\n"
         b"Transfer-Encoding: chunked\r\n"
@@ -255,7 +285,7 @@ def test_parser_transfer_encoding_chunked():
 
 
 def test_parser_transfer_encoding_chunked_trickle():
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Type: text/plain\r\n"
         b"Transfer-Encoding: chunked\r\n"
@@ -314,7 +344,7 @@ def test_parser_transfer_encoding_chunked_trickle():
 
 
 def test_parser_repr():
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Type: application/json\r\n"
         b"Content-Length: 23\r\n"
@@ -351,7 +381,7 @@ def test_parser_repr():
 
 
 def test_parser_invalid_transitions():
-    stream = hip.DuplexStream()
+    stream = DuplexStream()
 
     with pytest.raises(hip.ProtocolError):
         p = hip.HTTPParser(stream, mode="CLIENT")
@@ -367,9 +397,10 @@ def test_parser_invalid_transitions():
         p.send_body(b"")
 
     with pytest.raises(hip.ProtocolError):
-        hip.ByteStream(b"HTTP/1.1 200 OK\r\n")
-        p = hip.HTTPParser(stream, mode="CLIENT")
-        p.recv_status_line()
+        b = hip.Binary(b"HTTP/1.1 200 OK\r\n")
+        with b.open() as stream:
+            p = hip.HTTPParser(stream, mode="CLIENT")
+            p.recv_status_line()
 
     with pytest.raises(hip.ProtocolError):
         p = hip.HTTPParser(stream, mode="CLIENT")
@@ -382,7 +413,7 @@ def test_parser_invalid_transitions():
 
 def test_parser_invalid_status_line():
     # ...
-    stream = hip.DuplexStream(b"...")
+    stream = DuplexStream(b"...")
 
     p = hip.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
@@ -394,7 +425,7 @@ def test_parser_invalid_status_line():
         p.recv_status_line()
 
     # ...
-    stream = hip.DuplexStream(b"HTTP/1.1" + b"x" * 5000)
+    stream = DuplexStream(b"HTTP/1.1" + b"x" * 5000)
 
     p = hip.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
@@ -406,7 +437,7 @@ def test_parser_invalid_status_line():
         p.recv_status_line()
 
     # ...
-    stream = hip.DuplexStream(b"HTTP/1.1" + b"x" * 5000 + b"\r\n")
+    stream = DuplexStream(b"HTTP/1.1" + b"x" * 5000 + b"\r\n")
 
     p = hip.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
@@ -420,7 +451,7 @@ def test_parser_invalid_status_line():
 
 def test_parser_sent_unsupported_protocol():
     # Currently only HTTP/1.1 is supported.
-    stream = hip.DuplexStream()
+    stream = DuplexStream()
 
     p = hip.HTTPParser(stream, mode="CLIENT")
     msg = "Sent unsupported protocol version"
@@ -430,7 +461,7 @@ def test_parser_sent_unsupported_protocol():
 
 def test_parser_recv_unsupported_protocol():
     # Currently only HTTP/1.1 is supported.
-    stream = hip.DuplexStream(b"HTTP/1.0 200 OK\r\n")
+    stream = DuplexStream(b"HTTP/1.0 200 OK\r\n")
 
     p = hip.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
@@ -442,7 +473,7 @@ def test_parser_recv_unsupported_protocol():
 def test_parser_large_body():
     body = b"x" * 6988
 
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Length: 6988\r\n"
         b"Content-Type: text/plain\r\n"
@@ -465,7 +496,7 @@ def test_parser_large_body():
 def test_parser_stream_large_body():
     body = b"x" * 6956
 
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Transfer-Encoding: chunked\r\n"
         b"Content-Type: text/plain\r\n"
@@ -488,7 +519,7 @@ def test_parser_stream_large_body():
 
 
 def test_parser_not_enough_data_received():
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Length: 188\r\n"
         b"Content-Type: text/plain\r\n"
@@ -511,7 +542,7 @@ def test_parser_not_enough_data_received():
 
 
 def test_parser_not_enough_data_sent():
-    stream = hip.DuplexStream()
+    stream = DuplexStream()
 
     p = hip.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"POST", b"/", b"HTTP/1.1")
@@ -529,7 +560,7 @@ def test_parser_not_enough_data_sent():
 
 
 def test_parser_too_much_data_sent():
-    stream = hip.DuplexStream()
+    stream = DuplexStream()
 
     p = hip.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"POST", b"/", b"HTTP/1.1")
@@ -546,7 +577,7 @@ def test_parser_too_much_data_sent():
 
 
 def test_parser_missing_host_header():
-    stream = hip.DuplexStream()
+    stream = DuplexStream()
 
     p = hip.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
@@ -556,7 +587,7 @@ def test_parser_missing_host_header():
 
 
 def test_client_connection_close():
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Length: 12\r\n"
         b"Content-Type: text/plain\r\n"
@@ -597,7 +628,7 @@ def test_client_connection_close():
 
 
 def test_server_connection_close():
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Length: 12\r\n"
         b"Content-Type: text/plain\r\n"
@@ -633,7 +664,7 @@ def test_server_connection_close():
 
 
 def test_invalid_status_code():
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 99 OK\r\n"
         b"Content-Length: 12\r\n"
         b"Content-Type: text/plain\r\n"
@@ -657,7 +688,7 @@ def test_invalid_status_code():
 
 
 def test_1xx_status_code():
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 103 Early Hints\r\n"
         b"Link: </style.css>; rel=preload; as=style\r\n"
         b"Link: </script.js>; rel=preload; as=script\r\n"
@@ -702,7 +733,7 @@ def test_1xx_status_code():
 
 
 def test_received_invalid_content_length():
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Length: -999\r\n"
         b"Content-Type: text/plain\r\n"
@@ -727,7 +758,7 @@ def test_received_invalid_content_length():
 
 
 def test_sent_invalid_content_length():
-    stream = hip.DuplexStream()
+    stream = DuplexStream()
 
     p = hip.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
@@ -744,7 +775,7 @@ def test_sent_invalid_content_length():
 
 
 def test_received_invalid_characters_in_chunk_size():
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Transfer-Encoding: chunked\r\n"
         b"Content-Type: text/plain\r\n"
@@ -770,7 +801,7 @@ def test_received_invalid_characters_in_chunk_size():
 
 
 def test_received_oversized_chunk():
-    stream = hip.DuplexStream(
+    stream = DuplexStream(
         b"HTTP/1.1 200 OK\r\n"
         b"Transfer-Encoding: chunked\r\n"
         b"Content-Type: text/plain\r\n"
@@ -796,7 +827,7 @@ def test_received_oversized_chunk():
 
 
 def test_send_response_before_request():
-    stream = hip.DuplexStream()
+    stream = DuplexStream()
 
     p = hip.HTTPParser(stream, mode="SERVER")
     msg = "Called 'send_status_line' in invalid state State.WAIT"
@@ -805,7 +836,7 @@ def test_send_response_before_request():
 
 
 def test_server_receives_unsupported_protocol():
-    stream = hip.DuplexStream(b"GET / HTTP/1.0\r\n")
+    stream = DuplexStream(b"GET / HTTP/1.0\r\n")
 
     p = hip.HTTPParser(stream, mode="SERVER")
     msg = "Received unsupported protocol version"
@@ -814,7 +845,7 @@ def test_server_receives_unsupported_protocol():
 
 
 def test_server_sends_unsupported_protocol():
-    stream = hip.DuplexStream(b"GET / HTTP/1.1\r\n")
+    stream = DuplexStream(b"GET / HTTP/1.1\r\n")
 
     p = hip.HTTPParser(stream, mode="SERVER")
     p.recv_method_line()
@@ -824,7 +855,7 @@ def test_server_sends_unsupported_protocol():
 
 
 def test_server_receives_method_line_twice():
-    stream = hip.DuplexStream(b"GET / HTTP/1.1\r\n")
+    stream = DuplexStream(b"GET / HTTP/1.1\r\n")
 
     p = hip.HTTPParser(stream, mode="SERVER")
     p.recv_method_line()
@@ -834,7 +865,7 @@ def test_server_receives_method_line_twice():
 
 
 def test_request_missing_host_header():
-    stream = hip.DuplexStream(b"GET / HTTP/1.1\r\n\r\n")
+    stream = DuplexStream(b"GET / HTTP/1.1\r\n\r\n")
 
     p = hip.HTTPParser(stream, mode="SERVER")
     p.recv_method_line()
