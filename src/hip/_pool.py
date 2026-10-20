@@ -6,10 +6,9 @@ if typing.TYPE_CHECKING:
     # Once we drop 3.10 support, we can use 'typing.Self'.
     from typing_extensions import Self
 
-from ._connection import Connection, Transport, open_connection
+from ._connection import Connection, ResponseStream, Transport, open_connection
 from ._network import NetworkBackend, Semaphore
 from ._request import Request
-from ._response import Response
 from ._urls import URL
 
 __all__ = [
@@ -28,15 +27,14 @@ class ConnectionPool(Transport):
         self._closed = False
 
     # Public API...
-    def send(self, request: Request) -> Response:
+    def send(self, request: Request) -> ResponseStream:
         if self._closed:
             raise RuntimeError("ConnectionPool is closed.")
 
         # TODO: concurrency limiting
         self._cleanup()
         connection = self._get_connection(request)
-        response = connection.send(request)
-        return response
+        return connection.send(request)
 
     def close(self):
         self._closed = True

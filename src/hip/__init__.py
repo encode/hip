@@ -1,5 +1,5 @@
 from ._client import *  # Client
-from ._connection import *  # Connection, Transport
+from ._connection import *  # Connection, Transport, ResponseContext
 from ._content import *  # Binary, Content, File, Files, Form, HTML, JSON, MultiPart, Text
 from ._headers import *  # Headers
 from ._network import *  # NetworkBackend, NetworkStream, timeout

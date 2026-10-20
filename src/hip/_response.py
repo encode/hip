@@ -1,11 +1,9 @@
-import types
 import typing
 
 from ._content import Binary, Content, Empty
 from ._headers import Headers
-from ._streams import Stream
 
-__all__ = ["Response"]
+__all__ = ["Response", "StatusCode"]
 
 
 class StatusCode:
@@ -171,37 +169,5 @@ class Response:
     def body(self) -> bytes:
         return bytes(self.content)
 
-    def __enter__(self) -> "ResponseStream":
-        stream = self.content.open()
-        context = ResponseStream(self.status_code, self.headers, stream)
-        self._context = context
-        return self._context
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None = None,
-        exc_value: BaseException | None = None,
-        traceback: types.TracebackType | None = None,
-    ) -> None:
-        self._context.close()
-
     def __repr__(self):
         return f"<Response [{self.status_code}]>"
-
-
-class ResponseStream(Stream):
-    def __init__(
-        self, status_code: StatusCode, headers: Headers, stream: Stream
-    ) -> None:
-        self.status_code = status_code
-        self.headers = headers
-        self._stream = stream
-
-    def read(self, size: int = -1) -> bytes:
-        return self._stream.read(size)
-
-    def close(self) -> None:
-        self._stream.close()
-
-    def __repr__(self):
-        return f"<ResponseStream [{self.status_code}]>"

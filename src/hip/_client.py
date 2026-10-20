@@ -1,9 +1,10 @@
 import types
 import typing
 
+from ._connection import ResponseStream, Transport
 from ._content import HTML, JSON, Binary, Content, Text, select_media
 from ._headers import Headers
-from ._pool import ConnectionPool, Transport
+from ._pool import ConnectionPool
 from ._request import Method, Request
 from ._response import Response
 from ._urls import URL
@@ -73,7 +74,7 @@ class Client:
         url: URL | str,
         headers: Headers | dict[str, str] | None = None,
         content: Content | bytes | None = None,
-    ) -> Response:
+    ) -> ResponseStream:
         request = self.build_request(method, url, headers=headers, content=content)
         return self.via.send(request)
 
@@ -138,7 +139,7 @@ class RedirectMiddleware(Transport):
         self._transport = transport
 
     def build_redirect_request(
-        self, request: Request, response: Response
+        self, request: Request, response: ResponseStream
     ) -> Request | None:
         # Redirect status codes...
         if response.status_code not in (301, 302, 303, 307, 308):
@@ -158,7 +159,7 @@ class RedirectMiddleware(Transport):
 
         return Request(method, url, headers, content)
 
-    def send(self, request: Request) -> Response:
+    def send(self, request: Request) -> ResponseStream:
         while True:
             response = self._transport.send(request)
 
@@ -172,8 +173,8 @@ class RedirectMiddleware(Transport):
             # If we have a redirect, then we read the body of the response.
             # Ensures that the HTTP connection is available for a new
             # request/response cycle.
-            with response as stream:
-                stream.read()
+            with response:
+                response.read()
 
             # Make the next request
             request = redirect

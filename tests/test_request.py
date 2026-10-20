@@ -66,10 +66,3 @@ def test_request_supports_additional_standard_methods(method):
 def test_request_rejects_invalid_method():
     with pytest.raises(ValueError, match="Non-standard method 'INVALID METHOD'"):
         hip.Request("INVALID METHOD", "https://example.com")
-
-
-def test_request_stream_repr():
-    request = hip.Request("GET", "https://example.com")
-
-    with request as stream:
-        assert repr(stream) == "<RequestStream [GET 'https://example.com']>"
