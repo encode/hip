@@ -57,7 +57,7 @@ def test_parser():
         b"hello, world"
     )
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"POST", b"/", b"HTTP/1.1")
     p.send_headers(
         [
@@ -108,7 +108,7 @@ def test_parser():
 def test_parser_server():
     stream = DuplexStream(b"GET / HTTP/1.1\r\nHost: www.example.com\r\n\r\n")
 
-    p = hip.HTTPParser(stream, mode="SERVER")
+    p = hip.parsers.HTTPParser(stream, mode="SERVER")
     method, target, protocol = p.recv_method_line()
     headers = p.recv_headers()
     body = p.recv_body()
@@ -146,7 +146,7 @@ def test_parser_server():
 
 
 def test_empty_request_line_raises_eof_error():
-    parser = hip.HTTPParser(DuplexStream(b""), mode="SERVER")
+    parser = hip.parsers.HTTPParser(DuplexStream(b""), mode="SERVER")
 
     with pytest.raises(EOFError):
         parser.recv_method_line()
@@ -154,21 +154,22 @@ def test_empty_request_line_raises_eof_error():
 
 def test_incomplete_request_line_raises_protocol_error_on_eof():
     stream = DuplexStream(b"GE")
-    parser = hip.HTTPParser(stream, mode="SERVER")
+    parser = hip.parsers.HTTPParser(stream, mode="SERVER")
 
     with pytest.raises(
-        hip.ProtocolError, match=r"Stream closed early reading request method line\."
+        hip.parsers.ProtocolError,
+        match=r"Stream closed early reading request method line\.",
     ):
         parser.recv_method_line()
 
 
 def test_server_headers_eof_remains_protocol_error():
     stream = DuplexStream(b"GET / HTTP/1.1\r\nHost: example.com\r\n")
-    parser = hip.HTTPParser(stream, mode="SERVER")
+    parser = hip.parsers.HTTPParser(stream, mode="SERVER")
     parser.recv_method_line()
 
     with pytest.raises(
-        hip.ProtocolError, match="Stream closed early reading response headers"
+        hip.parsers.ProtocolError, match="Stream closed early reading response headers"
     ):
         parser.recv_headers()
 
@@ -182,7 +183,7 @@ def test_parser_trickle():
         b"hello, world"
     )
 
-    p = hip.HTTPParser(TrickleIO(stream), mode="CLIENT")
+    p = hip.parsers.HTTPParser(TrickleIO(stream), mode="CLIENT")
     p.send_method_line(b"POST", b"/", b"HTTP/1.1")
     p.send_headers(
         [
@@ -237,7 +238,7 @@ def test_parser_transfer_encoding_chunked():
         b"0\r\n\r\n"
     )
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"POST", b"/", b"HTTP/1.1")
     p.send_headers(
         [
@@ -296,7 +297,7 @@ def test_parser_transfer_encoding_chunked_trickle():
         b"0\r\n\r\n"
     )
 
-    p = hip.HTTPParser(TrickleIO(stream), mode="CLIENT")
+    p = hip.parsers.HTTPParser(TrickleIO(stream), mode="CLIENT")
     p.send_method_line(b"POST", b"/", b"HTTP/1.1")
     p.send_headers(
         [
@@ -353,7 +354,7 @@ def test_parser_repr():
         b'{"msg": "hello, world"}'
     )
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     assert repr(p) == "<HTTPParser [client SEND_METHOD_LINE, server WAIT]>"
 
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
@@ -384,31 +385,31 @@ def test_parser_repr():
 def test_parser_invalid_transitions():
     stream = DuplexStream()
 
-    with pytest.raises(hip.ProtocolError):
-        p = hip.HTTPParser(stream, mode="CLIENT")
+    with pytest.raises(hip.parsers.ProtocolError):
+        p = hip.parsers.HTTPParser(stream, mode="CLIENT")
         p.send_method_line(b"GET", b"/", b"HTTP/1.1")
         p.send_method_line(b"GET", b"/", b"HTTP/1.1")
 
-    with pytest.raises(hip.ProtocolError):
-        p = hip.HTTPParser(stream, mode="CLIENT")
+    with pytest.raises(hip.parsers.ProtocolError):
+        p = hip.parsers.HTTPParser(stream, mode="CLIENT")
         p.send_headers([])
 
-    with pytest.raises(hip.ProtocolError):
-        p = hip.HTTPParser(stream, mode="CLIENT")
+    with pytest.raises(hip.parsers.ProtocolError):
+        p = hip.parsers.HTTPParser(stream, mode="CLIENT")
         p.send_body(b"")
 
-    with pytest.raises(hip.ProtocolError):
+    with pytest.raises(hip.parsers.ProtocolError):
         b = hip.Binary(b"HTTP/1.1 200 OK\r\n")
         with b.open() as stream:
-            p = hip.HTTPParser(stream, mode="CLIENT")
+            p = hip.parsers.HTTPParser(stream, mode="CLIENT")
             p.recv_status_line()
 
-    with pytest.raises(hip.ProtocolError):
-        p = hip.HTTPParser(stream, mode="CLIENT")
+    with pytest.raises(hip.parsers.ProtocolError):
+        p = hip.parsers.HTTPParser(stream, mode="CLIENT")
         p.recv_headers()
 
-    with pytest.raises(hip.ProtocolError):
-        p = hip.HTTPParser(stream, mode="CLIENT")
+    with pytest.raises(hip.parsers.ProtocolError):
+        p = hip.parsers.HTTPParser(stream, mode="CLIENT")
         p.recv_body()
 
 
@@ -416,37 +417,37 @@ def test_parser_invalid_status_line():
     # ...
     stream = DuplexStream(b"...")
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b"")
 
     msg = "Stream closed early reading response status line"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.recv_status_line()
 
     # ...
     stream = DuplexStream(b"HTTP/1.1" + b"x" * 5000)
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b"")
 
     msg = "Exceeded maximum size reading response status line"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.recv_status_line()
 
     # ...
     stream = DuplexStream(b"HTTP/1.1" + b"x" * 5000 + b"\r\n")
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b"")
 
     msg = "Exceeded maximum size reading response status line"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.recv_status_line()
 
 
@@ -454,9 +455,9 @@ def test_parser_sent_unsupported_protocol():
     # Currently only HTTP/1.1 is supported.
     stream = DuplexStream()
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     msg = "Sent unsupported protocol version"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.send_method_line(b"GET", b"/", b"HTTP/1.0")
 
 
@@ -464,10 +465,10 @@ def test_parser_recv_unsupported_protocol():
     # Currently only HTTP/1.1 is supported.
     stream = DuplexStream(b"HTTP/1.0 200 OK\r\n")
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     msg = "Received unsupported protocol version"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.recv_status_line()
 
 
@@ -481,7 +482,7 @@ def test_parser_large_body():
         b"\r\n" + body
     )
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b"")
@@ -505,7 +506,7 @@ def test_parser_stream_large_body():
         b"1b2c\r\n" + body + b"\r\n0\r\n\r\n"
     )
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b"")
@@ -528,7 +529,7 @@ def test_parser_not_enough_data_received():
         b"truncated"
     )
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b"")
@@ -538,14 +539,14 @@ def test_parser_not_enough_data_received():
     p.recv_headers()
     p.recv_body()
     msg = "Not enough data received for declared Content-Length"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.recv_body()
 
 
 def test_parser_not_enough_data_sent():
     stream = DuplexStream()
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"POST", b"/", b"HTTP/1.1")
     p.send_headers(
         [
@@ -556,14 +557,14 @@ def test_parser_not_enough_data_sent():
     )
     p.send_body(b'{"msg": "too smol"}')
     msg = "Not enough data sent for declared Content-Length"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.send_body(b"")
 
 
 def test_parser_too_much_data_sent():
     stream = DuplexStream()
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"POST", b"/", b"HTTP/1.1")
     p.send_headers(
         [
@@ -573,17 +574,17 @@ def test_parser_too_much_data_sent():
         ]
     )
     msg = "Too much data sent for declared Content-Length"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.send_body(b'{"msg": "too chonky"}')
 
 
 def test_parser_missing_host_header():
     stream = DuplexStream()
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     msg = "Request missing 'Host' header"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.send_headers([])
 
 
@@ -596,7 +597,7 @@ def test_client_connection_close():
         b"hello, world"
     )
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers(
         [
@@ -638,7 +639,7 @@ def test_server_connection_close():
         b"hello, world"
     )
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b"")
@@ -673,7 +674,7 @@ def test_invalid_status_code():
         b"hello, world"
     )
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers(
         [
@@ -684,7 +685,7 @@ def test_invalid_status_code():
     p.send_body(b"")
 
     msg = "Received invalid status code"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.recv_status_line()
 
 
@@ -701,7 +702,7 @@ def test_1xx_status_code():
         b"hello, world"
     )
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers([(b"Host", b"example.com")])
     p.send_body(b"")
@@ -742,7 +743,7 @@ def test_received_invalid_content_length():
         b"hello, world"
     )
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers(
         [
@@ -754,17 +755,17 @@ def test_received_invalid_content_length():
 
     p.recv_status_line()
     msg = "Received invalid Content-Length"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.recv_headers()
 
 
 def test_sent_invalid_content_length():
     stream = DuplexStream()
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     msg = "Sent invalid Content-Length"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         # Limited to 20 digits.
         # 100 million terabytes should be enough for anyone.
         p.send_headers(
@@ -784,7 +785,7 @@ def test_received_invalid_characters_in_chunk_size():
         b"0xFF\r\n..."
     )
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers(
         [
@@ -797,7 +798,7 @@ def test_received_invalid_characters_in_chunk_size():
     p.recv_status_line()
     p.recv_headers()
     msg = "Received invalid chunk size"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.recv_body()
 
 
@@ -810,7 +811,7 @@ def test_received_oversized_chunk():
         b"FFFFFFFFFF\r\n..."
     )
 
-    p = hip.HTTPParser(stream, mode="CLIENT")
+    p = hip.parsers.HTTPParser(stream, mode="CLIENT")
     p.send_method_line(b"GET", b"/", b"HTTP/1.1")
     p.send_headers(
         [
@@ -823,53 +824,53 @@ def test_received_oversized_chunk():
     p.recv_status_line()
     p.recv_headers()
     msg = "Received invalid chunk size"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.recv_body()
 
 
 def test_send_response_before_request():
     stream = DuplexStream()
 
-    p = hip.HTTPParser(stream, mode="SERVER")
+    p = hip.parsers.HTTPParser(stream, mode="SERVER")
     msg = "Called 'send_status_line' in invalid state State.WAIT"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.send_status_line(b"HTTP/1.1", 200, b"OK")
 
 
 def test_server_receives_unsupported_protocol():
     stream = DuplexStream(b"GET / HTTP/1.0\r\n")
 
-    p = hip.HTTPParser(stream, mode="SERVER")
+    p = hip.parsers.HTTPParser(stream, mode="SERVER")
     msg = "Received unsupported protocol version"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.recv_method_line()
 
 
 def test_server_sends_unsupported_protocol():
     stream = DuplexStream(b"GET / HTTP/1.1\r\n")
 
-    p = hip.HTTPParser(stream, mode="SERVER")
+    p = hip.parsers.HTTPParser(stream, mode="SERVER")
     p.recv_method_line()
     msg = "Sent unsupported protocol version"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.send_status_line(b"HTTP/2.0", 200, b"OK")
 
 
 def test_server_receives_method_line_twice():
     stream = DuplexStream(b"GET / HTTP/1.1\r\n")
 
-    p = hip.HTTPParser(stream, mode="SERVER")
+    p = hip.parsers.HTTPParser(stream, mode="SERVER")
     p.recv_method_line()
     msg = "Called 'recv_method_line' in invalid state State.RECV_HEADERS"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.recv_method_line()
 
 
 def test_request_missing_host_header():
     stream = DuplexStream(b"GET / HTTP/1.1\r\n\r\n")
 
-    p = hip.HTTPParser(stream, mode="SERVER")
+    p = hip.parsers.HTTPParser(stream, mode="SERVER")
     p.recv_method_line()
     msg = "Request missing 'Host' header"
-    with pytest.raises(hip.ProtocolError, match=msg):
+    with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.recv_headers()

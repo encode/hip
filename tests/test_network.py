@@ -10,18 +10,18 @@ def echo(stream):
 
 @pytest.fixture
 def server():
-    net = hip.NetworkBackend()
+    net = hip.backends.NetworkBackend()
     with net.serve("127.0.0.1", 8080, echo) as server:
         yield server
 
 
 def test_network_backend():
-    net = hip.NetworkBackend()
+    net = hip.backends.NetworkBackend()
     assert repr(net) in ["<NetworkBackend [trio]>", "<NetworkBackend [threaded]>"]
 
 
 def test_network_backend_connect(server):
-    net = hip.NetworkBackend()
+    net = hip.backends.NetworkBackend()
     stream = net.connect(server.host, server.port)
     try:
         assert repr(stream) == f"<NetworkStream [{server.host}:{server.port}]>"
@@ -61,7 +61,7 @@ class FailingShutdownSocket(FakeSocket):
 
 def test_network_stream_close_ignores_shutdown_errors():
     sock = FailingShutdownSocket()
-    stream = hip.NetworkStream(sock, ("example.com", 443))
+    stream = hip.backends.NetworkStream(sock, ("example.com", 443))
 
     stream.close()
 
@@ -72,7 +72,7 @@ def test_network_backend_connect_tls(monkeypatch):
     raw_socket = FakeSocket()
     tls_socket = FakeSocket()
     ssl_context = FakeSSLContext(tls_socket)
-    backend = hip.NetworkBackend(ssl_ctx=ssl_context)
+    backend = hip.backends.NetworkBackend(ssl_ctx=ssl_context)
 
     create_connection_args = []
 
@@ -92,7 +92,7 @@ def test_network_backend_connect_tls(monkeypatch):
 
 
 def test_network_listener_context_managed():
-    backend = hip.NetworkBackend()
+    backend = hip.backends.NetworkBackend()
 
     with backend.listen("127.0.0.1", 0) as listener:
         assert listener.host == "127.0.0.1"
@@ -101,7 +101,7 @@ def test_network_listener_context_managed():
 
 
 def test_network_backend_context_managed(server):
-    net = hip.NetworkBackend()
+    net = hip.backends.NetworkBackend()
     with net.connect(server.host, server.port) as stream:
         stream.write(b"Hello, world.")
         content = stream.read()
@@ -110,7 +110,7 @@ def test_network_backend_context_managed(server):
 
 
 def test_network_backend_timeout(server):
-    net = hip.NetworkBackend()
+    net = hip.backends.NetworkBackend()
     with (
         hip.timeout(0.0),
         pytest.raises(TimeoutError),

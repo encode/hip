@@ -1,11 +1,8 @@
 import concurrent.futures
-import contextlib
-import contextvars
 import select
 import socket
 import ssl
 import threading
-import time
 import types
 import typing
 
@@ -16,42 +13,9 @@ if typing.TYPE_CHECKING:
     from typing_extensions import Self
 
 from ._streams import Stream
+from ._timeouts import get_current_timeout
 
-__all__ = ["NetworkBackend", "NetworkStream", "timeout"]
-
-_timeout_stack: contextvars.ContextVar[tuple[float, ...]] = contextvars.ContextVar(
-    "timeout_context", default=()
-)
-
-
-@contextlib.contextmanager
-def timeout(duration: float) -> typing.Iterator[None]:
-    """
-    A context managed timeout API.
-
-    with timeout(1.0):
-        ...
-    """
-    now = time.monotonic()
-    until = now + duration
-    stack = (until, *_timeout_stack.get())
-    token = _timeout_stack.set(stack)
-    try:
-        yield
-    finally:
-        _timeout_stack.reset(token)
-
-
-def get_current_timeout() -> float | None:
-    stack = _timeout_stack.get()
-    if not stack:
-        return None
-    soonest = min(stack)
-    now = time.monotonic()
-    remaining = soonest - now
-    if remaining <= 0.0:
-        raise TimeoutError()
-    return remaining
+__all__ = ["NetworkBackend", "NetworkStream"]
 
 
 class NetworkStream(Stream):
@@ -249,4 +213,3 @@ class NetworkBackend:
 
 Semaphore = threading.Semaphore
 Lock = threading.Lock
-sleep = time.sleep

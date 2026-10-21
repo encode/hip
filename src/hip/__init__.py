@@ -1,15 +1,13 @@
-from ._client import *  # Client
-from ._connection import *  # Connection, Transport, ResponseContext
-from ._content import *  # Binary, Content, File, Files, Form, HTML, JSON, MultiPart, Text
-from ._headers import *  # Headers
-from ._network import *  # NetworkBackend, NetworkStream, timeout
-from ._parsers import *  # HTTPParser, ProtocolError
-from ._pool import *  # ConnectionPool
-from ._request import *  # Method, Request
-from ._response import *  # StatusCode, Response
-from ._server import *  # Server
-from ._streams import *  # Stream
-from ._urls import *  # QueryParams, URL
+from . import backends, parsers, transports
+from ._client import Client
+from ._content import HTML, JSON, Binary, Content, File, Files, Form, MultiPart, Text
+from ._headers import Headers
+from ._request import Method, Request
+from ._response import Response, StatusCode
+from ._server import Server
+from ._streams import Stream
+from ._timeouts import sleep, timeout
+from ._urls import URL, QueryParams
 
 __all__ = [
     "HTML",
@@ -17,19 +15,13 @@ __all__ = [
     "URL",
     "Binary",
     "Client",
-    "Connection",
-    "ConnectionPool",
     "Content",
     "File",
     "Files",
     "Form",
-    "HTTPParser",
     "Headers",
     "Method",
     "MultiPart",
-    "NetworkBackend",
-    "NetworkStream",
-    "ProtocolError",
     "QueryParams",
     "Request",
     "Response",
@@ -37,7 +29,9 @@ __all__ = [
     "StatusCode",
     "Stream",
     "Text",
-    "Transport",
-    "open_connection",
+    "backends",
+    "parsers",
+    "sleep",
     "timeout",
+    "transports",
 ]

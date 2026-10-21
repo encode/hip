@@ -17,6 +17,7 @@ from ._urls import URL
 
 __all__ = [
     "Connection",
+    "ResponseStream",
     "Transport",
     "open_connection",
 ]
