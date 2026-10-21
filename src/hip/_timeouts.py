@@ -46,8 +46,7 @@ def sleep(dur: float):
     A `sleep()` implementation that is aware of the current timeout context.
     """
     remaining = get_current_timeout()
-    if remaining is None or dur < remaining:
-        time.sleep(dur)
-    else:
-        time.sleep(dur - remaining)
+    if remaining is not None and remaining <= dur:  # pragma: nocover
+        time.sleep(remaining)
         raise TimeoutError()
+    time.sleep(dur)
