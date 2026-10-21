@@ -80,6 +80,8 @@ requests v2.33.1 (63.4KiB)
 
 The `hip` redesign is currently in early development.
 
+For the release steps, see the [release guide](RELEASING.md).
+
 We are currently [seeking sponsorship](https://github.com/sponsors/encode), and looking to expand our team.
 
 If you'd like to discuss [getting involved](CONTRIBUTING.md), please [book in some time](https://calendly.com/encode-oss).
