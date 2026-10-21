@@ -271,36 +271,125 @@ True
 
 ## Content
 
-*Content types for requests...*
+A `Content` object represents an HTTP message body. Choose one based on the format you
+want to send or return.
+
+### Request bodies
+
+Use Form for URL-encoded fields, JSON for JSON data, and MultiPart for form fields
+with uploaded files.
 
 ```python
->>> j = hip.JSON(...)
+client = hip.Client()
+content = hip.Form({'email': 'ada@example.com', 'message': 'Hello'})
+response = client.post('https://www.example.com/contact', content=content)
 ```
 
 ```python
->>> f = hip.Form(...)
+content = hip.JSON({'title': 'A short guide', 'published': True})
+response = client.post('https://www.example.com/articles', content=content)
 ```
 
 ```python
->>> m = hip.MultiPart(...)
+upload = hip.MultiPart(
+      form={'description': 'A butterfly'},
+      files={'image': hip.File('image.png')},
+)
+response = client.post('https://www.example.com/images', content=upload)
 ```
 
-*Content types for responses...*
+### Response bodies
 
-```python
->>> h = hip.HTML('<html><body>¡Hola, mundo!</body></html>')
-```
-
-```python
->>> t = hip.Text('hello, world')
-```
-
-```python
->>> j = hip.JSON({'content': ...})
-```
+Use HTML or Text for text, JSON for structured data, and File to send a file’s
+contents.
 
 ```python
->>> f = hip.File('image.png')
+html_content = hip.HTML('<html><body>¡Hola, mundo!</body></html>')
 ```
+
+```python
+text_content = hip.Text('hello, world')
+```
+
+```python
+json_content = hip.JSON({'message': 'hello, world'})
+```
+
+```python
+file_content = hip.File('image.png')
+response = hip.Response(200, content=file_content)
+```
+
+### The Content interface
+
+`Content` describes an HTTP request or response body. Its two core methods are:
+
+* `headers()` returns the body's HTTP headers.
+* `open()` returns a `Stream` for reading the body's bytes.
+
+Each call to `open()` creates a new stream. Use a context manager so the stream
+is closed when you finish with it, including when an error occurs:
+
+```python
+content = hip.JSON({'message': 'hello, world'})
+headers = content.headers()
+
+with content.open() as stream:
+    body = stream.read()
+```
+
+The client or server normally opens content while sending it. Application code
+can open it directly when it needs to inspect or transform the bytes.
+
+## Stream
+
+`Stream` is the byte-reading and byte-writing interface used by content and
+connections:
+
+```python
+stream.read(size: int = -1) -> bytes
+stream.write(data: bytes) -> None
+stream.close() -> None
+```
+
+The Stream interface is public API, although the implementation classes themselves
+are private.
+
+### Reading
+
+For `read(size)` with `size > 0`, the result contains at most `size`
+bytes. A read may return fewer bytes than requested while more data is still
+arriving. A short read does not by itself mean the stream has ended. When the
+stream ends, a positive-size read returns b''.
+
+For a content stream or an HTTP response body stream, `read()` or `read(-1)` read
+the remaining body.
+
+```python
+with content.open() as content_stream:
+    body = content_stream.read()
+```
+
+To read the body in chunks, keep reading until a positive-size read returns `b''`:
+
+```python
+chunks = []
+with content.open() as content_stream:
+    while chunk := content_stream.read(64 * 1024):
+        chunks.append(chunk)
+
+body = b''.join(chunks)
+```
+
+### Writing
+
+Content streams returned by `Content.open()` are read-only. Calling `write()` on
+one raises `NotImplementedError`.
+
+### Closing
+
+`close()` releases the resource owned by the stream. A stream can also be used
+as a context manager; leaving the `with` block calls `close()`, even if the
+block raises an exception.
 
 <p align="center">&mdash; 💖 &mdash;</p>
