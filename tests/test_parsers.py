@@ -157,7 +157,8 @@ def test_incomplete_request_line_raises_protocol_error_on_eof():
     parser = hip.parsers.HTTPParser(stream, mode="SERVER")
 
     with pytest.raises(
-        hip.parsers.ProtocolError, match=r"Stream closed early reading request method line\."
+        hip.parsers.ProtocolError,
+        match=r"Stream closed early reading request method line\.",
     ):
         parser.recv_method_line()
 
