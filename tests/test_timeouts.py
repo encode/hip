@@ -1,6 +1,6 @@
-import hip
-
 import pytest
+
+import hip
 
 
 def test_timeout_not_expired():
@@ -9,9 +9,8 @@ def test_timeout_not_expired():
 
 
 def test_timeout_expired():
-    with hip.timeout(0.0):
-        with pytest.raises(TimeoutError):
-            hip.sleep(0.0)
+    with hip.timeout(0.0), pytest.raises(TimeoutError):
+        hip.sleep(0.0)
 
 
 def test_no_timeout_set():

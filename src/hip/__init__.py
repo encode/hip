@@ -1,17 +1,13 @@
+from . import backends, parsers, transports
 from ._client import Client
-from ._content import Binary, Content, File, Files, Form, HTML, JSON, MultiPart, Text
+from ._content import HTML, JSON, Binary, Content, File, Files, Form, MultiPart, Text
 from ._headers import Headers
 from ._request import Method, Request
-from ._response import StatusCode, Response
+from ._response import Response, StatusCode
 from ._server import Server
 from ._streams import Stream
 from ._timeouts import sleep, timeout
-from ._urls import QueryParams, URL
-
-from . import backends
-from . import parsers
-from . import transports
-
+from ._urls import URL, QueryParams
 
 __all__ = [
     "HTML",
