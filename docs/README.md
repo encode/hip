@@ -82,7 +82,7 @@ The `hip` redesign is currently in early development.
 
 We are currently [seeking sponsorship](https://github.com/sponsors/encode), and looking to expand our team.
 
-If you'd like to discuss getting involved, please [book in some time](https://calendly.com/encode-oss).
+If you'd like to discuss [getting involved](CONTRIBUTING.md), please [book in some time](https://calendly.com/encode-oss).
 
 ---
 
