@@ -29,6 +29,9 @@ __all__ = [
     "StatusCode",
     "Stream",
     "Text",
+    'backends',
+    'parsers',
     "sleep",
     "timeout",
+    'transports',
 ]
