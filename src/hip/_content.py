@@ -195,6 +195,7 @@ class File(Content):
     def __init__(self, path: str):
         self._path = path
 
+    @property
     def name(self) -> str:
         return os.path.basename(self._path)
 
