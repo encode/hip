@@ -54,7 +54,7 @@ class Client:
         request = self.build_request(method, url, headers=headers, content=content)
         with self.via.send(request) as stream:
             ct = stream.headers.get("Content-Type", "application/octet-stream")
-            ct = ct.split(';')[0].strip()
+            ct = ct.split(";")[0].strip()
             for cls in [JSON, HTML, Text]:
                 if cls.can_handle(ct):
                     content = cls.parse(stream)

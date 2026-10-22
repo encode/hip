@@ -76,9 +76,9 @@ def test_json_unicode_serialization():
 
 
 def test_json_parsing():
-    assert hip.JSON.can_handle('application/json')
-    assert hip.JSON.can_handle('application/openapi+json')
-    assert not hip.JSON.can_handle('text/plain')
+    assert hip.JSON.can_handle("application/json")
+    assert hip.JSON.can_handle("application/openapi+json")
+    assert not hip.JSON.can_handle("text/plain")
 
     with hip.Binary(b'{"text": "hello, world"}').open() as stream:
         data = hip.JSON.parse(stream)
@@ -89,15 +89,15 @@ def test_json_parsing():
 
 
 def test_binary():
-    data = hip.Binary(b'...')
+    data = hip.Binary(b"...")
 
     assert repr(data) == "<Binary b'...'>"
-    assert bytes(data) == b'...'
+    assert bytes(data) == b"..."
     assert len(data) == 3
 
 
 def test_binary_parsing():
-    assert hip.Binary.can_handle('literally/anything')
+    assert hip.Binary.can_handle("literally/anything")
 
     with hip.Binary(b'{"text": "hello, world"}').open() as stream:
         data = hip.Binary.parse(stream)

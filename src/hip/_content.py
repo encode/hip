@@ -356,9 +356,8 @@ class JSON(Content):
 
     @classmethod
     def can_handle(self, content_type: str) -> bool:
-        return (
-            content_type == 'application/json' or 
-            (content_type.startswith('application/') and content_type.endswith('+json'))
+        return content_type == "application/json" or (
+            content_type.startswith("application/") and content_type.endswith("+json")
         )
 
     # Return the underlying data. Copied to ensure immutability.
@@ -418,7 +417,7 @@ class Text(Content):
 
     @classmethod
     def can_handle(self, content_type: str) -> bool:
-        return content_type.startswith('text/')
+        return content_type.startswith("text/")
 
     def __str__(self) -> str:
         return self._text
@@ -456,7 +455,7 @@ class HTML(Content):
 
     @classmethod
     def can_handle(self, content_type: str) -> bool:
-        return content_type == 'text/html'
+        return content_type == "text/html"
 
     def __str__(self) -> str:
         return self._text
