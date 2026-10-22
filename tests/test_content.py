@@ -75,6 +75,36 @@ def test_json_unicode_serialization():
     assert bytes(data) == '{"name":"Çağdaş"}'.encode()
 
 
+def test_json_parsing():
+    assert hip.JSON.can_handle("application/json")
+    assert hip.JSON.can_handle("application/openapi+json")
+    assert not hip.JSON.can_handle("text/plain")
+
+    with hip.Binary(b'{"text": "hello, world"}').open() as stream:
+        data = hip.JSON.parse(stream)
+    assert data == hip.JSON({"text": "hello, world"})
+
+
+# Binary
+
+
+def test_binary():
+    data = hip.Binary(b"...")
+
+    assert repr(data) == "<Binary b'...'>"
+    assert bytes(data) == b"..."
+    assert len(data) == 3
+
+
+def test_binary_parsing():
+    assert hip.Binary.can_handle("literally/anything")
+
+    with hip.Binary(b'{"text": "hello, world"}').open() as stream:
+        data = hip.Binary.parse(stream)
+    assert data == hip.Binary(b'{"text": "hello, world"}')
+    assert data == b'{"text": "hello, world"}'
+
+
 # Form
 
 
@@ -382,6 +412,9 @@ def test_content():
 
     with pytest.raises(NotImplementedError):
         content.parse(hip.Stream())
+
+    with pytest.raises(NotImplementedError):
+        content.can_handle("text/plain")
 
     with pytest.raises(TypeError):
         bytes(content)

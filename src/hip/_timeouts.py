@@ -41,7 +41,7 @@ def get_current_timeout() -> float | None:
     return remaining
 
 
-def sleep(dur: float):
+def sleep(dur: float) -> None:
     """
     A `sleep()` implementation that is aware of the current timeout context.
     """

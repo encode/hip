@@ -2,7 +2,7 @@ import types
 import typing
 
 from ._connection import ResponseStream, Transport
-from ._content import HTML, JSON, Binary, Content, Text, select_media
+from ._content import HTML, JSON, Binary, Content, Text
 from ._headers import Headers
 from ._pool import ConnectionPool
 from ._request import Method, Request
@@ -29,12 +29,6 @@ class Client:
         self.transport = ConnectionPool()
         self.url = URL(url)
         self.via = RedirectMiddleware(self.transport)
-        self.media = {
-            "application/json": JSON,
-            "text/html": HTML,
-            "text/*": Text,
-            "*/*": Binary,
-        }
 
     def build_request(
         self,
@@ -60,8 +54,13 @@ class Client:
         request = self.build_request(method, url, headers=headers, content=content)
         with self.via.send(request) as stream:
             ct = stream.headers.get("Content-Type", "application/octet-stream")
-            cls = select_media(self.media, ct)
-            content = cls.parse(stream)
+            ct = ct.split(";")[0].strip()
+            for cls in [JSON, HTML, Text]:
+                if cls.can_handle(ct):
+                    content = cls.parse(stream)
+                    break
+            else:
+                content = Binary.parse(stream)
         return Response(
             status_code=stream.status_code,
             headers=stream.headers,
