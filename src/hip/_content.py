@@ -3,7 +3,7 @@ import json
 import os
 import typing
 
-from ._headers import Headers, parse_opts_header
+from ._headers import Headers
 from ._streams import ByteStream, FileStream, MultiPartStream, Stream
 from ._urlencode import urldecode, urlencode
 
@@ -15,10 +15,8 @@ __all__ = [
     "Empty",
     "File",
     "Files",
-    # Request Content Types
     "Form",
     "MultiPart",
-    # Response Content Types
     "Text",
 ]
 
@@ -45,6 +43,10 @@ class Content:
 
     @classmethod
     def parse(self, stream: Stream) -> "Content":
+        raise NotImplementedError()
+
+    @classmethod
+    def can_handle(self, content_type: str) -> bool:
         raise NotImplementedError()
 
     def __bytes__(self):
@@ -352,6 +354,13 @@ class JSON(Content):
         data = json.loads(source)
         return JSON(data, source)
 
+    @classmethod
+    def can_handle(self, content_type: str) -> bool:
+        return (
+            content_type == 'application/json' or 
+            (content_type.startswith('application/') and content_type.endswith('+json'))
+        )
+
     # Return the underlying data. Copied to ensure immutability.
     @property
     def value(self) -> typing.Any:
@@ -407,6 +416,10 @@ class Text(Content):
         text = source.decode("utf-8")
         return Text(text, source)
 
+    @classmethod
+    def can_handle(self, content_type: str) -> bool:
+        return content_type.startswith('text/')
+
     def __str__(self) -> str:
         return self._text
 
@@ -441,6 +454,10 @@ class HTML(Content):
         text = source.decode("utf-8")
         return HTML(text, source)
 
+    @classmethod
+    def can_handle(self, content_type: str) -> bool:
+        return content_type == 'text/html'
+
     def __str__(self) -> str:
         return self._text
 
@@ -466,6 +483,19 @@ class Binary(Content):
     def parse(self, stream: Stream) -> Content:
         source = stream.read()
         return Binary(source)
+
+    @classmethod
+    def can_handle(self, content_type: str) -> bool:
+        return True
+
+    # Built-ins.
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Binary):
+            return self._content == bytes(other)
+        return self._content == other
+
+    def __len__(self) -> int:
+        return len(self._content)
 
     def __bytes__(self) -> bytes:
         return self._content
@@ -536,24 +566,3 @@ class MultiPart(Content):
 
     def __repr__(self) -> str:
         return f"<MultiPart form={self._form.multi_items()!r}, files={self._files.multi_items()!r}>"
-
-
-def select_media(choices: dict[str, type[Content]], content_type: str) -> type[Content]:
-    # Eg. multipart/form-data; boundary=398hjiun98jhhi87g98h76g8
-    ct, _ = parse_opts_header(content_type)
-    # Eg. application/json
-    main, _, subtype = ct.partition("/")
-
-    if "+" in subtype:
-        # RFC 6839. Eg. application/schema+json
-        _, _, subtype = subtype.partition("+")
-
-    primary = choices.get(f"{main}/{subtype}")
-    if primary is not None:
-        return primary
-
-    secondary = choices.get(f"{main}/*")
-    if secondary is not None:
-        return secondary
-
-    return choices["*/*"]
