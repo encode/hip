@@ -6,10 +6,14 @@ if typing.TYPE_CHECKING:
     # Once we drop 3.10 support, we can use 'typing.Self'.
     from typing_extensions import Self
 
-from ._connection import Connection, ResponseStream, Transport, open_connection
-from ._request import Request
-from ._urls import URL
-from .backends.sync import NetworkBackend, Semaphore
+from .._request import Request
+from .._urls import URL
+from ..backends.sync import NetworkBackend, Semaphore
+from .base import ResponseStream, Transport
+from .connection import (
+    Connection,
+    open_connection,
+)
 
 __all__ = [
     "ConnectionPool",
