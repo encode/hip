@@ -1,6 +1,7 @@
 from . import backends, parsers, transports
 from ._client import Client
-from ._content import HTML, JSON, Binary, Content, File, Files, Form, MultiPart, Text
+from ._content import HTML, JSON, Binary, Content, Text
+from ._forms import File, Files, Form, MultiPart
 from ._headers import Headers
 from ._request import Method, Request
 from ._response import Response, StatusCode
