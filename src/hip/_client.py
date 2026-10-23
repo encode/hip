@@ -1,13 +1,12 @@
 import types
 import typing
 
-from ._connection import ResponseStream, Transport
 from ._content import HTML, JSON, Binary, Content, Text, select_media
 from ._headers import Headers
-from ._pool import ConnectionPool
 from ._request import Method, Request
 from ._response import Response
 from ._urls import URL
+from .transports import ConnectionPool, ResponseStream, Transport
 
 __all__ = ["Client"]
 
