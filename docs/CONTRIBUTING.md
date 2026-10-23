@@ -18,10 +18,13 @@ There's plenty of good work to be done here - on technical, educational, and com
 
 ## How can I get involved?
 
-We currently have two inaugral sprints planned...
+We currently have a sequence of inaugral sprints planned...
 
-* Biaritz, France. [29th & 30th October](#). Leading into PyCon FR.
-* Barcelona, Spain. [4th & 5th November](#). Leading into PyCon ES.
+* Amsterdam, Netherlands, 27th October. Leading into FastAPI conf.
+* Biaritz, France. 29th & 30th October. Leading into PyCon FR.
+* Barcelona, Spain. 4th & 5th November. Leading into PyCon ES.
+
+If you'd like to attend our sprints please send an intro email to `lovelydinosaur <at> icloud.com`
 
 We're also looking at booking in further sprints, and starting regular open office hours.
 
