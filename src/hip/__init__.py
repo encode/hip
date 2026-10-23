@@ -3,12 +3,13 @@ from ._client import Client
 from ._content import HTML, JSON, Binary, Content, Text
 from ._forms import File, Files, Form, MultiPart
 from ._headers import Headers
+from ._queryparams import QueryParams
 from ._request import Method, Request
 from ._response import Response, StatusCode
 from ._server import Server
 from ._streams import Stream
 from ._timeouts import sleep, timeout
-from ._urls import URL, QueryParams
+from ._urls import URL
 
 __all__ = [
     "HTML",
