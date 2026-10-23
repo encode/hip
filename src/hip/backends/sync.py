@@ -12,8 +12,8 @@ if typing.TYPE_CHECKING:
     # Once we drop 3.10 support, we can use 'typing.Self'.
     from typing_extensions import Self
 
-from ._streams import Stream
-from ._timeouts import get_current_timeout
+from .._streams import Stream
+from .._timeouts import get_current_timeout
 
 __all__ = ["NetworkBackend", "NetworkStream"]
 

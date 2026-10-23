@@ -8,12 +8,12 @@ if typing.TYPE_CHECKING:
 from ._body import GZipStream, HTTPStream
 from ._content import Content
 from ._headers import Headers
-from ._network import Lock, NetworkBackend
 from ._parsers import HTTPParser
 from ._request import Method, Request
 from ._response import Response, StatusCode
 from ._streams import Stream
 from ._urls import URL
+from .backends.sync import Lock, NetworkBackend
 
 __all__ = [
     "Connection",
