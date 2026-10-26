@@ -7,9 +7,9 @@ if typing.TYPE_CHECKING:
     from typing_extensions import Self
 
 from ._connection import Connection, ResponseStream, Transport, open_connection
-from ._network import NetworkBackend, Semaphore
 from ._request import Request
 from ._urls import URL
+from .backends.sync import NetworkBackend, Semaphore
 
 __all__ = [
     "ConnectionPool",

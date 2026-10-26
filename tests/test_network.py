@@ -80,7 +80,7 @@ def test_network_backend_connect_tls(monkeypatch):
         create_connection_args.append((address, timeout))
         return raw_socket
 
-    monkeypatch.setattr("hip._network.socket.create_connection", create_connection)
+    monkeypatch.setattr("hip.backends.sync.socket.create_connection", create_connection)
 
     stream = backend.connect_tls("example.com", 443)
     try:
