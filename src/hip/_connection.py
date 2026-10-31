@@ -19,7 +19,6 @@ __all__ = [
     "Connection",
     "ResponseStream",
     "Transport",
-    "open_connection",
 ]
 
 
@@ -87,8 +86,10 @@ class Connection(Transport):
         self._parser = HTTPParser(self._stream, mode="CLIENT")
 
         # Ensure valid URL
-        if self._origin.scheme not in ('http', 'https'):
-            raise ValueError(f"Invalid URL. Expected http:// or https://, got {self._origin.scheme}://")
+        if self._origin.scheme not in ("http", "https"):
+            raise ValueError(
+                f"Invalid URL. Expected http:// or https://, got {self._origin.scheme}://"
+            )
 
     def open(self, backend: NetworkBackend | None = None) -> None:
         backend = NetworkBackend() if (backend is None) else backend
