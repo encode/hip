@@ -80,7 +80,7 @@ class Transport:
 
 
 class Connection(Transport):
-    def __init__(self, stream: Stream, origin: URL | str):
+    def __init__(self, origin: URL | str, stream: Stream):
         self._stream = stream
         self._origin = URL(origin) if not isinstance(origin, URL) else origin
         self._request_lock = Lock()
@@ -213,4 +213,4 @@ def open_connection(
     else:
         stream = backend.connect(host, port)
 
-    return Connection(stream, url)
+    return Connection(origin=url, stream=stream)
