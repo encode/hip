@@ -80,11 +80,11 @@ class Transport:
 
 
 class Connection(Transport):
-    def __init__(self, origin: URL | str, stream: Stream):
-        self._stream = stream
+    def __init__(self, origin: URL | str, stream: Stream | None = None):
+        self._stream = Stream() if (stream is None) else stream
         self._origin = URL(origin) if not isinstance(origin, URL) else origin
         self._request_lock = Lock()
-        self._parser = HTTPParser(stream, mode="CLIENT")
+        self._parser = HTTPParser(self._stream, mode="CLIENT")
 
     # API for connection pool management...
     def origin(self) -> URL:
