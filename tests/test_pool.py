@@ -80,7 +80,7 @@ def test_connection_pool_should_have_managed_lifespan(server):
 
 
 def test_connection_request(server):
-    with hip.transports.open_connection(server.url) as conn:
+    with hip.transports.Connection(server.url) as conn:
         assert repr(conn) == f"<Connection [{server.url} idle]>"
 
         r = conn.request("GET", "/")
@@ -90,7 +90,7 @@ def test_connection_request(server):
 
 
 def test_connection_stream(server):
-    with hip.transports.open_connection(server.url) as conn:
+    with hip.transports.Connection(server.url) as conn:
         assert repr(conn) == f"<Connection [{server.url} idle]>"
         with conn.stream("GET", "/") as r:
             assert r.status_code == 200
@@ -101,7 +101,7 @@ def test_connection_stream(server):
 
 def test_connection_stream_read_in_chunks(server):
     with (
-        hip.transports.open_connection(server.url) as conn,
+        hip.transports.Connection(server.url) as conn,
         conn.stream("GET", "/") as response,
     ):
         assert response.read(5) == b"Hello"
@@ -110,19 +110,17 @@ def test_connection_stream_read_in_chunks(server):
 
 
 class TLSBackend:
-    def connect_tls(self, host, port, hostname):
-        self.connect_tls_args = (host, port, hostname)
+    def connect_tls(self, host, port):
+        self.connect_tls_args = (host, port)
         return hip.Binary(b"").open()
 
 
 def test_open_https_connection():
     backend = TLSBackend()
 
-    with hip.transports.open_connection(
-        "https://example.com",
-        hostname="example.com",
-        backend=backend,
-    ):
-        pass
-
-    assert backend.connect_tls_args == ("example.com", 443, "example.com")
+    conn = hip.transports.Connection("https://example.com")
+    conn.open(backend=backend)
+    try:
+        assert backend.connect_tls_args == ("example.com", 443)
+    finally:
+        conn.close()

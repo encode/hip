@@ -6,7 +6,7 @@ if typing.TYPE_CHECKING:
     # Once we drop 3.10 support, we can use 'typing.Self'.
     from typing_extensions import Self
 
-from ._connection import Connection, ResponseStream, Transport, open_connection
+from ._connection import Connection, ResponseStream, Transport
 from ._request import Request
 from ._urls import URL
 from .backends.sync import NetworkBackend, Semaphore
@@ -53,9 +53,8 @@ class ConnectionPool(Transport):
                 return conn
 
         # Or else create a new connection.
-        conn = open_connection(
-            origin, hostname=request.headers["Host"], backend=self._network_backend
-        )
+        conn = Connection(origin)
+        conn.open(backend=self._network_backend)
         self._connections.append(conn)
         return conn
 

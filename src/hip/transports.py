@@ -1,4 +1,4 @@
-from ._connection import Connection, ResponseStream, Transport, open_connection
+from ._connection import Connection, ResponseStream, Transport
 from ._pool import ConnectionPool
 
 __all__ = [
@@ -6,5 +6,4 @@ __all__ = [
     "ConnectionPool",
     "ResponseStream",
     "Transport",
-    "open_connection",
 ]

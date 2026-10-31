@@ -19,7 +19,6 @@ __all__ = [
     "Connection",
     "ResponseStream",
     "Transport",
-    "open_connection",
 ]
 
 
@@ -80,11 +79,30 @@ class Transport:
 
 
 class Connection(Transport):
-    def __init__(self, stream: Stream, origin: URL | str):
-        self._stream = stream
+    def __init__(self, origin: URL | str, stream: Stream | None = None):
+        self._stream = Stream() if (stream is None) else stream
         self._origin = URL(origin) if not isinstance(origin, URL) else origin
         self._request_lock = Lock()
-        self._parser = HTTPParser(stream, mode="CLIENT")
+        self._parser = HTTPParser(self._stream, mode="CLIENT")
+
+        # Ensure valid URL
+        if self._origin.scheme not in ("http", "https"):
+            raise ValueError(
+                f"Invalid URL. Expected http:// or https://, got {self._origin.scheme}://"
+            )
+
+    def open(self, backend: NetworkBackend | None = None) -> None:
+        backend = NetworkBackend() if (backend is None) else backend
+
+        scheme = self._origin.scheme
+        host = self._origin.host
+        port = self._origin.port or {"http": 80, "https": 443}[scheme]
+
+        if scheme == "https":
+            self._stream = backend.connect_tls(host, port)
+        else:
+            self._stream = backend.connect(host, port)
+        self._parser = HTTPParser(self._stream, mode="CLIENT")
 
     # API for connection pool management...
     def origin(self) -> URL:
@@ -180,6 +198,7 @@ class Connection(Transport):
         return f"<Connection [{self._origin} {self.description()}]>"
 
     def __enter__(self) -> "Self":
+        self.open()
         return self
 
     def __exit__(
@@ -189,28 +208,3 @@ class Connection(Transport):
         traceback: types.TracebackType | None = None,
     ):
         self.close()
-
-
-def open_connection(
-    url: URL | str,
-    hostname: str = "",
-    backend: NetworkBackend | None = None,
-) -> Connection:
-
-    if isinstance(url, str):
-        url = URL(url)
-
-    if url.scheme not in ("http", "https"):
-        raise ValueError("URL scheme must be 'http://' or 'https://'.")
-    if backend is None:
-        backend = NetworkBackend()
-
-    host = url.host
-    port = url.port or {"http": 80, "https": 443}[url.scheme]
-
-    if url.scheme == "https":
-        stream = backend.connect_tls(host, port, hostname)
-    else:
-        stream = backend.connect(host, port)
-
-    return Connection(stream, url)
