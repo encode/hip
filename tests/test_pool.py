@@ -124,4 +124,3 @@ def test_open_https_connection():
         assert backend.connect_tls_args == ("example.com", 443)
     finally:
         conn.close()
-
