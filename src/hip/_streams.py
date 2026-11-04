@@ -6,25 +6,25 @@ __all__ = ["Stream"]
 
 
 class Stream:
-    def read(self, size: int = -1) -> bytes:
+    async def read(self, size: int = -1) -> bytes:
         raise NotImplementedError()
 
-    def write(self, data: bytes) -> None:
+    async def write(self, data: bytes) -> None:
         raise NotImplementedError()
 
-    def close(self) -> None:
+    async def close(self) -> None:
         raise NotImplementedError()
 
-    def __enter__(self):
+    async def __aenter__(self):
         return self
 
-    def __exit__(
+    async def __aexit__(
         self,
         exc_type: type[BaseException] | None = None,
         exc_value: BaseException | None = None,
         traceback: types.TracebackType | None = None,
     ):
-        self.close()
+        await self.close()
 
 
 class ByteStream(Stream):
@@ -32,10 +32,10 @@ class ByteStream(Stream):
         self._buffer = io.BytesIO(data)
         self._size = len(data)
 
-    def read(self, size: int = -1) -> bytes:
+    async def read(self, size: int = -1) -> bytes:
         return self._buffer.read(size)
 
-    def close(self) -> None:
+    async def close(self) -> None:
         self._buffer.close()
 
 
@@ -43,10 +43,10 @@ class FileStream(Stream):
     def __init__(self, fileobj):
         self._fileobj = fileobj
 
-    def read(self, size: int = -1) -> bytes:
+    async def read(self, size: int = -1) -> bytes:
         return self._fileobj.read(size)
 
-    def close(self) -> None:
+    async def close(self) -> None:
         self._fileobj.close()
 
 
@@ -64,7 +64,7 @@ class MultiPartStream(Stream):
         self._complete = False
         self._buffer = io.BytesIO()
 
-    def read(self, size=-1) -> bytes:
+    async def read(self, size=-1) -> bytes:
         sections = []
         length = 0
 
@@ -132,7 +132,7 @@ class MultiPartStream(Stream):
         # return EOF marker
         return b""
 
-    def close(self) -> None:
+    async def close(self) -> None:
         if self._fileobj is not None:
             self._fileobj.close()
             self._fileobj = None

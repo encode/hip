@@ -62,7 +62,7 @@ class Form(typing.Mapping[str, str], Content):
 
     # Content API
 
-    def open(self) -> Stream:
+    async def open(self) -> Stream:
         return ByteStream(self._content)
 
     def headers(self) -> Headers:
@@ -168,7 +168,7 @@ class File(Content):
     def name(self) -> str:
         return os.path.basename(self._path)
 
-    def open(self) -> Stream:
+    async def open(self) -> Stream:
         fileobj = open(self._path, "rb")  # noqa: SIM115
         return FileStream(fileobj)
 
@@ -254,8 +254,8 @@ class Files(typing.Mapping[str, File], Content):
         return list(self._dict.get(key, []))
 
     # Content interface
-    def open(self) -> Stream:
-        return MultiPart(files=self, boundary=self._boundary).open()
+    async def open(self) -> Stream:
+        return await MultiPart(files=self, boundary=self._boundary).open()
 
     def headers(self) -> Headers:
         content_type = f"multipart/form-data; boundary={self._boundary}"
@@ -321,7 +321,7 @@ class MultiPart(Content):
     def files(self) -> Files:
         return self._files
 
-    def open(self) -> Stream:
+    async def open(self) -> Stream:
         form = [(key, value) for key, value in self._form.items()]
         files = [(key, file._path) for key, file in self._files.items()]
         return MultiPartStream(form, files, boundary=self._boundary)

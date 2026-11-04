@@ -17,7 +17,7 @@ __all__ = [
 
 
 class Content:
-    def open(self) -> Stream:
+    async def open(self) -> Stream:
         raise NotImplementedError()
 
     def headers(self) -> Headers:
@@ -44,7 +44,7 @@ class JSON(Content):
             else source
         )
 
-    def open(self) -> Stream:
+    async def open(self) -> Stream:
         return ByteStream(self._content)
 
     def headers(self) -> Headers:
@@ -58,8 +58,8 @@ class JSON(Content):
         )
 
     @classmethod
-    def parse(self, stream: Stream) -> "Content":
-        source = stream.read()
+    async def parse(self, stream: Stream) -> "Content":
+        source = await stream.read()
         data = json.loads(source)
         return JSON(data, source)
 
@@ -99,7 +99,7 @@ class Text(Content):
         self._text = text
         self._content = self._text.encode("utf-8") if source is None else source
 
-    def open(self) -> Stream:
+    async def open(self) -> Stream:
         return ByteStream(self._content)
 
     def headers(self) -> Headers:
@@ -113,8 +113,8 @@ class Text(Content):
         )
 
     @classmethod
-    def parse(self, stream: Stream) -> Content:
-        source = stream.read()
+    async def parse(self, stream: Stream) -> Content:
+        source = await stream.read()
         text = source.decode("utf-8")
         return Text(text, source)
 
@@ -133,7 +133,7 @@ class HTML(Content):
         self._text = text
         self._content = self._text.encode("utf-8") if source is None else source
 
-    def open(self) -> Stream:
+    async def open(self) -> Stream:
         return ByteStream(self._content)
 
     def headers(self) -> Headers:
@@ -147,8 +147,8 @@ class HTML(Content):
         )
 
     @classmethod
-    def parse(self, stream: Stream) -> Content:
-        source = stream.read()
+    async def parse(self, stream: Stream) -> Content:
+        source = await stream.read()
         text = source.decode("utf-8")
         return HTML(text, source)
 
@@ -166,7 +166,7 @@ class Binary(Content):
     def __init__(self, content: bytes | None) -> None:
         self._content = b"" if (content is None) else content
 
-    def open(self) -> Stream:
+    async def open(self) -> Stream:
         return ByteStream(self._content)
 
     def headers(self) -> Headers:
@@ -174,8 +174,8 @@ class Binary(Content):
         return Headers({"Content-Length": f"{content_length}"})
 
     @classmethod
-    def parse(self, stream: Stream) -> Content:
-        source = stream.read()
+    async def parse(self, stream: Stream) -> Content:
+        source = await stream.read()
         return Binary(source)
 
     def __bytes__(self) -> bytes:
@@ -189,7 +189,7 @@ class Empty(Content):
     def __init__(self) -> None:
         pass
 
-    def open(self) -> Stream:
+    async def open(self) -> Stream:
         return ByteStream(b"")
 
     def headers(self) -> Headers:

@@ -8,7 +8,7 @@ if typing.TYPE_CHECKING:
 
 from .._request import Request
 from .._urls import URL
-from ..backends.sync import NetworkBackend, Semaphore
+from ..backends.asyncio import NetworkBackend, Semaphore
 from .base import SendContext, Transport
 from .connection import (
     Connection,
@@ -31,24 +31,24 @@ class ConnectionPool(Transport):
         self._closed = False
 
     # Public API...
-    def send(self, request: Request) -> SendContext:
+    async def send(self, request: Request) -> SendContext:
         if self._closed:
             raise RuntimeError("ConnectionPool is closed.")
 
         # TODO: concurrency limiting
-        self._cleanup()
-        connection = self._get_connection(request)
-        return connection.send(request)
+        await self._cleanup()
+        connection = await self._get_connection(request)
+        return await connection.send(request)
 
-    def close(self):
+    async def close(self):
         self._closed = True
         closing = list(self._connections)
         self._connections = []
         for conn in closing:
-            conn.close()
+            await conn.close()
 
     # Create or reuse connections as required...
-    def _get_connection(self, request: Request) -> "Connection":
+    async def _get_connection(self, request: Request) -> "Connection":
         # Attempt to reuse an existing connection.
         url = request.url
         origin = URL(scheme=url.scheme, host=url.host, port=url.port)
@@ -57,18 +57,18 @@ class ConnectionPool(Transport):
                 return conn
 
         # Or else create a new connection.
-        conn = open_connection(
+        conn = await open_connection(
             origin, hostname=request.headers["Host"], backend=self._network_backend
         )
         self._connections.append(conn)
         return conn
 
     # Connection pool management...
-    def _cleanup(self) -> None:
+    async def _cleanup(self) -> None:
         time.monotonic()
         for conn in list(self._connections):
             if conn.is_expired():
-                conn.close()
+                await conn.close()
             if conn.is_closed():
                 self._connections.remove(conn)
 
@@ -92,13 +92,13 @@ class ConnectionPool(Transport):
 
             warnings.warn("ConnectionPool was garbage collected without being closed.")
 
-    def __enter__(self) -> "Self":
+    async def __aenter__(self) -> "Self":
         return self
 
-    def __exit__(
+    async def __aexit__(
         self,
         exc_type: type[BaseException] | None = None,
         exc_value: BaseException | None = None,
         traceback: types.TracebackType | None = None,
     ) -> None:
-        self.close()
+        await self.close()

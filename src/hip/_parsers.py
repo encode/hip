@@ -93,7 +93,7 @@ class HTTPParser:
         # Special states...
         self.processing_1xx = False
 
-    def send_method_line(self, method: bytes, target: bytes, protocol: bytes) -> None:
+    async def send_method_line(self, method: bytes, target: bytes, protocol: bytes) -> None:
         """
         Send the initial request line:
 
@@ -112,12 +112,12 @@ class HTTPParser:
         if protocol != b"HTTP/1.1":
             raise ProtocolError("Sent unsupported protocol version")
         data = b" ".join([method, target, protocol]) + b"\r\n"
-        self.stream.write(data)
+        await self.stream.write(data)
 
         self.send_state = State.SEND_HEADERS
         self.recv_state = State.RECV_STATUS_LINE
 
-    def send_status_line(
+    async def send_status_line(
         self, protocol: bytes, status_code: int, reason: bytes
     ) -> None:
         """
@@ -136,11 +136,11 @@ class HTTPParser:
             raise ProtocolError("Sent unsupported protocol version")
         status_code_bytes = str(status_code).encode("ascii")
         data = b" ".join([protocol, status_code_bytes, reason]) + b"\r\n"
-        self.stream.write(data)
+        await self.stream.write(data)
 
         self.send_state = State.SEND_HEADERS
 
-    def send_headers(self, headers: list[tuple[bytes, bytes]]) -> None:
+    async def send_headers(self, headers: list[tuple[bytes, bytes]]) -> None:
         """
         Send the request headers:
 
@@ -173,11 +173,11 @@ class HTTPParser:
         # Send request headers
         lines = [name + b": " + value + b"\r\n" for name, value in headers]
         data = b"".join(lines) + b"\r\n"
-        self.stream.write(data)
+        await self.stream.write(data)
 
         self.send_state = State.SEND_BODY
 
-    def send_body(self, body: bytes) -> None:
+    async def send_body(self, body: bytes) -> None:
         """
         Send the request body. An empty bytes argument indicates the end of the stream:
 
@@ -193,7 +193,7 @@ class HTTPParser:
             # Transfer-Encoding: chunked
             self.send_seen_length += len(body)
             marker = f"{len(body):x}\r\n".encode("ascii")
-            self.stream.write(marker + body + b"\r\n")
+            await self.stream.write(marker + body + b"\r\n")
 
         else:
             # Content-Length: xxx
@@ -205,13 +205,13 @@ class HTTPParser:
                 msg = "Not enough data sent for declared Content-Length"
                 raise ProtocolError(msg)
             if body:
-                self.stream.write(body)
+                await self.stream.write(body)
 
         if body == b"":
             # Handle body close
             self.send_state = State.DONE
 
-    def recv_method_line(self) -> tuple[bytes, bytes, bytes]:
+    async def recv_method_line(self) -> tuple[bytes, bytes, bytes]:
         """
         Receive the initial request method line:
 
@@ -234,7 +234,7 @@ class HTTPParser:
 
         # Read initial response line, eg. "GET / HTTP/1.1"
         exc_text = "reading request method line"
-        line = self.parser.read_until(
+        line = await self.parser.read_until(
             b"\r\n",
             max_size=4096,
             exc_text=exc_text,
@@ -249,7 +249,7 @@ class HTTPParser:
         self.send_state = State.SEND_STATUS_LINE
         return method, target, protocol
 
-    def recv_status_line(self) -> tuple[bytes, int, bytes]:
+    async def recv_status_line(self) -> tuple[bytes, int, bytes]:
         """
         Receive the initial response status line:
 
@@ -263,7 +263,7 @@ class HTTPParser:
 
         # Read initial response line, eg. "HTTP/1.1 200 OK"
         exc_text = "reading response status line"
-        line = self.parser.read_until(b"\r\n", max_size=4096, exc_text=exc_text)
+        line = await self.parser.read_until(b"\r\n", max_size=4096, exc_text=exc_text)
         protocol, status_code_str, reason_phrase = line.split(b" ", 2)
         if protocol != b"HTTP/1.1":
             raise ProtocolError("Received unsupported protocol version")
@@ -279,7 +279,7 @@ class HTTPParser:
         self.recv_state = State.RECV_HEADERS
         return protocol, status_code, reason_phrase
 
-    def recv_headers(self) -> list[tuple[bytes, bytes]]:
+    async def recv_headers(self) -> list[tuple[bytes, bytes]]:
         """
         Receive the response headers:
 
@@ -295,7 +295,7 @@ class HTTPParser:
         # Read response headers
         headers = []
         exc_text = "reading response headers"
-        while line := self.parser.read_until(b"\r\n", max_size=4096, exc_text=exc_text):
+        while line := await self.parser.read_until(b"\r\n", max_size=4096, exc_text=exc_text):
             name, value = line.split(b":", 1)
             value = value.strip(b" ")
             headers.append((name, value))
@@ -326,7 +326,7 @@ class HTTPParser:
             self.recv_state = State.RECV_BODY
         return headers
 
-    def recv_body(self) -> bytes:
+    async def recv_body(self) -> bytes:
         """
         Receive the response body. An empty byte string indicates the end of the stream:
 
@@ -343,26 +343,26 @@ class HTTPParser:
         if self.recv_content_length is None:
             # Transfer-Encoding: chunked
             exc_text = "reading chunk size"
-            line = self.parser.read_until(b"\r\n", max_size=4096, exc_text=exc_text)
+            line = await self.parser.read_until(b"\r\n", max_size=4096, exc_text=exc_text)
             sizestr, _, _ = line.partition(b";")
 
             exc_text = "Received invalid chunk size"
             size = bounded_hex(sizestr, max_digits=8, exc_text=exc_text)
             if size > 0:
-                body = self.parser.read(size=size)
+                body = await self.parser.read(size=size)
                 exc_text = "reading chunk data"
-                self.parser.read_until(b"\r\n", max_size=2, exc_text=exc_text)
+                await self.parser.read_until(b"\r\n", max_size=2, exc_text=exc_text)
                 self.recv_seen_length += len(body)
             else:
                 body = b""
                 exc_text = "reading chunk termination"
-                self.parser.read_until(b"\r\n", max_size=2, exc_text=exc_text)
+                await self.parser.read_until(b"\r\n", max_size=2, exc_text=exc_text)
 
         else:
             # Content-Length: xxx
             remaining = self.recv_content_length - self.recv_seen_length
             size = min(remaining, 4096)
-            body = self.parser.read(size=size)
+            body = await self.parser.read(size=size)
             self.recv_seen_length += len(body)
             if self.recv_seen_length < self.recv_content_length and body == b"":
                 msg = "Not enough data received for declared Content-Length"
@@ -373,14 +373,14 @@ class HTTPParser:
             self.recv_state = State.DONE
         return body
 
-    def complete(self):
+    async def complete(self):
         is_fully_complete = (
             self.send_state == State.DONE and self.recv_state == State.DONE
         )
         is_keepalive = self.send_keep_alive and self.recv_keep_alive
 
         if not (is_fully_complete and is_keepalive):
-            self.close()
+            await self.close()
             return
 
         if self.mode == Mode.CLIENT:
@@ -399,11 +399,11 @@ class HTTPParser:
         self.processing_1xx = False
         self.keepalive_until = time.monotonic() + self.keepalive_duration
 
-    def close(self):
+    async def close(self):
         if self.send_state != State.CLOSED:
             self.send_state = State.CLOSED
             self.recv_state = State.CLOSED
-            self.stream.close()
+            await self.stream.close()
 
     def is_idle(self) -> bool:
         return (
@@ -442,17 +442,17 @@ class ReadAheadParser:
         self._stream = stream
         self._chunk_size = 4096
 
-    def _read_some(self) -> bytes:
+    async def _read_some(self) -> bytes:
         if self._buffer:
             ret, self._buffer = self._buffer, b""
             return ret
-        return self._stream.read(self._chunk_size)
+        return await self._stream.read(self._chunk_size)
 
     def _push_back(self, buffer):
         assert self._buffer == b""
         self._buffer = buffer
 
-    def read(self, size: int) -> bytes:
+    async def read(self, size: int) -> bytes:
         """
         Read and return up to 'size' bytes from the stream, with I/O buffering provided.
 
@@ -460,7 +460,7 @@ class ReadAheadParser:
         """
         buffer = bytearray()
         while len(buffer) < size:
-            chunk = self._read_some()
+            chunk = await self._read_some()
             if not chunk:
                 break
             buffer.extend(chunk)
@@ -470,7 +470,7 @@ class ReadAheadParser:
             self._push_back(bytes(push_back))
         return bytes(buffer)
 
-    def read_until(
+    async def read_until(
         self,
         marker: bytes,
         max_size: int,
@@ -489,7 +489,7 @@ class ReadAheadParser:
         """
         buffer = bytearray()
         while len(buffer) <= max_size:
-            chunk = self._read_some()
+            chunk = await self._read_some()
             if not chunk:
                 # EOF is only clean if no part of the line has arrived.
                 if allow_empty_eof and not buffer:
