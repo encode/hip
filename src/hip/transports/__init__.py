@@ -1,11 +1,11 @@
-from .base import ResponseStream, Transport
+from .base import SendContext, Transport
 from .connection import Connection, open_connection
 from .pool import ConnectionPool
 
 __all__ = [
     "Connection",
     "ConnectionPool",
-    "ResponseStream",
+    "SendContext",
     "Transport",
     "open_connection",
 ]

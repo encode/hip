@@ -7,10 +7,10 @@ from .._response import Response, StatusCode
 from .._streams import Stream
 from .._urls import URL
 
-__all__ = ["ResponseStream", "Transport"]
+__all__ = ["SendContext", "Transport"]
 
 
-class ResponseStream(Stream):
+class SendContext:
     def __init__(
         self, status_code: StatusCode, headers: Headers, stream: Stream
     ) -> None:
@@ -18,11 +18,8 @@ class ResponseStream(Stream):
         self.headers = headers
         self.stream = stream
 
-    def read(self, size: int = -1) -> bytes:
-        return self.stream.read(size)
-
-    def close(self):
-        self.stream.close()
+    def __iter__(self):
+        return iter((self.status_code, self.headers, self.stream))
 
     def __enter__(self):
         return self
@@ -33,11 +30,11 @@ class ResponseStream(Stream):
         exc_value: BaseException | None = None,
         traceback: types.TracebackType | None = None,
     ) -> None:
-        self.close()
+        self.stream.close()
 
 
 class Transport:
-    def send(self, request: Request) -> ResponseStream:
+    def send(self, request: Request) -> SendContext:
         raise NotImplementedError()
 
     def close(self):
@@ -51,9 +48,9 @@ class Transport:
         content: Content | bytes | None = None,
     ) -> Response:
         request = Request(method, url, headers=headers, content=content)
-        with self.send(request) as stream:
+        with self.send(request) as (status_code, resp_headers, stream):
             body = stream.read()
-        return Response(stream.status_code, headers=stream.headers, content=body)
+        return Response(status_code, headers=resp_headers, content=body)
 
     def stream(
         self,
@@ -61,6 +58,6 @@ class Transport:
         url: URL | str,
         headers: Headers | dict[str, str] | None = None,
         content: Content | bytes | None = None,
-    ) -> ResponseStream:
+    ) -> SendContext:
         request = Request(method, url, headers=headers, content=content)
         return self.send(request)

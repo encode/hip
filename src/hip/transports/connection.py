@@ -14,7 +14,7 @@ from .._response import Response, StatusCode
 from .._streams import Stream
 from .._urls import URL
 from ..backends.sync import Lock, NetworkBackend
-from .base import ResponseStream, Transport
+from .base import SendContext, Transport
 
 __all__ = ["Connection", "open_connection"]
 
@@ -43,14 +43,14 @@ class Connection(Transport):
         return self._parser.description()
 
     # API entry points...
-    def send(self, request: Request) -> ResponseStream:
+    def send(self, request: Request) -> SendContext:
         # async with self._request_lock:
         #    try:
         self._send_head(request)
         self._send_body(request)
         code, headers = self._recv_head()
         stream = self._recv_body(headers)
-        return ResponseStream(code, headers, stream)
+        return SendContext(code, headers, stream)
 
     def close(self) -> None:
         with self._request_lock:
@@ -66,9 +66,9 @@ class Connection(Transport):
     ) -> Response:
         url = self._origin.join(url)
         request = Request(method, url, headers=headers, content=content)
-        with self.send(request) as stream:
+        with self.send(request) as (status_code, resp_headers, stream):
             body = stream.read()
-        return Response(stream.status_code, headers=stream.headers, content=body)
+        return Response(status_code, headers=resp_headers, content=body)
 
     def stream(
         self,
@@ -76,7 +76,7 @@ class Connection(Transport):
         url: URL | str,
         headers: Headers | dict[str, str] | None = None,
         content: Content | bytes | None = None,
-    ) -> ResponseStream:
+    ) -> SendContext:
         url = self._origin.join(url)
         request = Request(method, url, headers=headers, content=content)
         return self.send(request)

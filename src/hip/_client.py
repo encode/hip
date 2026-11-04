@@ -6,7 +6,7 @@ from ._headers import Headers
 from ._request import Method, Request
 from ._response import Response
 from ._urls import URL
-from .transports import ConnectionPool, ResponseStream, Transport
+from .transports import ConnectionPool, SendContext, Transport
 
 __all__ = ["Client"]
 
@@ -57,13 +57,13 @@ class Client:
         content: Content | bytes | None = None,
     ) -> Response:
         request = self.build_request(method, url, headers=headers, content=content)
-        with self.via.send(request) as stream:
-            ct = stream.headers.get("Content-Type", "application/octet-stream")
+        with self.via.send(request) as (status_code, resp_headers, stream):
+            ct = resp_headers.get("Content-Type", "application/octet-stream")
             cls = select_media(self.media, ct)
             content = cls.parse(stream)
         return Response(
-            status_code=stream.status_code,
-            headers=stream.headers,
+            status_code=status_code,
+            headers=resp_headers,
             content=content,
         )
 
@@ -73,7 +73,7 @@ class Client:
         url: URL | str,
         headers: Headers | dict[str, str] | None = None,
         content: Content | bytes | None = None,
-    ) -> ResponseStream:
+    ) -> SendContext:
         request = self.build_request(method, url, headers=headers, content=content)
         return self.via.send(request)
 
@@ -138,15 +138,15 @@ class RedirectMiddleware(Transport):
         self._transport = transport
 
     def build_redirect_request(
-        self, request: Request, response: ResponseStream
+        self, request: Request, ctx: SendContext
     ) -> Request | None:
         # Redirect status codes...
-        if response.status_code not in (301, 302, 303, 307, 308):
+        if ctx.status_code not in (301, 302, 303, 307, 308):
             return None
 
         # Redirects need a valid location header...
         try:
-            location = URL(response.headers["Location"])
+            location = URL(ctx.headers["Location"])
         except (KeyError, ValueError):
             return None
 
@@ -158,22 +158,22 @@ class RedirectMiddleware(Transport):
 
         return Request(method, url, headers, content)
 
-    def send(self, request: Request) -> ResponseStream:
+    def send(self, request: Request) -> SendContext:
         while True:
-            response = self._transport.send(request)
+            ctx = self._transport.send(request)
 
             # Determine if we have a redirect or not.
-            redirect = self.build_redirect_request(request, response)
+            redirect = self.build_redirect_request(request, ctx)
 
             # If we don't have a redirect, we're done.
             if redirect is None:
-                return response
+                return ctx
 
             # If we have a redirect, then we read the body of the response.
             # Ensures that the HTTP connection is available for a new
             # request/response cycle.
-            with response:
-                response.read()
+            with ctx:
+                ctx.stream.read()
 
             # Make the next request
             request = redirect
