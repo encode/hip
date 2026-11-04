@@ -14,7 +14,7 @@ class HTTPStream(Stream):
         self._buffer = io.BytesIO()
         self._finished = False
 
-    def read(self, size=-1) -> bytes:
+    async def read(self, size=-1) -> bytes:
         if self._finished:
             return b""
 
@@ -31,7 +31,7 @@ class HTTPStream(Stream):
 
         # Read each chunk in turn.
         while (size < 0) or (length < size):
-            section = self._parser.recv_body()
+            section = await self._parser.recv_body()
             sections.append(section)
             length += len(section)
             if section == b"":
@@ -47,10 +47,10 @@ class HTTPStream(Stream):
 
         return output
 
-    def close(self) -> None:
+    async def close(self) -> None:
         self._buffer.close()
         if self._is_response:
-            self._parser.complete()
+            await self._parser.complete()
 
 
 class GZipStream(Stream):
@@ -61,9 +61,9 @@ class GZipStream(Stream):
         self._finished = False
         self._buffer = bytearray()
 
-    def read(self, size=-1) -> bytes:
+    async def read(self, size=-1) -> bytes:
         while (size < 0 or len(self._buffer) < size) and not self._finished:
-            compressed = self._stream.read(8192)
+            compressed = await self._stream.read(8192)
 
             try:
                 if compressed:
@@ -88,5 +88,5 @@ class GZipStream(Stream):
 
         return output
 
-    def close(self) -> None:
-        self._stream.close()
+    async def close(self) -> None:
+        await self._stream.close()

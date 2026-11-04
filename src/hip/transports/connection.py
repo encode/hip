@@ -13,7 +13,7 @@ from .._request import Method, Request
 from .._response import Response, StatusCode
 from .._streams import Stream
 from .._urls import URL
-from ..backends.sync import Lock, NetworkBackend
+from ..backends.asyncio import Lock, NetworkBackend
 from .base import SendContext, Transport
 
 __all__ = ["Connection", "open_connection"]
@@ -43,21 +43,21 @@ class Connection(Transport):
         return self._parser.description()
 
     # API entry points...
-    def send(self, request: Request) -> SendContext:
+    async def send(self, request: Request) -> SendContext:
         # async with self._request_lock:
         #    try:
-        self._send_head(request)
-        self._send_body(request)
-        code, headers = self._recv_head()
-        stream = self._recv_body(headers)
+        await self._send_head(request)
+        await self._send_body(request)
+        code, headers = await self._recv_head()
+        stream = await self._recv_body(headers)
         return SendContext((code, headers, stream))
 
-    def close(self) -> None:
-        with self._request_lock:
-            self._close()
+    async def close(self) -> None:
+        async with self._request_lock:
+            await self._parser.close()
 
     # Top-level API for working directly with a connection.
-    def request(
+    async def request(
         self,
         method: Method | str,
         url: URL | str,
@@ -66,61 +66,57 @@ class Connection(Transport):
     ) -> Response:
         url = self._origin.join(url)
         request = Request(method, url, headers=headers, content=content)
-        with self.send(request) as (status_code, resp_headers, stream):
+        async with await self.send(request) as (status_code, resp_headers, stream):
             body = stream.read()
         return Response(status_code, headers=resp_headers, content=body)
 
     # Send the request...
-    def _send_head(self, request: Request) -> None:
+    async def _send_head(self, request: Request) -> None:
         method = bytes(request.method)
         target = request.url.target.encode("ascii")
         protocol = b"HTTP/1.1"
-        self._parser.send_method_line(method, target, protocol)
+        await self._parser.send_method_line(method, target, protocol)
         headers = request.headers.as_byte_pairs()
-        self._parser.send_headers(headers)
+        await self._parser.send_headers(headers)
 
-    def _send_body(self, request: Request) -> None:
-        with request.content.open() as stream:
-            while data := stream.read(64 * 1024):
-                self._parser.send_body(data)
-        self._parser.send_body(b"")
+    async def _send_body(self, request: Request) -> None:
+        async with await request.content.open() as stream:
+            while data := await stream.read(64 * 1024):
+                await self._parser.send_body(data)
+        await self._parser.send_body(b"")
 
     # Receive the response...
-    def _recv_head(self) -> tuple[StatusCode, Headers]:
-        _, code, _ = self._parser.recv_status_line()
-        h = self._parser.recv_headers()
+    async def _recv_head(self) -> tuple[StatusCode, Headers]:
+        _, code, _ = await self._parser.recv_status_line()
+        h = await self._parser.recv_headers()
         status_code = StatusCode(code)
         headers = Headers([(k.decode("ascii"), v.decode("ascii")) for k, v in h])
         return status_code, headers
 
-    def _recv_body(self, headers) -> Stream:
+    async def _recv_body(self, headers) -> Stream:
         stream: Stream = HTTPStream(self._parser, is_response=True)
         content_encoding = headers.get("Content-Encoding", "")
         if content_encoding.lower() == "gzip":
             stream = GZipStream(stream)
         return stream
 
-    # Request/response cycle complete...
-    def _close(self) -> None:
-        self._parser.close()
-
     # Builtins...
     def __repr__(self) -> str:
         return f"<Connection [{self._origin} {self.description()}]>"
 
-    def __enter__(self) -> "Self":
+    async def __aenter__(self) -> "Self":
         return self
 
-    def __exit__(
+    async def __aexit__(
         self,
         exc_type: type[BaseException] | None = None,
         exc_value: BaseException | None = None,
         traceback: types.TracebackType | None = None,
     ):
-        self.close()
+        await self.close()
 
 
-def open_connection(
+async def open_connection(
     url: URL | str,
     hostname: str = "",
     backend: NetworkBackend | None = None,
@@ -138,8 +134,8 @@ def open_connection(
     port = url.port or {"http": 80, "https": 443}[url.scheme]
 
     if url.scheme == "https":
-        stream = backend.connect_tls(host, port, hostname)
+        stream = await backend.connect_tls(host, port, hostname)
     else:
-        stream = backend.connect(host, port)
+        stream = await backend.connect(host, port)
 
     return Connection(stream, url)

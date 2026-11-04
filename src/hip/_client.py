@@ -49,7 +49,7 @@ class Client:
             content=content,
         )
 
-    def request(
+    async def request(
         self,
         method: Method | str,
         url: URL | str,
@@ -57,67 +57,67 @@ class Client:
         content: Content | bytes | None = None,
     ) -> Response:
         request = self.build_request(method, url, headers=headers, content=content)
-        with self.via.send(request) as (status_code, resp_headers, stream):
+        async with await self.via.send(request) as (status_code, resp_headers, stream):
             ct = resp_headers.get("Content-Type", "application/octet-stream")
             cls = select_media(self.media, ct)
-            content = cls.parse(stream)
+            content = await cls.parse(stream)
         return Response(
             status_code=status_code,
             headers=resp_headers,
             content=content,
         )
 
-    def get(
+    async def get(
         self,
         url: URL | str,
         headers: Headers | dict[str, str] | None = None,
     ):
-        return self.request("GET", url, headers=headers)
+        return await self.request("GET", url, headers=headers)
 
-    def post(
-        self,
-        url: URL | str,
-        headers: Headers | dict[str, str] | None = None,
-        content: Content | bytes | None = None,
-    ):
-        return self.request("POST", url, headers=headers, content=content)
-
-    def put(
+    async def post(
         self,
         url: URL | str,
         headers: Headers | dict[str, str] | None = None,
         content: Content | bytes | None = None,
     ):
-        return self.request("PUT", url, headers=headers, content=content)
+        return await self.request("POST", url, headers=headers, content=content)
 
-    def patch(
+    async def put(
         self,
         url: URL | str,
         headers: Headers | dict[str, str] | None = None,
         content: Content | bytes | None = None,
     ):
-        return self.request("PATCH", url, headers=headers, content=content)
+        return await self.request("PUT", url, headers=headers, content=content)
 
-    def delete(
+    async def patch(
+        self,
+        url: URL | str,
+        headers: Headers | dict[str, str] | None = None,
+        content: Content | bytes | None = None,
+    ):
+        return await self.request("PATCH", url, headers=headers, content=content)
+
+    async def delete(
         self,
         url: URL | str,
         headers: Headers | dict[str, str] | None = None,
     ):
-        return self.request("DELETE", url, headers=headers)
+        return await self.request("DELETE", url, headers=headers)
 
-    def close(self):
-        self.via.close()
+    async def close(self):
+        await self.via.close()
 
-    def __enter__(self):
+    async def __aenter__(self):
         return self
 
-    def __exit__(
+    async def __aexit__(
         self,
         exc_type: type[BaseException] | None = None,
         exc_value: BaseException | None = None,
         traceback: types.TracebackType | None = None,
     ):
-        self.close()
+        await self.close()
 
     def __repr__(self):
         return f"<Client [{self.transport.description()}]>"
@@ -150,9 +150,9 @@ class RedirectMiddleware(Transport):
 
         return Request(method, url, headers, content)
 
-    def send(self, request: Request) -> SendContext:
+    async def send(self, request: Request) -> SendContext:
         while True:
-            ctx = self._transport.send(request)
+            ctx = await self._transport.send(request)
 
             # Determine if we have a redirect or not.
             redirect = self.build_redirect_request(request, ctx)
@@ -166,10 +166,10 @@ class RedirectMiddleware(Transport):
             # request/response cycle.
             with ctx:
                 _, _, stream = ctx
-                stream.read()
+                await stream.read()
 
             # Make the next request
             request = redirect
 
-    def close(self):
-        self._transport.close()
+    async def close(self):
+        await self._transport.close()

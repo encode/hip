@@ -11,27 +11,27 @@ __all__ = ["SendContext", "Transport"]
 
 
 class SendContext(tuple[StatusCode, Headers, Stream]):
-    def __enter__(self):
+    async def __aenter__(self):
         return self
 
-    def __exit__(
+    async def __aexit__(
         self,
         exc_type: type[BaseException] | None = None,
         exc_value: BaseException | None = None,
         traceback: types.TracebackType | None = None,
     ) -> None:
         _, _, stream = self
-        stream.close()
+        await stream.close()
 
 
 class Transport:
-    def send(self, request: Request) -> SendContext:
+    async def send(self, request: Request) -> SendContext:
         raise NotImplementedError()
 
-    def close(self):
+    async def close(self):
         pass
 
-    def request(
+    async def request(
         self,
         method: Method | str,
         url: URL | str,
@@ -39,6 +39,6 @@ class Transport:
         content: Content | bytes | None = None,
     ) -> Response:
         request = Request(method, url, headers=headers, content=content)
-        with self.send(request) as (status, resp_headers, stream):
-            body = stream.read()
+        async with await self.send(request) as (status, resp_headers, stream):
+            body = await stream.read()
         return Response(status, headers=resp_headers, content=body)
