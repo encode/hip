@@ -149,9 +149,10 @@ def test_request(client, server):
 
 
 def test_stream(client, server):
-    with client.stream("GET", server.url) as r:
-        assert r.status_code == 200
-        body = r.read()
+    request = hip.Request("GET", server.url)
+    with client.transport.send(request) as (status, _, stream):
+        assert status == 200
+        body = stream.read()
         assert json.loads(body) == {
             "method": "GET",
             "query-params": {},
@@ -161,10 +162,12 @@ def test_stream(client, server):
 
 
 def test_stream_read_after_eof(client, server):
-    with client.stream("GET", server.url) as response:
-        assert response.read()
-        assert response.read() == b""
-        assert response.read() == b""
+    request = hip.Request("GET", server.url)
+    with client.transport.send(request) as (status, _, stream):
+        assert status == 200
+        assert stream.read()
+        assert stream.read() == b""
+        assert stream.read() == b""
 
 
 def test_keepalive(client, server):
@@ -269,15 +272,15 @@ def test_client_receives_mixed_case_gzip_response(client):
 
 
 def test_client_streams_gzip_response(client):
-    with (
-        hip.Server(gzip_response) as server,
-        client.stream("GET", server.url) as response,
-    ):
-        assert response.read(5) == b"Hello"
-        assert response.read(5) == b", wor"
-        assert response.read(5) == b"ld."
-        assert response.read(5) == b""
-        assert response.read(5) == b""
+    with hip.Server(gzip_response) as server:
+        request = hip.Request("GET", server.url, {"Accept-Encoding": "gzip"})
+        with client.transport.send(request) as (status, _, stream):
+            assert status == 200
+            assert stream.read(5) == b"Hello"
+            assert stream.read(5) == b", wor"
+            assert stream.read(5) == b"ld."
+            assert stream.read(5) == b""
+            assert stream.read(5) == b""
 
 
 def test_client_rejects_truncated_gzip_response(client):
@@ -332,8 +335,8 @@ def test_client_streams_gzip_response_in_multiple_chunks(client):
             content=gzipped,
         )
 
-    with (
-        hip.Server(app) as server,
-        client.stream("GET", server.url) as response,
-    ):
-        assert response.read() == source
+    with hip.Server(app) as server:
+        request = hip.Request("GET", server.url, {"Accept-Encoding": "gzip"})
+        with client.transport.send(request) as (status, _, stream):
+            assert status == 200
+            assert stream.read() == source

@@ -55,11 +55,12 @@ def test_connection_pool_stream(server):
         assert repr(pool) == "<ConnectionPool [0 active]>"
         assert len(pool.connections) == 0
 
-        with pool.stream("GET", server.url) as r:
-            assert r.status_code == 200
+        request = hip.Request("GET", server.url)
+        with pool.send(request) as (status, _, stream):
+            assert status == 200
             assert repr(pool) == "<ConnectionPool [1 active]>"
             assert len(pool.connections) == 1
-            r.read()
+            stream.read()
 
         assert repr(pool) == "<ConnectionPool [0 active, 1 idle]>"
         assert len(pool.connections) == 1
@@ -92,21 +93,22 @@ def test_connection_request(server):
 def test_connection_stream(server):
     with hip.transports.open_connection(server.url) as conn:
         assert repr(conn) == f"<Connection [{server.url} idle]>"
-        with conn.stream("GET", "/") as r:
-            assert r.status_code == 200
+        request = hip.Request("GET", server.url)
+        with conn.send(request) as (status, _, stream):
+            assert status == 200
             assert repr(conn) == f"<Connection [{server.url} active]>"
-            r.read()
+            stream.read()
         assert repr(conn) == f"<Connection [{server.url} idle]>"
 
 
 def test_connection_stream_read_in_chunks(server):
-    with (
-        hip.transports.open_connection(server.url) as conn,
-        conn.stream("GET", "/") as response,
-    ):
-        assert response.read(5) == b"Hello"
-        assert response.read(5) == b", wor"
-        assert response.read() == b"ld."
+    with hip.transports.open_connection(server.url) as conn:
+        request = hip.Request("GET", server.url)
+        with conn.send(request) as (status, _, stream):
+            assert status == 200
+            assert stream.read(5) == b"Hello"
+            assert stream.read(5) == b", wor"
+            assert stream.read() == b"ld."
 
 
 class TLSBackend:

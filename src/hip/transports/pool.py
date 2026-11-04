@@ -9,7 +9,7 @@ if typing.TYPE_CHECKING:
 from .._request import Request
 from .._urls import URL
 from ..backends.sync import NetworkBackend, Semaphore
-from .base import ResponseStream, Transport
+from .base import SendContext, Transport
 from .connection import (
     Connection,
     open_connection,
@@ -31,7 +31,7 @@ class ConnectionPool(Transport):
         self._closed = False
 
     # Public API...
-    def send(self, request: Request) -> ResponseStream:
+    def send(self, request: Request) -> SendContext:
         if self._closed:
             raise RuntimeError("ConnectionPool is closed.")
 
