@@ -104,7 +104,7 @@ def test_connection_stream_read_in_chunks(server):
         hip.transports.open_connection(server.url) as conn,
         conn.stream("GET", "/") as (status, _, stream),
     ):
-        status == 200
+        assert status == 200
         assert stream.read(5) == b"Hello"
         assert stream.read(5) == b", wor"
         assert stream.read() == b"ld."
