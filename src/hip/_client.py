@@ -67,16 +67,6 @@ class Client:
             content=content,
         )
 
-    def stream(
-        self,
-        method: Method | str,
-        url: URL | str,
-        headers: Headers | dict[str, str] | None = None,
-        content: Content | bytes | None = None,
-    ) -> SendContext:
-        request = self.build_request(method, url, headers=headers, content=content)
-        return self.via.send(request)
-
     def get(
         self,
         url: URL | str,

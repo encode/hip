@@ -42,13 +42,3 @@ class Transport:
         with self.send(request) as (status, resp_headers, stream):
             body = stream.read()
         return Response(status, headers=resp_headers, content=body)
-
-    def stream(
-        self,
-        method: Method | str,
-        url: URL | str,
-        headers: Headers | dict[str, str] | None = None,
-        content: Content | bytes | None = None,
-    ) -> SendContext:
-        request = Request(method, url, headers=headers, content=content)
-        return self.send(request)

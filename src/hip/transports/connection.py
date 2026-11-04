@@ -70,17 +70,6 @@ class Connection(Transport):
             body = stream.read()
         return Response(status_code, headers=resp_headers, content=body)
 
-    def stream(
-        self,
-        method: Method | str,
-        url: URL | str,
-        headers: Headers | dict[str, str] | None = None,
-        content: Content | bytes | None = None,
-    ) -> SendContext:
-        url = self._origin.join(url)
-        request = Request(method, url, headers=headers, content=content)
-        return self.send(request)
-
     # Send the request...
     def _send_head(self, request: Request) -> None:
         method = bytes(request.method)
