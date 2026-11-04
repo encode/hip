@@ -140,13 +140,15 @@ class RedirectMiddleware(Transport):
     def build_redirect_request(
         self, request: Request, ctx: SendContext
     ) -> Request | None:
+        status, headers, _ = ctx
+
         # Redirect status codes...
-        if ctx.status_code not in (301, 302, 303, 307, 308):
+        if status not in (301, 302, 303, 307, 308):
             return None
 
         # Redirects need a valid location header...
         try:
-            location = URL(ctx.headers["Location"])
+            location = URL(headers["Location"])
         except (KeyError, ValueError):
             return None
 
@@ -173,7 +175,8 @@ class RedirectMiddleware(Transport):
             # Ensures that the HTTP connection is available for a new
             # request/response cycle.
             with ctx:
-                ctx.stream.read()
+                _, _, stream = ctx
+                stream.read()
 
             # Make the next request
             request = redirect

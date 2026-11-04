@@ -10,17 +10,7 @@ from .._urls import URL
 __all__ = ["SendContext", "Transport"]
 
 
-class SendContext:
-    def __init__(
-        self, status_code: StatusCode, headers: Headers, stream: Stream
-    ) -> None:
-        self.status_code = status_code
-        self.headers = headers
-        self.stream = stream
-
-    def __iter__(self):
-        return iter((self.status_code, self.headers, self.stream))
-
+class SendContext(tuple[StatusCode, Headers, Stream]):
     def __enter__(self):
         return self
 
@@ -30,7 +20,8 @@ class SendContext:
         exc_value: BaseException | None = None,
         traceback: types.TracebackType | None = None,
     ) -> None:
-        self.stream.close()
+        _, _, stream = self
+        stream.close()
 
 
 class Transport:
@@ -48,9 +39,9 @@ class Transport:
         content: Content | bytes | None = None,
     ) -> Response:
         request = Request(method, url, headers=headers, content=content)
-        with self.send(request) as (status_code, resp_headers, stream):
+        with self.send(request) as (status, resp_headers, stream):
             body = stream.read()
-        return Response(status_code, headers=resp_headers, content=body)
+        return Response(status, headers=resp_headers, content=body)
 
     def stream(
         self,

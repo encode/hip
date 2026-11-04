@@ -50,7 +50,7 @@ class Connection(Transport):
         self._send_body(request)
         code, headers = self._recv_head()
         stream = self._recv_body(headers)
-        return SendContext(code, headers, stream)
+        return SendContext((code, headers, stream))
 
     def close(self) -> None:
         with self._request_lock:
