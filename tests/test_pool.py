@@ -26,6 +26,15 @@ def test_connection_pool_request(server):
         assert len(pool.connections) == 1
 
 
+def test_connection_pool_head(server):
+    with hip.transports.ConnectionPool() as pool:
+        response = pool.request("HEAD", server.url)
+
+    assert response.status_code == 200
+    assert response.headers["Content-Length"] == "13"
+    assert response.body == b""
+
+
 def test_transport_request_not_implemented():
     transport = hip.transports.Transport()
 
@@ -88,6 +97,15 @@ def test_connection_request(server):
 
         assert r.status_code == 200
         assert repr(conn) == f"<Connection [{server.url} idle]>"
+
+
+def test_connection_head(server):
+    with hip.transports.open_connection(server.url) as conn:
+        response = conn.request("HEAD", "/")
+
+    assert response.status_code == 200
+    assert response.headers["Content-Length"] == "13"
+    assert response.body == b""
 
 
 def test_connection_stream(server):

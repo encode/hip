@@ -1,6 +1,6 @@
 import types
 
-from .._content import Content
+from .._content import Content, Empty
 from .._headers import Headers
 from .._request import Method, Request
 from .._response import Response, StatusCode
@@ -41,4 +41,5 @@ class Transport:
         request = Request(method, url, headers=headers, content=content)
         with self.send(request) as (status, resp_headers, stream):
             body = stream.read()
-        return Response(status, headers=resp_headers, content=body)
+        response_content = Empty() if request.method == "HEAD" else body
+        return Response(status, headers=resp_headers, content=response_content)
