@@ -12,12 +12,13 @@ class State(enum.Enum):
     SEND_STATUS_LINE = 2
     SEND_HEADERS = 3
     SEND_BODY = 4
-    RECV_METHOD_LINE = 5
-    RECV_STATUS_LINE = 6
-    RECV_HEADERS = 7
-    RECV_BODY = 8
-    DONE = 9
-    CLOSED = 10
+    SEND_BODYLESS = 5
+    RECV_METHOD_LINE = 6
+    RECV_STATUS_LINE = 7
+    RECV_HEADERS = 8
+    RECV_BODY = 9
+    DONE = 10
+    CLOSED = 11
 
 
 class Mode(enum.Enum):
@@ -92,6 +93,7 @@ class HTTPParser:
 
         # Special states...
         self.processing_1xx = False
+        self.send_bodyless = False
 
     def send_method_line(self, method: bytes, target: bytes, protocol: bytes) -> None:
         """
@@ -142,11 +144,12 @@ class HTTPParser:
 
     def send_headers(self, headers: list[tuple[bytes, bytes]]) -> None:
         """
-        Send the request headers:
+        Send the message headers:
 
         >>> p.send_headers([(b'Host', b'www.example.com')])
 
-        Sending state will switch to SEND_BODY state.
+        Sending state switches to SEND_BODY state by default, or SEND_BODYLESS
+        when sending a response for a HEAD request.
         """
         if self.send_state != State.SEND_HEADERS:
             msg = f"Called 'send_headers' in invalid state {self.send_state}"
@@ -175,16 +178,28 @@ class HTTPParser:
         data = b"".join(lines) + b"\r\n"
         self.stream.write(data)
 
-        self.send_state = State.SEND_BODY
+        self.send_state = (
+            State.SEND_BODYLESS
+            if self.mode == Mode.SERVER and self.send_bodyless
+            else State.SEND_BODY
+        )
 
     def send_body(self, body: bytes) -> None:
         """
-        Send the request body. An empty bytes argument indicates the end of the stream:
+        Send the message body. An empty bytes argument indicates the end of the stream:
 
         >>> p.send_body(b'')
 
-        Sending state will switch to DONE.
+        Sending state will switch to DONE. For a response to HEAD, only an empty
+        body is accepted; it switches the state to DONE without writing body bytes.
         """
+        if self.send_state == State.SEND_BODYLESS:
+            if body != b"":
+                raise ProtocolError("Cannot send body for a bodyless response")
+
+            self.send_state = State.DONE
+            return
+
         if self.send_state != State.SEND_BODY:
             msg = f"Called 'send_body' in invalid state {self.send_state}"
             raise ProtocolError(msg)
@@ -244,6 +259,8 @@ class HTTPParser:
         method, target, protocol = line.split(b" ", 2)
         if protocol != b"HTTP/1.1":
             raise ProtocolError("Received unsupported protocol version")
+
+        self.send_bodyless = method == b"HEAD"
 
         self.recv_state = State.RECV_HEADERS
         self.send_state = State.SEND_STATUS_LINE
@@ -398,6 +415,7 @@ class HTTPParser:
         self.recv_keep_alive = True
         self.processing_1xx = False
         self.keepalive_until = time.monotonic() + self.keepalive_duration
+        self.send_bodyless = False
 
     def close(self):
         if self.send_state != State.CLOSED:
