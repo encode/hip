@@ -1,7 +1,7 @@
 import types
 import typing
 
-from ._content import HTML, JSON, Binary, Content, Text, select_media
+from ._content import HTML, JSON, Binary, Content, Empty, Text, select_media
 from ._headers import Headers
 from ._request import Method, Request
 from ._response import Response
@@ -58,9 +58,13 @@ class Client:
     ) -> Response:
         request = self.build_request(method, url, headers=headers, content=content)
         with self.via.send(request) as (status_code, resp_headers, stream):
-            ct = resp_headers.get("Content-Type", "application/octet-stream")
-            cls = select_media(self.media, ct)
-            content = cls.parse(stream)
+            if request.method == "HEAD":
+                stream.read()  # reaches recv_body(), which switches the receive state to DONE
+                content = Empty()
+            else:
+                ct = resp_headers.get("Content-Type", "application/octet-stream")
+                cls = select_media(self.media, ct)
+                content = cls.parse(stream)
         return Response(
             status_code=status_code,
             headers=resp_headers,
@@ -73,6 +77,13 @@ class Client:
         headers: Headers | dict[str, str] | None = None,
     ):
         return self.request("GET", url, headers=headers)
+
+    def head(
+        self,
+        url: URL | str,
+        headers: Headers | dict[str, str] | None = None,
+    ):
+        return self.request("HEAD", url, headers=headers)
 
     def post(
         self,

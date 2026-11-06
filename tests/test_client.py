@@ -340,3 +340,15 @@ def test_client_streams_gzip_response_in_multiple_chunks(client):
         with client.transport.send(request) as (status, _, stream):
             assert status == 200
             assert stream.read() == source
+
+
+def test_server_head():
+    def app(request):
+        content = hip.HTML("<html><body>¡Hola, mundo!</body></html>")
+        return hip.Response(200, content=content)
+
+    with hip.Server(app) as server, hip.Client() as client:
+        response = client.head(server.url)
+        assert response.headers["Server"] == "hip/dev"
+        assert response.body == b""
+        assert response.headers["Content-Length"] == "40"

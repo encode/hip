@@ -6,7 +6,7 @@ if typing.TYPE_CHECKING:
     from typing_extensions import Self
 
 from .._body import GZipStream, HTTPStream
-from .._content import Content
+from .._content import Content, Empty
 from .._headers import Headers
 from .._parsers import HTTPParser
 from .._request import Method, Request
@@ -68,7 +68,8 @@ class Connection(Transport):
         request = Request(method, url, headers=headers, content=content)
         with self.send(request) as (status_code, resp_headers, stream):
             body = stream.read()
-        return Response(status_code, headers=resp_headers, content=body)
+        response_content = Empty() if request.method == "HEAD" else body
+        return Response(status_code, headers=resp_headers, content=response_content)
 
     # Send the request...
     def _send_head(self, request: Request) -> None:

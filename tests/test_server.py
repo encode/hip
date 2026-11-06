@@ -30,6 +30,25 @@ def test_server_defaults_headers():
         assert response.headers["Server"] == "hip/dev"
         assert response.headers["Connection"] == "keep-alive"
         assert response.headers["Date"].endswith("GMT")
+        assert response.body == "<html><body>¡Hola, mundo!</body></html>".encode()
+
+
+def test_server_head():
+    with (
+        hip.Server(app) as server,
+        socket.create_connection((server.host, server.port)) as client,
+    ):
+        client.sendall(b"HEAD / HTTP/1.1\r\nHost: localhost\r\n\r\n")
+        client.shutdown(socket.SHUT_WR)
+        response = bytearray()
+        while chunk := client.recv(4096):
+            response.extend(chunk)
+
+    head, _, body = response.partition(b"\r\n\r\n")
+    assert head.startswith(b"HTTP/1.1 200 OK\r\n")
+    assert b"Server: hip/dev\r\n" in head
+    assert b"Content-Length: 40" in head.split(b"\r\n")
+    assert body == b""
 
 
 def test_server_ignores_clean_client_disconnect(caplog):

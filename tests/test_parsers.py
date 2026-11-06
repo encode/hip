@@ -145,6 +145,29 @@ def test_parser_server():
     assert p.is_idle()
 
 
+def test_parser_server_head_bodyless():
+    stream = DuplexStream(b"HEAD / HTTP/1.1\r\nHost: example.com\r\n\r\n")
+    parser = hip.parsers.HTTPParser(stream, mode="SERVER")
+
+    assert parser.recv_method_line()[0] == b"HEAD"
+    parser.recv_headers()
+    assert parser.recv_body() == b""
+
+    parser.send_status_line(b"HTTP/1.1", 200, b"OK")
+    parser.send_headers([(b"Content-Length", b"23")])
+    assert parser.send_state.name == "SEND_BODYLESS"
+
+    with pytest.raises(
+        hip.parsers.ProtocolError, match="Cannot send body for a bodyless response"
+    ):
+        parser.send_body(b'{"msg": "hello, world"}')
+
+    parser.send_body(b"")
+    assert stream.output_bytes() == b"HTTP/1.1 200 OK\r\nContent-Length: 23\r\n\r\n"
+    parser.complete()
+    assert parser.is_idle()
+
+
 def test_empty_request_line_raises_eof_error():
     parser = hip.parsers.HTTPParser(DuplexStream(b""), mode="SERVER")
 

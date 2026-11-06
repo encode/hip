@@ -47,10 +47,10 @@ class HTTPConnection:
                     content = Text("Internal Server Error")
                     err = Response(500, content=content)
                     self._send_head(err)
-                    self._send_body(err)
+                    self._send_body(err, method)
                 else:
                     self._send_head(response)
-                    self._send_body(response)
+                    self._send_body(response, method)
         except BaseException:
             logger.exception("Internal Server Error")
 
@@ -77,11 +77,14 @@ class HTTPConnection:
         headers = headers.copy_update(response.headers)
         self._parser.send_headers(headers.as_byte_pairs())
 
-    def _send_body(self, response: Response):
-        with response.content.open() as stream:
-            while data := stream.read(64 * 1024):
-                self._parser.send_body(data)
+    def _send_body(self, response: Response, method: str) -> None:
+        if method == "HEAD":
             self._parser.send_body(b"")
+        else:
+            with response.content.open() as stream:
+                while data := stream.read(64 * 1024):
+                    self._parser.send_body(data)
+                self._parser.send_body(b"")
         self._parser.complete()
 
 
