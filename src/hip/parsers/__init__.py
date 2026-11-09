@@ -1,4 +1,4 @@
-from ._parsers import HTTPParser, ProtocolError
+from .http import HTTPParser, ProtocolError
 
 __all__ = [
     "HTTPParser",
