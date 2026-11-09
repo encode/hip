@@ -4,11 +4,11 @@ import logging
 from ._body import HTTPStream
 from ._content import Text
 from ._headers import Headers
-from ._parsers import HTTPParser
 from ._request import Request
 from ._response import Response
 from ._timeouts import sleep
 from .backends.sync import NetworkBackend
+from .parsers import HTTPParser
 
 __all__ = ["Server"]
 
