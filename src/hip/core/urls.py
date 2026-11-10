@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import typing
 
-from ._queryparams import QueryParams
-from ._urlencode import unquote
-from ._urlparse import urlparse
+from .queryparams import QueryParams
+from .urlencode import unquote
+from .urlparse import urlparse
 
 __all__ = ["URL"]
 

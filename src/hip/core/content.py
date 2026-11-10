@@ -2,8 +2,8 @@ import copy
 import json
 import typing
 
-from ._headers import Headers, parse_opts_header
-from ._streams import ByteStream, Stream
+from .headers import Headers, parse_opts_header
+from .streams import ByteStream, Stream
 
 __all__ = [
     "HTML",

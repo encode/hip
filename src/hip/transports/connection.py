@@ -5,14 +5,14 @@ if typing.TYPE_CHECKING:
     # Once we drop 3.10 support, we can use 'typing.Self'.
     from typing_extensions import Self
 
-from .._body import GZipStream, HTTPStream
-from .._content import Content
-from .._headers import Headers
-from .._request import Method, Request
-from .._response import Response, StatusCode
-from .._streams import Stream
-from .._urls import URL
 from ..backends.sync import Lock, NetworkBackend
+from ..body import GZipStream, HTTPStream
+from ..core.content import Content
+from ..core.headers import Headers
+from ..core.request import Method, Request
+from ..core.response import Response, StatusCode
+from ..core.streams import Stream
+from ..core.urls import URL
 from ..parsers import HTTPParser
 from .base import SendContext, Transport
 

@@ -1,10 +1,10 @@
 import os
 import typing
 
-from ._content import Content
-from ._headers import Headers
-from ._streams import ByteStream, FileStream, MultiPartStream, Stream
-from ._urlencode import urldecode, urlencode
+from .content import Content
+from .headers import Headers
+from .streams import ByteStream, FileStream, MultiPartStream, Stream
+from .urlencode import urldecode, urlencode
 
 __all__ = ["File", "Files", "Form", "MultiPart"]
 

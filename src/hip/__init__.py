@@ -1,15 +1,15 @@
 from . import backends, parsers, transports
-from ._client import Client
-from ._content import HTML, JSON, Binary, Content, Text
-from ._forms import File, Files, Form, MultiPart
-from ._headers import Headers
-from ._queryparams import QueryParams
-from ._request import Method, Request
-from ._response import Response, StatusCode
-from ._server import Server
-from ._streams import Stream
-from ._timeouts import sleep, timeout
-from ._urls import URL
+from .client import Client
+from .core.content import HTML, JSON, Binary, Content, Text
+from .core.forms import File, Files, Form, MultiPart
+from .core.headers import Headers
+from .core.queryparams import QueryParams
+from .core.request import Method, Request
+from .core.response import Response, StatusCode
+from .core.streams import Stream
+from .core.timeouts import sleep, timeout
+from .core.urls import URL
+from .server import Server
 
 __all__ = [
     "HTML",

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing
 
-from ._urlencode import urldecode, urlencode
+from .urlencode import urldecode, urlencode
 
 __all__ = ["QueryParams"]
 

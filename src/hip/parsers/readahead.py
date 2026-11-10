@@ -1,4 +1,4 @@
-from .._streams import Stream
+from ..core.streams import Stream
 from .exceptions import ProtocolError
 
 
