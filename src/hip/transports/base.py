@@ -1,11 +1,11 @@
 import types
 
-from .._content import Content
-from .._headers import Headers
-from .._request import Method, Request
-from .._response import Response, StatusCode
-from .._streams import Stream
-from .._urls import URL
+from ..core.content import Content
+from ..core.headers import Headers
+from ..core.request import Method, Request
+from ..core.response import Response, StatusCode
+from ..core.streams import Stream
+from ..core.urls import URL
 
 __all__ = ["SendContext", "Transport"]
 

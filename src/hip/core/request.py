@@ -1,6 +1,6 @@
-from ._content import Binary, Content, Empty
-from ._headers import Headers
-from ._urls import URL
+from .content import Binary, Content, Empty
+from .headers import Headers
+from .urls import URL
 
 __all__ = ["Method", "Request"]
 

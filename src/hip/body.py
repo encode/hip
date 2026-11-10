@@ -1,7 +1,7 @@
 import io
 import zlib
 
-from ._streams import Stream
+from .core.streams import Stream
 from .parsers import HTTPParser
 
 __all__ = ["GZipStream", "HTTPStream"]

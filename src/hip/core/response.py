@@ -1,7 +1,7 @@
 import typing
 
-from ._content import Binary, Content, Empty
-from ._headers import Headers
+from .content import Binary, Content, Empty
+from .headers import Headers
 
 __all__ = ["Response", "StatusCode"]
 

@@ -6,9 +6,9 @@ if typing.TYPE_CHECKING:
     # Once we drop 3.10 support, we can use 'typing.Self'.
     from typing_extensions import Self
 
-from .._request import Request
-from .._urls import URL
 from ..backends.sync import NetworkBackend, Semaphore
+from ..core.request import Request
+from ..core.urls import URL
 from .base import SendContext, Transport
 from .connection import (
     Connection,
