@@ -1,14 +1,14 @@
 import datetime
 import logging
 
-from .backends.sync import NetworkBackend
-from .body import HTTPStream
-from .core.content import Text
-from .core.headers import Headers
-from .core.request import Request
-from .core.response import Response
-from .core.timeouts import sleep
-from .parsers import HTTPParser
+from ..backends.sync import NetworkBackend
+from ..body import HTTPStream
+from ..core.content import Text
+from ..core.headers import Headers
+from ..core.request import Request
+from ..core.response import Response
+from ..core.timeouts import sleep
+from ..parsers import HTTPParser
 
 __all__ = ["Server"]
 
