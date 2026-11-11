@@ -1,10 +1,9 @@
 import io
-import zlib
 
 from .core.streams import Stream
 from .parsers import HTTPParser
 
-__all__ = ["GZipStream", "HTTPStream"]
+__all__ = ["HTTPStream"]
 
 
 class HTTPStream(Stream):
@@ -51,42 +50,3 @@ class HTTPStream(Stream):
         self._buffer.close()
         if self._is_response:
             self._parser.complete()
-
-
-class GZipStream(Stream):
-    def __init__(self, stream: Stream):
-        self._stream = stream
-        # Adding 16 enables gzip header and trailer handling.
-        self._decoder = zlib.decompressobj(wbits=16 + zlib.MAX_WBITS)
-        self._finished = False
-        self._buffer = bytearray()
-
-    def read(self, size=-1) -> bytes:
-        while (size < 0 or len(self._buffer) < size) and not self._finished:
-            compressed = self._stream.read(8192)
-
-            try:
-                if compressed:
-                    decoded = self._decoder.decompress(compressed)
-                else:
-                    decoded = self._decoder.flush()
-            except zlib.error as exc:
-                raise ValueError("Invalid gzip response content.") from exc
-
-            if not compressed:
-                if not self._decoder.eof:
-                    raise ValueError("Invalid gzip response content.")
-                self._finished = True
-
-            self._buffer.extend(decoded)
-        if size < 0:
-            output = bytes(self._buffer)
-            self._buffer.clear()
-        else:
-            output = bytes(self._buffer[:size])
-            del self._buffer[:size]
-
-        return output
-
-    def close(self) -> None:
-        self._stream.close()
