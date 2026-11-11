@@ -874,3 +874,63 @@ def test_request_missing_host_header():
     msg = "Request missing 'Host' header"
     with pytest.raises(hip.parsers.ProtocolError, match=msg):
         p.recv_headers()
+
+
+# Test Sans-IO parsers...
+
+def test_bytes_parser():
+    p = hip.parsers.BytesParser()
+    p.feed(b"abc")
+    p.feed(b"defg")
+    p.feed(b"")
+
+    assert p.read_some(10) == b"abcdefg"
+    assert p.read_some(10) == b""
+    assert p.read_some(10) == b""
+
+
+def test_bytes_parser_partial_reads():
+    p = hip.parsers.BytesParser()
+    p.feed(b"abc")
+    p.feed(b"defg")
+    p.feed(b"")
+
+    assert p.read_some(1) == b"a"
+    assert p.read_some(2) == b"bc"
+    assert p.read_some(3) == b"def"
+    assert p.read_some(4) == b"g"
+    assert p.read_some(5) == b""
+    assert p.read_some(6) == b""
+
+
+def test_bytes_parser_need_feeds():
+    p = hip.parsers.BytesParser()
+
+    assert p.read_some(1) is None
+    p.feed(b"abc")
+    assert p.read_some(1) == b"a"
+    assert p.read_some(2) == b"bc"
+
+    assert p.read_some(3) is None
+    p.feed(b"defg")
+
+    assert p.read_some(3) == b"def"
+    assert p.read_some(4) == b"g"
+    assert p.read_some(5) is None
+    p.feed(b"")
+
+    assert p.read_some(5) == b""
+    assert p.read_some(6) == b""
+
+
+def test_bytes_parser_read_until():
+    p = hip.parsers.BytesParser()
+    p.feed(b"GET / HTTP/1.0\r\n")
+    p.feed(b"Host: example.com\r\n")
+    p.feed(b"User-Agent: dev/hip\r\n")
+    p.feed(b"\r\n")
+    p.feed(b"")
+
+    assert p.read_until(b"\r\n", max_size=5_000) == b"GET / HTTP/1.0"
+    assert p.read_until(b"\r\n\r\n", max_size=10_000) == b"Host: example.com\r\nUser-Agent: dev/hip"
+    assert p.read_some(max_size=10_000) == b""
