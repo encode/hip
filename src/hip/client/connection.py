@@ -1,3 +1,4 @@
+import io
 import types
 import typing
 
@@ -8,7 +9,6 @@ if typing.TYPE_CHECKING:
 import zlib
 
 from ..backends.sync import Lock, NetworkBackend
-from ..body import HTTPStream
 from ..core.content import Content
 from ..core.headers import Headers
 from ..core.request import Method, Request
@@ -96,7 +96,7 @@ class Connection(Transport):
         return status_code, headers
 
     def _recv_body(self, headers) -> Stream:
-        stream: Stream = HTTPStream(self._parser, is_response=True)
+        stream: Stream = ResponseStream(self._parser)
         content_encoding = headers.get("Content-Encoding", "")
         if content_encoding.lower() == "gzip":
             stream = GZipStream(stream)
@@ -184,3 +184,47 @@ class GZipStream(Stream):
 
     def close(self) -> None:
         self._stream.close()
+
+
+class ResponseStream(Stream):
+    def __init__(self, parser: HTTPParser):
+        self._parser = parser
+        self._buffer = io.BytesIO()
+        self._finished = False
+
+    def read(self, size=-1) -> bytes:
+        if self._finished:
+            return b""
+
+        sections = []
+        length = 0
+
+        # If we have any data in the buffer read that and clear the buffer.
+        buffered = self._buffer.read()
+        if buffered:
+            sections.append(buffered)
+            length += len(buffered)
+            self._buffer.seek(0)
+            self._buffer.truncate(0)
+
+        # Read each chunk in turn.
+        while (size < 0) or (length < size):
+            section = self._parser.recv_body()
+            sections.append(section)
+            length += len(section)
+            if section == b"":
+                self._finished = True
+                break
+
+        # If we've more data than requested, then push some back into the buffer.
+        output = b"".join(sections)
+        if size > -1 and len(output) > size:
+            output, remainder = output[:size], output[size:]
+            self._buffer.write(remainder)
+            self._buffer.seek(0)
+
+        return output
+
+    def close(self) -> None:
+        self._buffer.close()
+        self._parser.complete()

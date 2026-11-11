@@ -1,12 +1,13 @@
 import datetime
+import io
 import logging
 
 from ..backends.sync import NetworkBackend
-from ..body import HTTPStream
 from ..core.content import Text
 from ..core.headers import Headers
 from ..core.request import Request
 from ..core.response import Response
+from ..core.streams import Stream
 from ..core.timeouts import sleep
 from ..parsers import HTTPParser
 
@@ -33,7 +34,7 @@ class HTTPConnection:
                 except EOFError:
                     # The client closed while waiting for a request line.
                     return
-                with HTTPStream(self._parser, is_response=False) as stream:
+                with RequestStream(self._parser) as stream:
                     body = stream.read()
                 request = Request(method, url, headers=headers, content=body)
                 # TODO: Handle endpoint exceptions
@@ -119,3 +120,46 @@ class Server:
     def handle_stream(self, stream):
         connection = HTTPConnection(stream, self.app)
         connection.handle_requests()
+
+
+class RequestStream(Stream):
+    def __init__(self, parser: HTTPParser):
+        self._parser = parser
+        self._buffer = io.BytesIO()
+        self._finished = False
+
+    def read(self, size=-1) -> bytes:
+        if self._finished:
+            return b""
+
+        sections = []
+        length = 0
+
+        # If we have any data in the buffer read that and clear the buffer.
+        buffered = self._buffer.read()
+        if buffered:
+            sections.append(buffered)
+            length += len(buffered)
+            self._buffer.seek(0)
+            self._buffer.truncate(0)
+
+        # Read each chunk in turn.
+        while (size < 0) or (length < size):
+            section = self._parser.recv_body()
+            sections.append(section)
+            length += len(section)
+            if section == b"":
+                self._finished = True
+                break
+
+        # If we've more data than requested, then push some back into the buffer.
+        output = b"".join(sections)
+        if size > -1 and len(output) > size:
+            output, remainder = output[:size], output[size:]
+            self._buffer.write(remainder)
+            self._buffer.seek(0)
+
+        return output
+
+    def close(self) -> None:
+        self._buffer.close()
