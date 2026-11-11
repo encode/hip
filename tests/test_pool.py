@@ -15,7 +15,7 @@ def server():
 
 
 def test_connection_pool_request(server):
-    with hip.transports.ConnectionPool() as pool:
+    with hip.client.ConnectionPool() as pool:
         assert repr(pool) == "<ConnectionPool [0 active]>"
         assert len(pool.connections) == 0
 
@@ -27,18 +27,18 @@ def test_connection_pool_request(server):
 
 
 def test_transport_request_not_implemented():
-    transport = hip.transports.Transport()
+    transport = hip.client.Transport()
 
     with pytest.raises(NotImplementedError):
         transport.request("GET", "http://example.com")
 
 
 def test_transport_close():
-    hip.transports.Transport().close()
+    hip.client.Transport().close()
 
 
 def test_connection_pool_connection_close(server):
-    with hip.transports.ConnectionPool() as pool:
+    with hip.client.ConnectionPool() as pool:
         assert repr(pool) == "<ConnectionPool [0 active]>"
         assert len(pool.connections) == 0
 
@@ -51,7 +51,7 @@ def test_connection_pool_connection_close(server):
 
 
 def test_connection_pool_stream(server):
-    with hip.transports.ConnectionPool() as pool:
+    with hip.client.ConnectionPool() as pool:
         assert repr(pool) == "<ConnectionPool [0 active]>"
         assert len(pool.connections) == 0
 
@@ -67,7 +67,7 @@ def test_connection_pool_stream(server):
 
 
 def test_connection_pool_cannot_request_after_closed():
-    with hip.transports.ConnectionPool() as pool:
+    with hip.client.ConnectionPool() as pool:
         pass
 
     with pytest.raises(RuntimeError):
@@ -75,13 +75,13 @@ def test_connection_pool_cannot_request_after_closed():
 
 
 def test_connection_pool_should_have_managed_lifespan(server):
-    pool = hip.transports.ConnectionPool()
+    pool = hip.client.ConnectionPool()
     with pytest.warns(UserWarning):
         del pool
 
 
 def test_connection_request(server):
-    with hip.transports.open_connection(server.url) as conn:
+    with hip.client.open_connection(server.url) as conn:
         assert repr(conn) == f"<Connection [{server.url} idle]>"
 
         r = conn.request("GET", "/")
@@ -91,7 +91,7 @@ def test_connection_request(server):
 
 
 def test_connection_stream(server):
-    with hip.transports.open_connection(server.url) as conn:
+    with hip.client.open_connection(server.url) as conn:
         assert repr(conn) == f"<Connection [{server.url} idle]>"
         request = hip.Request("GET", server.url)
         with conn.send(request) as (status, _, stream):
@@ -102,7 +102,7 @@ def test_connection_stream(server):
 
 
 def test_connection_stream_read_in_chunks(server):
-    with hip.transports.open_connection(server.url) as conn:
+    with hip.client.open_connection(server.url) as conn:
         request = hip.Request("GET", server.url)
         with conn.send(request) as (status, _, stream):
             assert status == 200
@@ -120,7 +120,7 @@ class TLSBackend:
 def test_open_https_connection():
     backend = TLSBackend()
 
-    with hip.transports.open_connection(
+    with hip.client.open_connection(
         "https://example.com",
         hostname="example.com",
         backend=backend,

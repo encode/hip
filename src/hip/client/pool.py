@@ -9,11 +9,11 @@ if typing.TYPE_CHECKING:
 from ..backends.sync import NetworkBackend, Semaphore
 from ..core.request import Request
 from ..core.urls import URL
-from .base import SendContext, Transport
 from .connection import (
     Connection,
     open_connection,
 )
+from .transport import SendContext, Transport
 
 __all__ = [
     "ConnectionPool",

@@ -1,4 +1,4 @@
-from . import backends, parsers, transports
+from . import backends, parsers
 from .client import Client
 from .core.content import HTML, JSON, Binary, Content, Text
 from .core.forms import File, Files, Form, MultiPart
@@ -35,5 +35,4 @@ __all__ = [
     "parsers",
     "sleep",
     "timeout",
-    "transports",
 ]
