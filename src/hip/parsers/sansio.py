@@ -51,10 +51,10 @@ class BytesParser:
             return None
 
         start_point = self._cursor
-        end_point = self._cursor + max_size + len(marker)
+        end_point = max_size + len(marker)
         idx = self._buffer.find(marker, start_point, end_point)
         if idx < 0:
-            self._cursor += max_size
+            self._cursor = max(0, len(self._buffer) - len(marker))
             return None
 
         read, unread = self._buffer[:idx], self._buffer[idx + len(marker) :]

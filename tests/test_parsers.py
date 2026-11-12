@@ -938,3 +938,42 @@ def test_bytes_parser_read_until():
         == b"Host: example.com\r\nUser-Agent: dev/hip"
     )
     assert p.read_some(max_size=10_000) == b""
+
+
+def test_bytes_parser_read_until_needs_feeds():
+    p = hip.parsers.BytesParser()
+
+    assert p.read_until(b"\r\n", max_size=5_000) is None
+    p.feed(b"GET / HTTP/1.0\r\n")
+    assert p.read_until(b"\r\n", max_size=5_000) == b"GET / HTTP/1.0"
+
+    assert p.read_until(b"\r\n\r\n", max_size=10_000) is None
+    p.feed(b"Host: example.com\r\n")
+    assert p.read_until(b"\r\n\r\n", max_size=10_000) is None
+    p.feed(b"User-Agent: dev/hip\r\n")
+    assert p.read_until(b"\r\n\r\n", max_size=10_000) is None
+    p.feed(b"\r\n")
+    assert (
+        p.read_until(b"\r\n\r\n", max_size=10_000)
+        == b"Host: example.com\r\nUser-Agent: dev/hip"
+    )
+
+    assert p.read_some(max_size=10_000) is None
+    p.feed(b"")
+    assert p.read_some(max_size=10_000) == b""
+
+
+def test_bytes_parser_read_until_exception():
+    p = hip.parsers.BytesParser()
+    p.feed(b"")
+
+    with pytest.raises(hip.parsers.ParseError):
+        assert p.read_until(b"\r\n", max_size=5_000)
+
+
+def test_bytes_parser_feed_after_close():
+    p = hip.parsers.BytesParser()
+    p.feed(b"")
+
+    with pytest.raises(ValueError):
+        assert p.feed(b"...")
