@@ -881,10 +881,13 @@ def test_request_missing_host_header():
 
 def test_bytes_parser():
     p = hip.parsers.BytesParser()
+
+    # Feed some data, then half-close the buffer.
     p.feed(b"abc")
     p.feed(b"defg")
     p.feed(b"")
 
+    # Test a sequence of reads.
     assert p.read_some(10) == b"abcdefg"
     assert p.read_some(10) == b""
     assert p.read_some(10) == b""
@@ -892,10 +895,13 @@ def test_bytes_parser():
 
 def test_bytes_parser_partial_reads():
     p = hip.parsers.BytesParser()
+
+    # Feed some data, then half-close the buffer.
     p.feed(b"abc")
     p.feed(b"defg")
     p.feed(b"")
 
+    # Test a sequence of reads.
     assert p.read_some(1) == b"a"
     assert p.read_some(2) == b"bc"
     assert p.read_some(3) == b"def"
@@ -904,62 +910,90 @@ def test_bytes_parser_partial_reads():
     assert p.read_some(6) == b""
 
 
+def test_bytes_parser_feed_after_close():
+    p = hip.parsers.BytesParser()
+
+    # Feed some data, then half-close the buffer.
+    p.feed(b"abc")
+    p.feed(b"defg")
+    p.feed(b"")
+
+    # Buffer is half-closed, cannot feed any more data.
+    with pytest.raises(ValueError):
+        assert p.feed(b"...")
+
+
 def test_bytes_parser_need_feeds():
     p = hip.parsers.BytesParser()
 
+    # Parser needs some I/O feeding to the buffer
     assert p.read_some(1) is None
     p.feed(b"abc")
     assert p.read_some(1) == b"a"
     assert p.read_some(2) == b"bc"
 
+    # Parser needs some I/O feeding to the buffer
     assert p.read_some(3) is None
     p.feed(b"defg")
 
     assert p.read_some(3) == b"def"
     assert p.read_some(4) == b"g"
+
+    # Parser needs some I/O feeding to the buffer
     assert p.read_some(5) is None
     p.feed(b"")
-
     assert p.read_some(5) == b""
     assert p.read_some(6) == b""
 
 
 def test_bytes_parser_read_until():
     p = hip.parsers.BytesParser()
+
+    # Feed some data, then half-close the buffer.
     p.feed(b"GET / HTTP/1.0\r\n")
     p.feed(b"Host: example.com\r\n")
-    p.feed(b"User-Agent: dev/hip\r\n")
+    p.feed(b"Connection: close\r\n")
     p.feed(b"\r\n")
     p.feed(b"")
 
-    assert p.read_until(b"\r\n", max_size=5_000) == b"GET / HTTP/1.0"
-    assert (
-        p.read_until(b"\r\n\r\n", max_size=10_000)
-        == b"Host: example.com\r\nUser-Agent: dev/hip"
-    )
-    assert p.read_some(max_size=10_000) == b""
+    # Parse the different components of the requst
+    request = p.read_until(b"\r\n", max_size=5_000)
+    headers = p.read_until(b"\r\n\r\n", max_size=10_000)
+    content = p.read_some(max_size=10_000)
+
+    assert request == b"GET / HTTP/1.0"
+    assert headers == b"Host: example.com\r\nConnection: close"
+    assert content == p.read_some(max_size=10_000)
 
 
 def test_bytes_parser_read_until_needs_feeds():
     p = hip.parsers.BytesParser()
 
+    # Parser needs some I/O feeding to the buffer
     assert p.read_until(b"\r\n", max_size=5_000) is None
     p.feed(b"GET / HTTP/1.0\r\n")
+    # Request line is complete
     assert p.read_until(b"\r\n", max_size=5_000) == b"GET / HTTP/1.0"
 
+    # Parser needs some I/O feeding to the buffer
     assert p.read_until(b"\r\n\r\n", max_size=10_000) is None
     p.feed(b"Host: example.com\r\n")
+    # Parser needs some I/O feeding to the buffer
     assert p.read_until(b"\r\n\r\n", max_size=10_000) is None
-    p.feed(b"User-Agent: dev/hip\r\n")
+    p.feed(b"Connection: close\r\n")
+    # Parser needs some I/O feeding to the buffer
     assert p.read_until(b"\r\n\r\n", max_size=10_000) is None
     p.feed(b"\r\n")
+    # Request headers are complete
     assert (
         p.read_until(b"\r\n\r\n", max_size=10_000)
-        == b"Host: example.com\r\nUser-Agent: dev/hip"
+        == b"Host: example.com\r\nConnection: close"
     )
 
+    # Parser needs some I/O feeding to the buffer
     assert p.read_some(max_size=10_000) is None
     p.feed(b"")
+    # Reques is complete
     assert p.read_some(max_size=10_000) == b""
 
 
@@ -971,9 +1005,74 @@ def test_bytes_parser_read_until_exception():
         assert p.read_until(b"\r\n", max_size=5_000)
 
 
-def test_bytes_parser_feed_after_close():
-    p = hip.parsers.BytesParser()
-    p.feed(b"")
+# Test HTTP client parser...
 
-    with pytest.raises(ValueError):
-        assert p.feed(b"...")
+def test_http_client_parser():
+    parser = hip.parsers.HTTPClient()
+
+    # Write the request...
+    output = b''
+    output += parser.send_request_line(b"GET", b"/", b"HTTP/1.1")
+    output += parser.send_headers([
+        (b"Host", b"www.example.com"),
+        (b"User-Agent", b"hip/dev")
+    ])
+    output += parser.send_body(b'')
+
+    assert output == (
+        b"GET / HTTP/1.1\r\n"
+        b"Host: www.example.com\r\n"
+        b"User-Agent: hip/dev\r\n"
+        b"\r\n"
+    )
+
+    # Read the response...
+    input = (
+        b"HTTP/1.1 200 OK\r\n"
+        b"Content-Type: text/html\r\n"
+        b"Content-Length: 25\r\n"
+        b"\r\n"
+        b"<html>hello, world</html>"
+    )
+    parser.feed(input)
+
+    protocol, status, reason = parser.recv_status_line()
+    headers = parser.recv_headers()
+    body = parser.recv_body()
+
+    assert protocol == b'HTTP/1.1'
+    assert status == 200
+    assert reason == b'OK'
+    assert headers == [
+        (b'Content-Type', b'text/html'),
+        (b'Content-Length', b'25'),
+    ]
+    assert body == b'<html>hello, world</html>'
+
+
+def test_http_client_parser_invalid_transitions():
+    # Ensure calling parser methods cannot be called in an invalid order.
+    with pytest.raises(RuntimeError):
+        parser = hip.parsers.HTTPClient()
+        parser.send_request_line(b'GET', b'/', b'HTTP/1.1')
+        parser.send_request_line(b'GET', b'/', b'HTTP/1.1')
+
+    with pytest.raises(RuntimeError):
+        parser = hip.parsers.HTTPClient()
+        parser.send_headers([])
+
+    with pytest.raises(RuntimeError):
+        parser = hip.parsers.HTTPClient()
+        parser.send_body(b'')
+
+    with pytest.raises(RuntimeError):
+        parser = hip.parsers.HTTPClient()
+        parser.recv_status_line()
+
+    with pytest.raises(RuntimeError):
+        parser = hip.parsers.HTTPClient()
+        parser.recv_headers()
+
+    with pytest.raises(RuntimeError):
+        parser = hip.parsers.HTTPClient()
+        parser.recv_body()
