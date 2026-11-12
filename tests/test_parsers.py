@@ -878,6 +878,7 @@ def test_request_missing_host_header():
 
 # Test Sans-IO parsers...
 
+
 def test_bytes_parser():
     p = hip.parsers.BytesParser()
     p.feed(b"abc")
@@ -932,5 +933,8 @@ def test_bytes_parser_read_until():
     p.feed(b"")
 
     assert p.read_until(b"\r\n", max_size=5_000) == b"GET / HTTP/1.0"
-    assert p.read_until(b"\r\n\r\n", max_size=10_000) == b"Host: example.com\r\nUser-Agent: dev/hip"
+    assert (
+        p.read_until(b"\r\n\r\n", max_size=10_000)
+        == b"Host: example.com\r\nUser-Agent: dev/hip"
+    )
     assert p.read_some(max_size=10_000) == b""

@@ -1,6 +1,10 @@
+class ParseError(Exception):
+    pass
+
+
 class BytesParser:
     """
-    A parser following the Sans-IO design pattern. 
+    A parser following the Sans-IO design pattern.
 
     Provides parsing operations for "read some data" and
     "read some data up until a fixed delimiter".
@@ -24,13 +28,12 @@ class BytesParser:
         """
         if not self._buffer:
             if self._closed:
-                return b''
+                return b""
             return None
 
         read, unread = self._buffer[:max_size], self._buffer[max_size:]
         self._buffer = bytearray(unread)
         return bytes(read)
-
 
     def read_until(self, marker: bytes, max_size: int) -> bytes | None:
         """
@@ -44,7 +47,7 @@ class BytesParser:
         """
         if self._cursor >= len(self._buffer):
             if self._closed:
-                raise ...
+                raise ParseError()
             return None
 
         start_point = self._cursor
@@ -54,7 +57,7 @@ class BytesParser:
             self._cursor += max_size
             return None
 
-        read, unread = self._buffer[:idx], self._buffer[idx + len(marker):]
+        read, unread = self._buffer[:idx], self._buffer[idx + len(marker) :]
         self._buffer = bytearray(unread)
         self._cursor = 0
         return bytes(read)
@@ -66,7 +69,7 @@ class BytesParser:
         """
         if data:
             if self._closed:
-                raise ValueError('Attempted to feed data to a closed parser.')
+                raise ValueError("Attempted to feed data to a closed parser.")
             self._buffer.extend(data)
         else:
             self._closed = True
@@ -76,6 +79,6 @@ class BytesParser:
     #     Returns True to indicate the end of the stream.
     #     Returns False to indicate the st
     #     Does not remove any data from the buffer.
-    
+
     #     Returns `None` to indicate feed required.
     #     """
