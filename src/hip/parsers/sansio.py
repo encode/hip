@@ -83,7 +83,9 @@ class BytesParser:
     #     Returns `None` to indicate feed required.
     #     """
 
+
 # ---
+
 
 class ProtocolError(Exception):
     pass
@@ -151,11 +153,10 @@ def _validate_headers(data: bytes) -> list[tuple[bytes, bytes]]:
 
 # TODO:
 
-# * Content-Length validation 
+# * Content-Length validation
 # * Connection: keep-alive support
 # * Transfer-Encoding: chunked support
 # * Validate Host header
-
 
 
 class HTTPClient:
@@ -202,7 +203,7 @@ class HTTPClient:
         # Too little body for declared Content-Length
         # Invalid framing for Transfer-Encoding
 
-        if body == b'':
+        if body == b"":
             self._client = SEND_COMPLETE
 
             # if self._server == SEND_COMPLETE:
@@ -244,7 +245,7 @@ class HTTPClient:
         if (body := self._parser.read_some(max_size=MAX_READ)) is None:
             return None
 
-        if body == b'':
+        if body == b"":
             self._server = SEND_COMPLETE
             # if self._client == SEND_COMPLETE:
             #     self._client = SEND_START

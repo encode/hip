@@ -1007,23 +1007,20 @@ def test_bytes_parser_read_until_exception():
 
 # Test HTTP client parser...
 
+
 def test_http_client_parser():
     parser = hip.parsers.HTTPClient()
 
     # Write the request...
-    output = b''
+    output = b""
     output += parser.send_request_line(b"GET", b"/", b"HTTP/1.1")
-    output += parser.send_headers([
-        (b"Host", b"www.example.com"),
-        (b"User-Agent", b"hip/dev")
-    ])
-    output += parser.send_body(b'')
+    output += parser.send_headers(
+        [(b"Host", b"www.example.com"), (b"User-Agent", b"hip/dev")]
+    )
+    output += parser.send_body(b"")
 
     assert output == (
-        b"GET / HTTP/1.1\r\n"
-        b"Host: www.example.com\r\n"
-        b"User-Agent: hip/dev\r\n"
-        b"\r\n"
+        b"GET / HTTP/1.1\r\nHost: www.example.com\r\nUser-Agent: hip/dev\r\n\r\n"
     )
 
     # Read the response...
@@ -1035,27 +1032,81 @@ def test_http_client_parser():
         b"<html>hello, world</html>"
     )
     parser.feed(input)
+    parser.feed(b"")
 
     protocol, status, reason = parser.recv_status_line()
     headers = parser.recv_headers()
     body = parser.recv_body()
+    eof = parser.recv_body()
 
-    assert protocol == b'HTTP/1.1'
+    assert protocol == b"HTTP/1.1"
     assert status == 200
-    assert reason == b'OK'
+    assert reason == b"OK"
     assert headers == [
-        (b'Content-Type', b'text/html'),
-        (b'Content-Length', b'25'),
+        (b"Content-Type", b"text/html"),
+        (b"Content-Length", b"25"),
     ]
-    assert body == b'<html>hello, world</html>'
+    assert body == b"<html>hello, world</html>"
+    assert eof == b""
+
+
+def test_http_client_parser_trickle_data():
+    parser = hip.parsers.HTTPClient()
+
+    # Write the request...
+    output = b""
+    output += parser.send_request_line(b"GET", b"/", b"HTTP/1.1")
+    output += parser.send_headers(
+        [(b"Host", b"www.example.com"), (b"User-Agent", b"hip/dev")]
+    )
+    output += parser.send_body(b"")
+
+    assert output == (
+        b"GET / HTTP/1.1\r\nHost: www.example.com\r\nUser-Agent: hip/dev\r\n\r\n"
+    )
+
+    # Read the response...
+    input = io.BytesIO(
+        b"HTTP/1.1 200 OK\r\n"
+        b"Content-Type: text/html\r\n"
+        b"Content-Length: 25\r\n"
+        b"\r\n"
+        b"<html>hello, world</html>"
+    )
+
+    while (line := parser.recv_status_line()) is None:
+        parser.feed(input.read(1))
+    protocol, status, reason = line
+
+    while (headers := parser.recv_headers()) is None:
+        parser.feed(input.read(1))
+
+    body = b""
+    while True:
+        part = parser.recv_body()
+        if part is None:
+            parser.feed(input.read(1))
+        elif part:
+            body += part
+        else:
+            break
+
+    assert protocol == b"HTTP/1.1"
+    assert status == 200
+    assert reason == b"OK"
+    assert headers == [
+        (b"Content-Type", b"text/html"),
+        (b"Content-Length", b"25"),
+    ]
+    assert body == b"<html>hello, world</html>"
 
 
 def test_http_client_parser_invalid_transitions():
     # Ensure calling parser methods cannot be called in an invalid order.
     with pytest.raises(RuntimeError):
         parser = hip.parsers.HTTPClient()
-        parser.send_request_line(b'GET', b'/', b'HTTP/1.1')
-        parser.send_request_line(b'GET', b'/', b'HTTP/1.1')
+        parser.send_request_line(b"GET", b"/", b"HTTP/1.1")
+        parser.send_request_line(b"GET", b"/", b"HTTP/1.1")
 
     with pytest.raises(RuntimeError):
         parser = hip.parsers.HTTPClient()
@@ -1063,7 +1114,7 @@ def test_http_client_parser_invalid_transitions():
 
     with pytest.raises(RuntimeError):
         parser = hip.parsers.HTTPClient()
-        parser.send_body(b'')
+        parser.send_body(b"")
 
     with pytest.raises(RuntimeError):
         parser = hip.parsers.HTTPClient()

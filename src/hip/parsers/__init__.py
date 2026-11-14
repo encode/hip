@@ -3,8 +3,8 @@ from .sansio import BytesParser, HTTPClient, ParseError
 
 __all__ = [
     "BytesParser",
-    "HTTPParser",
     "HTTPClient",
+    "HTTPParser",
     "ParseError",
     "ProtocolError",
 ]
