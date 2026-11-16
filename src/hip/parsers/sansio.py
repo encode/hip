@@ -97,10 +97,21 @@ SEND_HEADERS = 2
 SEND_BODY = 3
 SEND_COMPLETE = 4
 
-MAX_STATUS_LINE_SIZE = 1024
-MAX_METHOD_LINE_SIZE = 16384
-MAX_HEADERS_SIZE = 65536
-MAX_READ = 65536
+# Internal state during framing for 'Transfer-Encoding: chunked'.
+# This is how data is sent over HTTP/1.1, when the Content-Length is not known up front.
+USE_CONTENT_LENGTH = 0
+CHUNK_FRAME_START = 1
+CHUNK_FRAME_DATA = 2
+CHUNK_FRAME_NEXT = 3
+CHUNK_FRAME_END = 4
+
+# ...
+MAX_REQUEST_LINE_SIZE = (
+    16384  # Maximum size of 'GET /path/to/url?search=blue HTTP/1.1'.
+)
+MAX_RESPONSE_LINE_SIZE = 1024  # Maximum size of 'HTTP/1.1 200 OK'.
+MAX_HEADERS_SIZE = 65536  # Maximum size of the request or response headers.
+MAX_BODY_STREAM = 65536  # Limit individual part sizes while retutrning body.
 
 
 # def _validate_request_line(data: bytes) -> tuple[bytes, bytes, bytes]:
@@ -151,6 +162,20 @@ def _validate_headers(data: bytes) -> list[tuple[bytes, bytes]]:
     return headers
 
 
+def _validate_content_length(headers: list[tuple[bytes, bytes]]) -> int:
+    for key, val in headers:
+        if key.lower() == b"content-length":
+            return int(val)
+    return 0
+
+
+def _validate_data_transfer_mode(headers: list[tuple[bytes, bytes]]) -> int:
+    for key, val in headers:
+        if key.lower() == b"transfer-encoding" and val == b"chunked":
+            return CHUNK_FRAME_START
+    return USE_CONTENT_LENGTH
+
+
 # TODO:
 
 # * Content-Length validation
@@ -158,12 +183,32 @@ def _validate_headers(data: bytes) -> list[tuple[bytes, bytes]]:
 # * Transfer-Encoding: chunked support
 # * Validate Host header
 
+# self._recv_te_
+# self._recv_te_state = FRAME_START
+
 
 class HTTPClient:
     def __init__(self):
         self._parser = BytesParser()
+
         self._client = SEND_START
         self._server = WAIT
+
+        # Switch for Content-Length vs Transfer-Encoding: chunked.
+        self._send_body_mode = USE_CONTENT_LENGTH
+        self._recv_body_mode = USE_CONTENT_LENGTH
+
+        # Track byte sent/recv counts.
+        self._send_seen_bytes = 0
+        self._send_content_length = 0
+        self._recv_seen_bytes = 0
+        self._recv_content_length = 0
+
+        # Track chunk sent/recv counts.
+        self._send_chunk_size = 0
+        self._send_chunk_seen_bytes = 0
+        self._recv_chunk_size = 0
+        self._recv_chunk_seen_bytes = 0
 
     def send_request_line(self, method: bytes, target: bytes, protocol: bytes) -> bytes:
         if self._client != SEND_START:
@@ -184,6 +229,8 @@ class HTTPClient:
         if self._client != SEND_HEADERS:
             raise RuntimeError("Called 'send_headers' out of sequence.")
 
+        self._send_content_length = _validate_content_length(headers)
+
         lines = [b"%b: %b\r\n" % (name, value) for name, value in headers]
         lines.append(b"\r\n")
         data = b"".join(lines)
@@ -201,7 +248,8 @@ class HTTPClient:
             raise RuntimeError("Called 'send_body' out of sequence.")
 
         # Too little body for declared Content-Length
-        # Invalid framing for Transfer-Encoding
+        # Too much body for declared Content-Length
+        self._send_seen_bytes += len(body)
 
         if body == b"":
             self._client = SEND_COMPLETE
@@ -216,7 +264,7 @@ class HTTPClient:
         if self._server != SEND_START:
             raise RuntimeError("Called 'recv_status_line' out of sequence.")
 
-        if (data := self._parser.read_until(b"\r\n", MAX_STATUS_LINE_SIZE)) is None:
+        if (data := self._parser.read_until(b"\r\n", MAX_RESPONSE_LINE_SIZE)) is None:
             return None
 
         protocol, status, reason = _validate_status_line(data)
@@ -233,6 +281,8 @@ class HTTPClient:
             return None
 
         headers = _validate_headers(data)
+        self._recv_content_length = _validate_content_length(headers)
+        self._recv_body_mode = _validate_data_transfer_mode(headers)
 
         self._server = SEND_BODY
 
@@ -242,8 +292,10 @@ class HTTPClient:
         if self._server != SEND_BODY:
             raise RuntimeError("Called 'recv_body' out of sequence.")
 
-        if (body := self._parser.read_some(max_size=MAX_READ)) is None:
-            return None
+        if self._recv_body_mode == USE_CONTENT_LENGTH:
+            body = self._recv_body_content_length()
+        else:
+            body = self._recv_body_te_chunked()
 
         if body == b"":
             self._server = SEND_COMPLETE
@@ -252,6 +304,51 @@ class HTTPClient:
             #     self._server = WAIT
 
         return body
+
+    def _recv_body_content_length(self) -> bytes | None:
+        count = min(self._recv_content_length - self._recv_seen_bytes, MAX_BODY_STREAM)
+        if (body := self._parser.read_some(max_size=count)) is None:
+            return None
+        self._recv_seen_bytes += len(body)
+        return body
+
+    def _recv_body_te_chunked(self) -> bytes | None:
+        if self._recv_body_mode == CHUNK_FRAME_NEXT:
+            # Read a closing '\r\n', not the final frame.
+            if self._parser.read_until(b"\r\n", max_size=0) is None:
+                return None
+            self._recv_body_mode = CHUNK_FRAME_START
+            self._recv_chunk_seen_bytes = 0
+            self._recv_chunk_size = 0
+
+        if self._recv_body_mode == CHUNK_FRAME_START:
+            # Read a leading 'xxxx\r\n', opening the frame.
+            if (
+                chunk_size_bytes := self._parser.read_until(b"\r\n", max_size=10)
+            ) is None:
+                return None
+            self._recv_chunk_size = int(chunk_size_bytes, base=16)
+            if self._recv_chunk_size > 0:
+                self._recv_body_mode = CHUNK_FRAME_DATA
+            else:
+                self._recv_body_mode = CHUNK_FRAME_END
+
+        if self._recv_body_mode == CHUNK_FRAME_END:
+            # Read the closing '\r\n' returning the closing b''.
+            if self._parser.read_until(b"\r\n", max_size=0) is None:
+                return None
+            return b""
+
+        # Read and return some '<data>' from the frame.
+        count = min(
+            self._recv_chunk_size - self._recv_chunk_seen_bytes, MAX_BODY_STREAM
+        )
+        if (chunk := self._parser.read_some(max_size=count)) is None:
+            return None
+        self._recv_chunk_seen_bytes += len(chunk)
+        if self._recv_chunk_seen_bytes >= self._recv_chunk_size:
+            self._recv_body_mode = CHUNK_FRAME_NEXT
+        return chunk
 
     def feed(self, data: bytes) -> None:
         """
