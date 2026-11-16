@@ -18,6 +18,8 @@ There's plenty of good work to be done here - on technical, educational, and com
 
 ## How can I get involved?
 
-Join our open office hours every Wednesday at 🕥 12:30 GMT. If you're interested, drop us a line at `lovelydinosaur <at> icloud.com`, and we'll share the details with you.
+Join our open office hours every Wednesday at 🕥 12:30 UTC.
+
+If you're interested, drop us a line at `lovelydinosaur <at> icloud.com`, and we'll share the details with you.
 
 You can also book in time to [introduce yourself](https://calendly.com/encode-oss) and discuss working together.
