@@ -18,14 +18,6 @@ There's plenty of good work to be done here - on technical, educational, and com
 
 ## How can I get involved?
 
-We currently have a sequence of inaugral sprints planned...
-
-* Amsterdam, Netherlands, 27th October. Leading into FastAPI conf.
-* Biaritz, France. 29th & 30th October. Leading into PyCon FR.
-* Barcelona, Spain. 4th & 5th November. Leading into PyCon ES.
-
-We're also looking at booking in further sprints, and starting regular open office hours.
-
 Join our open office hours every Wednesday at 🕥 12:30 GMT. If you're interested, drop us a line at `lovelydinosaur <at> icloud.com`, and we'll share the details with you.
 
 You can also book in time to [introduce yourself](https://calendly.com/encode-oss) and discuss working together.
