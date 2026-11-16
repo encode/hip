@@ -24,8 +24,8 @@ We currently have a sequence of inaugral sprints planned...
 * Biaritz, France. 29th & 30th October. Leading into PyCon FR.
 * Barcelona, Spain. 4th & 5th November. Leading into PyCon ES.
 
-If you'd like to attend our sprints please send an intro email to `lovelydinosaur <at> icloud.com`
-
 We're also looking at booking in further sprints, and starting regular open office hours.
+
+Join our open office hours every Wednesday at 🕥 12:30 GMT. If you're interested, drop us a line at `lovelydinosaur <at> icloud.com`, and we'll share the details with you.
 
 You can also book in time to [introduce yourself](https://calendly.com/encode-oss) and discuss working together.
