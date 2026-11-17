@@ -1135,12 +1135,7 @@ def test_http_client_parser_chunked():
         (b"Content-Type", b"text/html"),
         (b"Transfer-Encoding", b"chunked"),
     ]
-    assert parts == [
-        b"<html>hell",
-        b"o, world</",
-        b"html>",
-        b""
-    ]
+    assert parts == [b"<html>hell", b"o, world</", b"html>", b""]
 
 
 def test_http_client_parser_trickle_data():
