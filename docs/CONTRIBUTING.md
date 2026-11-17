@@ -1,5 +1,11 @@
 # Contributing
 
+The `hip` redesign is currently in early development.
+
+We are currently [seeking sponsorship](https://github.com/sponsors/encode), and looking to expand our team.
+
+-----
+
 We love to welcome you to the team. We're looking for writers, coders, designers.
 
 All experience levels are welcome, whether you're new to development, or a veteran.
@@ -18,8 +24,10 @@ There's plenty of good work to be done here - on technical, educational, and com
 
 ## How can I get involved?
 
-Join our open office hours every Wednesday at 🕥 12:30 UTC.
+If you're looking for a first contribution, browse the [open issues](https://github.com/encode/hip/issues) and comment on one that interests you, or join our office hours. We can help you find and scope a task.
 
-If you're interested, drop us a line at `lovelydinosaur <at> icloud.com`, and we'll share the details with you.
+Pull requests are currently limited to collaborators. If you have a fix, comment on the relevant issue and we can discuss how to receive it.
+
+Join our open office hours every Wednesday at 🕥 12:30 UTC on Google Meet: https://meet.google.com/sae-aoun-brz.
 
 You can also book in time to [introduce yourself](https://calendly.com/encode-oss) and discuss working together.
