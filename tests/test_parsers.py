@@ -1093,7 +1093,7 @@ def test_http_client_parser_content_length():
     assert eof == b""
 
 
-def test_http_client_parser_chunked():
+def test_http_client_parser_response_chunked():
     parser = hip.parsers.HTTPClient()
 
     # Write the request...
@@ -1123,10 +1123,8 @@ def test_http_client_parser_chunked():
     protocol, status, reason = parser.recv_status_line()
     headers = parser.recv_headers()
     parts = []
-    parts.append(parser.recv_body())
-    parts.append(parser.recv_body())
-    parts.append(parser.recv_body())
-    parts.append(parser.recv_body())
+    while (part := parser.recv_body()) != b'':
+        parts.append(part)
 
     assert protocol == b"HTTP/1.1"
     assert status == 200
@@ -1135,7 +1133,66 @@ def test_http_client_parser_chunked():
         (b"Content-Type", b"text/html"),
         (b"Transfer-Encoding", b"chunked"),
     ]
-    assert parts == [b"<html>hell", b"o, world</", b"html>", b""]
+    assert parts == [b"<html>hell", b"o, world</", b"html>"]
+
+
+def test_http_client_parser_request_chunked():
+    parser = hip.parsers.HTTPClient()
+
+    # Write the request...
+    output = b""
+    output += parser.send_request_line(b"POST", b"/", b"HTTP/1.1")
+    output += parser.send_headers(
+        [
+            (b"Host", b"www.example.com"),
+            (b"User-Agent", b"hip/dev"),
+            (b"Content-Type", b"text/html"),
+            (b"Transfer-Encoding", b"chunked"),
+        ]
+    )
+    output += parser.send_body(b"<html>hell")
+    output += parser.send_body(b"o, world</")
+    output += parser.send_body(b"html>")
+    output += parser.send_body(b"")
+
+    assert output == (
+        b"POST / HTTP/1.1\r\n"
+        b"Host: www.example.com\r\n"
+        b"User-Agent: hip/dev\r\n"
+        b"Content-Type: text/html\r\n"
+        b"Transfer-Encoding: chunked\r\n"
+        b"\r\n"
+        b"A\r\n<html>hell\r\n"
+        b"A\r\no, world</\r\n"
+        b"5\r\nhtml>\r\n"
+        b"0\r\n\r\n"
+    )
+
+    # Read the response...
+    input = (
+        b"HTTP/1.1 200 OK\r\n"
+        b"Content-Type: text/html\r\n"
+        b"Content-Length: 25\r\n"
+        b"\r\n"
+        b"<html>hello, world</html>"
+    )
+    parser.feed(input)
+    parser.feed(b"")
+
+    protocol, status, reason = parser.recv_status_line()
+    headers = parser.recv_headers()
+    body = parser.recv_body()
+    eof = parser.recv_body()
+
+    assert protocol == b"HTTP/1.1"
+    assert status == 200
+    assert reason == b"OK"
+    assert headers == [
+        (b"Content-Type", b"text/html"),
+        (b"Content-Length", b"25"),
+    ]
+    assert body == b"<html>hello, world</html>"
+    assert eof == b""
 
 
 def test_http_client_parser_trickle_data():
@@ -1170,14 +1227,11 @@ def test_http_client_parser_trickle_data():
         parser.feed(input.read(1))
 
     body = b""
-    while True:
-        part = parser.recv_body()
+    while (part := parser.recv_body()) != b'':
         if part is None:
             parser.feed(input.read(1))
-        elif part:
-            body += part
         else:
-            break
+            body += part
 
     assert protocol == b"HTTP/1.1"
     assert status == 200

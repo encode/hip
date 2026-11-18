@@ -97,8 +97,10 @@ SEND_HEADERS = 2
 SEND_BODY = 3
 SEND_COMPLETE = 4
 
-# Internal state during framing for 'Transfer-Encoding: chunked'.
-# This is how data is sent over HTTP/1.1, when the Content-Length is not known up front.
+# Internal state to track how the HTTP request/response body is sent.
+# The typical case is simply 'Content-Length', or 0 bytes content.
+# When the content length is unknown upfront 'Transfer-Encoding: chunked' is used.
+# In this case we need state to keep track of which part 
 USE_CONTENT_LENGTH = 0
 CHUNK_FRAME_START = 1
 CHUNK_FRAME_DATA = 2
@@ -106,9 +108,7 @@ CHUNK_FRAME_NEXT = 3
 CHUNK_FRAME_END = 4
 
 # ...
-MAX_REQUEST_LINE_SIZE = (
-    16384  # Maximum size of 'GET /path/to/url?search=blue HTTP/1.1'.
-)
+MAX_REQUEST_LINE_SIZE = 16384  # Maximum size of 'GET /path?search=blue HTTP/1.1'.
 MAX_RESPONSE_LINE_SIZE = 1024  # Maximum size of 'HTTP/1.1 200 OK'.
 MAX_HEADERS_SIZE = 65536  # Maximum size of the request or response headers.
 MAX_BODY_STREAM = 65536  # Limit individual part sizes while retutrning body.
@@ -187,6 +187,12 @@ def _validate_data_transfer_mode(headers: list[tuple[bytes, bytes]]) -> int:
 # self._recv_te_state = FRAME_START
 
 
+# 'HEAD' responses
+# 'Connection: upgrade' / 101
+# 'CONNECT' support / 2xx
+# 'Transfer-Encoding: chunked' - chunk extensions
+# 'Transfer-Encoding: chunked' - trailing headers
+
 class HTTPClient:
     def __init__(self):
         self._parser = BytesParser()
@@ -230,6 +236,7 @@ class HTTPClient:
             raise RuntimeError("Called 'send_headers' out of sequence.")
 
         self._send_content_length = _validate_content_length(headers)
+        self._send_body_mode = _validate_data_transfer_mode(headers)
 
         lines = [b"%b: %b\r\n" % (name, value) for name, value in headers]
         lines.append(b"\r\n")
@@ -249,16 +256,21 @@ class HTTPClient:
 
         # Too little body for declared Content-Length
         # Too much body for declared Content-Length
-        self._send_seen_bytes += len(body)
+        if self._send_body_mode == USE_CONTENT_LENGTH:
+            part = body
+        else:
+            part = b"%X\r\n%b\r\n" % (len(body), body)
 
-        if body == b"":
+        self._send_seen_bytes += len(part)
+
+        if part == b"":
             self._client = SEND_COMPLETE
 
             # if self._server == SEND_COMPLETE:
             #     self._client = SEND_START
             #     self._server = WAIT
 
-        return body
+        return part
 
     def recv_status_line(self) -> tuple[bytes, int, bytes] | None:
         if self._server != SEND_START:
