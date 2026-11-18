@@ -1123,7 +1123,7 @@ def test_http_client_parser_response_chunked():
     protocol, status, reason = parser.recv_status_line()
     headers = parser.recv_headers()
     parts = []
-    while (part := parser.recv_body()) != b'':
+    while (part := parser.recv_body()) != b"":
         parts.append(part)
 
     assert protocol == b"HTTP/1.1"
@@ -1227,7 +1227,7 @@ def test_http_client_parser_trickle_data():
         parser.feed(input.read(1))
 
     body = b""
-    while (part := parser.recv_body()) != b'':
+    while (part := parser.recv_body()) != b"":
         if part is None:
             parser.feed(input.read(1))
         else:

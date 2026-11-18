@@ -100,7 +100,7 @@ SEND_COMPLETE = 4
 # Internal state to track how the HTTP request/response body is sent.
 # The typical case is simply 'Content-Length', or 0 bytes content.
 # When the content length is unknown upfront 'Transfer-Encoding: chunked' is used.
-# In this case we need state to keep track of which part 
+# In this case we need state to keep track of which part
 USE_CONTENT_LENGTH = 0
 CHUNK_FRAME_START = 1
 CHUNK_FRAME_DATA = 2
@@ -192,6 +192,7 @@ def _validate_data_transfer_mode(headers: list[tuple[bytes, bytes]]) -> int:
 # 'CONNECT' support / 2xx
 # 'Transfer-Encoding: chunked' - chunk extensions
 # 'Transfer-Encoding: chunked' - trailing headers
+
 
 class HTTPClient:
     def __init__(self):
