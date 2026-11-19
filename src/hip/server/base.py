@@ -2,13 +2,12 @@ import datetime
 import io
 import logging
 
-from ..backends.sync import NetworkBackend
+from ..backends.sync import NetworkBackend, sleep
 from ..core.content import Text
 from ..core.headers import Headers
 from ..core.request import Request
 from ..core.response import Response
 from ..core.streams import Stream
-from ..core.timeouts import sleep
 from ..parsers import HTTPParser
 
 __all__ = ["Server"]
