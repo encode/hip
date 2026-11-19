@@ -264,7 +264,7 @@ class HTTPClient:
 
         self._send_seen_bytes += len(part)
 
-        if part == b"":
+        if body == b"":
             self._client = SEND_COMPLETE
 
             # if self._server == SEND_COMPLETE:
