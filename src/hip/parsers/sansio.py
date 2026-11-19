@@ -132,7 +132,7 @@ MAX_BODY_STREAM = 65536  # Limit individual part sizes while retutrning body.
 
 def _validate_status_line(data: bytes) -> tuple[bytes, int, bytes]:
     try:
-        protocol, status_code, reason = data.split(b" ", 3)
+        protocol, status_code, reason = data.split(b" ", 2)
     except ValueError:
         raise ProtocolError("Invalid status line")
 
