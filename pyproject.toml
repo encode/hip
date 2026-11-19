@@ -22,7 +22,6 @@ dev = [
     "pytest==8.3.5",
     "pytest-cov==7.1.0",
     "ruff",
-    "typing-extensions>=4.0",
 ]
 
 [build-system]
