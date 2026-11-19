@@ -1,8 +1,8 @@
 <p align="center">
-  <img width="350" height="208" src="img/butterfly.png" alt='hip'>
+  <img width="350" height="208" src="https://www.encode.io/hip/img/butterfly.png" alt="hip">
 </p>
 
-# [hip](README.md)
+# [hip](https://www.encode.io/hip/)
 
 Engineered for simplicity, `hip` provides a complete Python web suite&hellip;
 
@@ -12,48 +12,11 @@ Engineered for simplicity, `hip` provides a complete Python web suite&hellip;
 
 ...we're currently in early stages design, and would love for you to get involved.
 
-## Installation
-
-Install the package from PyPI&hellip;
-
-```shell
-$ uv add hip --dev
-```
-
-## Client
-
-Sending HTTP requests&hellip;
-
-```python
->>> import hip
-
->>> cli = hip.Client()
->>> r = cli.get('https://www.example.com/')
->>> r
-<Response [200 OK]>
-```
-
-## Server
-
-Creating web apps&hellip;
-
-```python
->>> import hip
-
->>> def app(request):
-...     content = hip.HTML('<html><body>¡Hola, mundo!</body></html>')
-...     return hip.Response(200, content=content)
-
->>> with hip.Server(app) as server:
-...     print(server.url)
-...     server.until_interrupt()
-```
-
----
+To get started, follow the [installation guide](https://www.encode.io/hip/installation/).
 
 ## Motivation
 
-A clean modern design, with [a focused API](API.md) and an exceptionally light installation footprint.
+A clean modern design, with a focused API and an exceptionally light installation footprint.
 
 For comparison, see `hip` <small>vs</small> `requests`&hellip;
 
@@ -78,12 +41,12 @@ requests v2.33.1 (63.4KiB)
 
 ## Contribution
 
-See [Contributing](CONTRIBUTING.md) to get involved.
+See [Contributing](https://www.encode.io/hip/contributing/) to get involved.
 
 ---
 
 <p align="center">
-<a href="license/">MIT Licensed</a>.<br/>Designed & Built with Love.
+<a href="https://www.encode.io/hip/license/">MIT Licensed</a>.<br/>Designed & Built with Love.
 </p>
 
 <p align="center">&mdash; 💖 &mdash;</p>
