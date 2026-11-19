@@ -11,9 +11,6 @@ import typing
 
 import truststore
 
-if typing.TYPE_CHECKING:
-    from typing import Self
-
 from ..core.streams import Stream
 
 __all__ = ["NetworkBackend", "NetworkStream", "sleep", "timeout"]
@@ -64,7 +61,7 @@ class NetworkStream(Stream):
         description += " CLOSED" if self._is_closed else ""
         return f"<NetworkStream [{self.host}:{self.port}{description}]>"
 
-    def __enter__(self) -> "Self":
+    def __enter__(self) -> typing.Self:
         return self
 
     def __exit__(

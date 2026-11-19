@@ -2,9 +2,6 @@ import time
 import types
 import typing
 
-if typing.TYPE_CHECKING:
-    from typing import Self
-
 from ..backends.sync import NetworkBackend, Semaphore
 from ..core.request import Request
 from ..core.urls import URL
@@ -91,7 +88,7 @@ class ConnectionPool(Transport):
 
             warnings.warn("ConnectionPool was garbage collected without being closed.")
 
-    def __enter__(self) -> "Self":
+    def __enter__(self) -> typing.Self:
         return self
 
     def __exit__(
