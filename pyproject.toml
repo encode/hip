@@ -1,6 +1,6 @@
 [project]
 name = "hip"
-version = "0.3"
+version = "0.4"
 description = "HTTP, for everyone."
 readme = "docs/README.md"
 requires-python = ">=3.10"
