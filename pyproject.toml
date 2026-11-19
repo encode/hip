@@ -1,35 +1,18 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
 name = "hip"
 version = "0.3"
-description = "HTTP, for Python."
+description = "HTTP, for everyone."
 readme = "docs/README.md"
 requires-python = ">=3.10"
 authors = [
-    { name = "Kim Christie", email = "noreply@lovelydinosaur.com" },
+    { name = "the hip community" },
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Environment :: Web Environment",
-    "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Topic :: Internet :: WWW/HTTP",
 ]
 dependencies = [
     "truststore",
-]
-
-[tool.hatch.build.targets.sdist]
-include = [
-    "/src",
 ]
 
 [dependency-groups]
@@ -41,3 +24,7 @@ dev = [
     "ruff",
     "typing-extensions>=4.0",
 ]
+
+[build-system]
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
