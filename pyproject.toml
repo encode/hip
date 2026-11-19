@@ -15,6 +15,11 @@ dependencies = [
     "truststore",
 ]
 
+[project.optional-dependencies]
+trio = [
+    "trio>=0.22,<1",
+]
+
 [dependency-groups]
 dev = [
     "mkdocs==2.0.dev6",
