@@ -3,7 +3,7 @@ name = "hip"
 version = "0.4"
 description = "HTTP, for everyone."
 readme = "docs/README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     { name = "the hip community" },
 ]

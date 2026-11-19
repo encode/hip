@@ -6,6 +6,10 @@ Since we are currently on [an 0.x series](https://semver.org/#spec-item-4) you s
 
 At this point in time, only documented functionality should be considered "Public API".
 
+## Unreleased
+
+* Drop Python 3.10 support. Python 3.11 is now the minimum supported version.
+
 ## 0.4
 
 * The server closes quietly when a client disconnects between requests, instead of
