@@ -4,7 +4,7 @@ Releases to the `hip` project follow [SEMVER](https://semver.org/).
 
 Since we are currently on [an 0.x series](https://semver.org/#spec-item-4) you should pin releases precisely and review release notes on all updates.
 
-At this point in time, only documented functionality should be consider "Public API".
+At this point in time, only documented functionality should be considered "Public API".
 
 ## 0.4
 
