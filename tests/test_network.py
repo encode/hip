@@ -112,11 +112,11 @@ def test_network_backend_context_managed(server):
 def test_network_backend_timeout(server):
     net = hip.backends.NetworkBackend()
     with (
-        hip.timeout(0.0),
+        hip.backends.timeout(0.0),
         pytest.raises(TimeoutError),
         net.connect(server.host, server.port),
     ):
         pass
 
-    with hip.timeout(10.0), net.connect(server.host, server.port):
+    with hip.backends.timeout(10.0), net.connect(server.host, server.port):
         pass
