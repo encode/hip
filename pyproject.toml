@@ -3,7 +3,7 @@ name = "hip"
 version = "0.4"
 description = "HTTP, for everyone."
 readme = "docs/README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     { name = "the hip community" },
 ]
@@ -22,7 +22,6 @@ dev = [
     "pytest==8.3.5",
     "pytest-cov==7.1.0",
     "ruff",
-    "typing-extensions>=4.0",
 ]
 
 [build-system]

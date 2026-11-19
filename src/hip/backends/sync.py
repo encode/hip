@@ -12,8 +12,7 @@ import typing
 import truststore
 
 if typing.TYPE_CHECKING:
-    # Once we drop 3.10 support, we can use 'typing.Self'.
-    from typing_extensions import Self
+    from typing import Self
 
 from ..core.streams import Stream
 
