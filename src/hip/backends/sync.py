@@ -103,7 +103,7 @@ class NetworkListener:
         self._is_closed = True
         self._server_socket.close()
 
-    def __enter__(self) -> "Self":
+    def __enter__(self) -> typing.Self:
         return self
 
     def __exit__(

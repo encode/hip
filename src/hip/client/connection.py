@@ -1,7 +1,6 @@
 import io
 import types
 import typing
-
 import zlib
 
 from ..backends.sync import Lock, NetworkBackend
