@@ -42,7 +42,7 @@ def send(req: bytes, res: bytes):
         server.feed(req_stream.read(1))
     while (req_h := server.recv_headers()) is None:
         server.feed(req_stream.read(1))
-    while (some_body := server.recv_body()) != b'':
+    while (some_body := server.recv_body()) != b"":
         if some_body is None:
             server.feed(req_stream.read(1))
         else:
@@ -61,7 +61,7 @@ def send(req: bytes, res: bytes):
         client.feed(res_stream.read(1))
     while (res_h := client.recv_headers()) is None:
         client.feed(res_stream.read(1))
-    while (some_body := client.recv_body()) != b'':
+    while (some_body := client.recv_body()) != b"":
         if some_body is None:
             client.feed(res_stream.read(1))
         else:
@@ -80,32 +80,29 @@ def send(req: bytes, res: bytes):
 def test_request_response():
     req, res = send(
         # Request...
-        b"POST / HTTP/1.1\r\n"
-        b"Host: www.example.com\r\n"
-        b"User-Agent: hip/dev\r\n"
-        b"\r\n",
+        b"POST / HTTP/1.1\r\nHost: www.example.com\r\nUser-Agent: hip/dev\r\n\r\n",
         # Response...
         b"HTTP/1.1 200 OK\r\n"
         b"Content-Type: text/html\r\n"
         b"Content-Length: 24\r\n"
         b"\r\n"
-        b"<html>hola, mundo</html>"
+        b"<html>hola, mundo</html>",
     )
 
     # Request...
-    assert req.method == b'POST'
-    assert req.target == b'/'
-    assert req.protocol == b'HTTP/1.1'
+    assert req.method == b"POST"
+    assert req.target == b"/"
+    assert req.protocol == b"HTTP/1.1"
     assert req.headers == [
-        (b'Host', b'www.example.com'),
-        (b'User-Agent', b'hip/dev'),
+        (b"Host", b"www.example.com"),
+        (b"User-Agent", b"hip/dev"),
     ]
-    assert req.body == b''
+    assert req.body == b""
 
     # Response...
-    assert res.protocol == b'HTTP/1.1'
+    assert res.protocol == b"HTTP/1.1"
     assert res.status == 200
-    assert res.reason == b'OK'
+    assert res.reason == b"OK"
     assert res.headers == [
         (b"Content-Type", b"text/html"),
         (b"Content-Length", b"24"),
@@ -128,30 +125,30 @@ def test_request_response_content_length():
         b"Content-Type: text/html\r\n"
         b"Content-Length: 24\r\n"
         b"\r\n"
-        b"<html>hola, mundo</html>"
+        b"<html>hola, mundo</html>",
     )
 
     # Request...
-    assert req.method == b'POST'
-    assert req.target == b'/'
-    assert req.protocol == b'HTTP/1.1'
+    assert req.method == b"POST"
+    assert req.target == b"/"
+    assert req.protocol == b"HTTP/1.1"
     assert req.headers == [
-        (b'Host', b'www.example.com'),
-        (b'User-Agent', b'hip/dev'),
-        (b'Content-Type', b'text/html'),
-        (b'Content-Length', b'24'),
+        (b"Host", b"www.example.com"),
+        (b"User-Agent", b"hip/dev"),
+        (b"Content-Type", b"text/html"),
+        (b"Content-Length", b"24"),
     ]
-    assert req.body == b'<html>hola, mundo</html>'
+    assert req.body == b"<html>hola, mundo</html>"
 
     # Response...
-    assert res.protocol == b'HTTP/1.1'
+    assert res.protocol == b"HTTP/1.1"
     assert res.status == 200
-    assert res.reason == b'OK'
+    assert res.reason == b"OK"
     assert res.headers == [
-        (b'Content-Type', b'text/html'),
-        (b'Content-Length', b'24'),
+        (b"Content-Type", b"text/html"),
+        (b"Content-Length", b"24"),
     ]
-    assert res.body == b'<html>hola, mundo</html>'
+    assert res.body == b"<html>hola, mundo</html>"
 
 
 def test_request_response_te_chunked():
@@ -173,187 +170,157 @@ def test_request_response_te_chunked():
     )
 
     # Request...
-    assert req.method == b'GET'
-    assert req.target == b'/'
-    assert req.protocol == b'HTTP/1.1'
+    assert req.method == b"GET"
+    assert req.target == b"/"
+    assert req.protocol == b"HTTP/1.1"
     assert req.headers == [
-        (b'Host', b'www.example.com'),
-        (b'User-Agent', b'hip/dev'),
-        (b'Content-Type', b'text/html'),
-        (b'Transfer-Encoding', b'chunked'),
+        (b"Host", b"www.example.com"),
+        (b"User-Agent", b"hip/dev"),
+        (b"Content-Type", b"text/html"),
+        (b"Transfer-Encoding", b"chunked"),
     ]
-    assert req.body == b'<html>hola, mundo</html>'
+    assert req.body == b"<html>hola, mundo</html>"
 
     # Response...
-    assert res.protocol == b'HTTP/1.1'
+    assert res.protocol == b"HTTP/1.1"
     assert res.status == 200
-    assert res.reason == b'OK'
+    assert res.reason == b"OK"
     assert res.headers == [
-        (b'Content-Type', b'text/html'),
-        (b'Transfer-Encoding', b'chunked'),
+        (b"Content-Type", b"text/html"),
+        (b"Transfer-Encoding", b"chunked"),
     ]
-    assert res.body == b'<html>hola, mundo</html>'
+    assert res.body == b"<html>hola, mundo</html>"
 
 
 def test_invalid_request_line():
     msg = "Invalid request line"
-    with pytest.raises(hip.parsers.ParseError, match=msg) as exc:
+    with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
             # Request...
-            b"...\r\n"
-            b"Host: www.example.com\r\n"
-            b"User-Agent: hip/dev\r\n"
-            b"\r\n",
+            b"...\r\nHost: www.example.com\r\nUser-Agent: hip/dev\r\n\r\n",
             # Response...
             b"HTTP/1.1 200 OK\r\n"
             b"Content-Type: text/html\r\n"
             b"Content-Length: 24\r\n"
             b"\r\n"
-            b"<html>hola, mundo</html>"
+            b"<html>hola, mundo</html>",
         )
 
     msg = "Invalid method"
-    with pytest.raises(hip.parsers.ParseError, match=msg) as exc:
+    with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
             # Request...
-            b" / HTTP/1.1\r\n"
-            b"Host: www.example.com\r\n"
-            b"User-Agent: hip/dev\r\n"
-            b"\r\n",
+            b" / HTTP/1.1\r\nHost: www.example.com\r\nUser-Agent: hip/dev\r\n\r\n",
             # Response...
             b"HTTP/1.1 200 OK\r\n"
             b"Content-Type: text/html\r\n"
             b"Content-Length: 24\r\n"
             b"\r\n"
-            b"<html>hola, mundo</html>"
+            b"<html>hola, mundo</html>",
         )
 
     msg = "Invalid url"
-    with pytest.raises(hip.parsers.ParseError, match=msg) as exc:
+    with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
             # Request...
-            b"GET  HTTP/1.1\r\n"
-            b"Host: www.example.com\r\n"
-            b"User-Agent: hip/dev\r\n"
-            b"\r\n",
+            b"GET  HTTP/1.1\r\nHost: www.example.com\r\nUser-Agent: hip/dev\r\n\r\n",
             # Response...
             b"HTTP/1.1 200 OK\r\n"
             b"Content-Type: text/html\r\n"
             b"Content-Length: 24\r\n"
             b"\r\n"
-            b"<html>hola, mundo</html>"
+            b"<html>hola, mundo</html>",
         )
 
     msg = "Invalid protocol"
-    with pytest.raises(hip.parsers.ParseError, match=msg) as exc:
+    with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
             # Request...
-            b"GET / ...\r\n"
-            b"Host: www.example.com\r\n"
-            b"User-Agent: hip/dev\r\n"
-            b"\r\n",
+            b"GET / ...\r\nHost: www.example.com\r\nUser-Agent: hip/dev\r\n\r\n",
             # Response...
             b"HTTP/1.1 200 OK\r\n"
             b"Content-Type: text/html\r\n"
             b"Content-Length: 24\r\n"
             b"\r\n"
-            b"<html>hola, mundo</html>"
+            b"<html>hola, mundo</html>",
         )
 
     msg = "Invalid status line"
-    with pytest.raises(hip.parsers.ParseError, match=msg) as exc:
+    with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
             # Request...
-            b"GET / HTTP/1.1\r\n"
-            b"Host: www.example.com\r\n"
-            b"User-Agent: hip/dev\r\n"
-            b"\r\n",
+            b"GET / HTTP/1.1\r\nHost: www.example.com\r\nUser-Agent: hip/dev\r\n\r\n",
             # Response...
             b"...\r\n"
             b"Content-Type: text/html\r\n"
             b"Content-Length: 24\r\n"
             b"\r\n"
-            b"<html>hola, mundo</html>"
+            b"<html>hola, mundo</html>",
         )
 
     msg = "Invalid protocol"
-    with pytest.raises(hip.parsers.ParseError, match=msg) as exc:
+    with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
             # Request...
-            b"GET / HTTP/1.1\r\n"
-            b"Host: www.example.com\r\n"
-            b"User-Agent: hip/dev\r\n"
-            b"\r\n",
+            b"GET / HTTP/1.1\r\nHost: www.example.com\r\nUser-Agent: hip/dev\r\n\r\n",
             # Response...
             b"... 200 OK\r\n"
             b"Content-Type: text/html\r\n"
             b"Content-Length: 24\r\n"
             b"\r\n"
-            b"<html>hola, mundo</html>"
+            b"<html>hola, mundo</html>",
         )
 
     msg = "Invalid status code"
-    with pytest.raises(hip.parsers.ParseError, match=msg) as exc:
+    with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
             # Request...
-            b"GET / HTTP/1.1\r\n"
-            b"Host: www.example.com\r\n"
-            b"User-Agent: hip/dev\r\n"
-            b"\r\n",
+            b"GET / HTTP/1.1\r\nHost: www.example.com\r\nUser-Agent: hip/dev\r\n\r\n",
             # Response...
             b"HTTP/1.1 007 OK\r\n"
             b"Content-Type: text/html\r\n"
             b"Content-Length: 24\r\n"
             b"\r\n"
-            b"<html>hola, mundo</html>"
+            b"<html>hola, mundo</html>",
         )
 
     msg = "Invalid status code"
-    with pytest.raises(hip.parsers.ParseError, match=msg) as exc:
+    with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
             # Request...
-            b"GET / HTTP/1.1\r\n"
-            b"Host: www.example.com\r\n"
-            b"User-Agent: hip/dev\r\n"
-            b"\r\n",
+            b"GET / HTTP/1.1\r\nHost: www.example.com\r\nUser-Agent: hip/dev\r\n\r\n",
             # Response...
             b"HTTP/1.1 XXX OK\r\n"
             b"Content-Type: text/html\r\n"
             b"Content-Length: 24\r\n"
             b"\r\n"
-            b"<html>hola, mundo</html>"
+            b"<html>hola, mundo</html>",
         )
 
     msg = "Invalid status code"
-    with pytest.raises(hip.parsers.ParseError, match=msg) as exc:
+    with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
             # Request...
-            b"GET / HTTP/1.1\r\n"
-            b"Host: www.example.com\r\n"
-            b"User-Agent: hip/dev\r\n"
-            b"\r\n",
+            b"GET / HTTP/1.1\r\nHost: www.example.com\r\nUser-Agent: hip/dev\r\n\r\n",
             # Response...
             b"HTTP/1.1 XXXX OK\r\n"
             b"Content-Type: text/html\r\n"
             b"Content-Length: 24\r\n"
             b"\r\n"
-            b"<html>hola, mundo</html>"
+            b"<html>hola, mundo</html>",
         )
 
     msg = "Invalid header"
-    with pytest.raises(hip.parsers.ParseError, match=msg) as exc:
+    with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
             # Request...
-            b"GET / HTTP/1.1\r\n"
-            b"Host www.example.com\r\n"
-            b"User-Agent hip/dev\r\n"
-            b"\r\n",
+            b"GET / HTTP/1.1\r\nHost www.example.com\r\nUser-Agent hip/dev\r\n\r\n",
             # Response...
             b"HTTP/1.1 XXXX OK\r\n"
             b"Content-Type: text/html\r\n"
             b"Content-Length: 24\r\n"
             b"\r\n"
-            b"<html>hola, mundo</html>"
+            b"<html>hola, mundo</html>",
         )
 
 

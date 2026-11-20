@@ -28,7 +28,7 @@ class BytesParser:
         Returns `None` to indicate feed required.
         """
         if max_size <= 0:
-            raise ValueError('max_size must be > 0')
+            raise ValueError("max_size must be > 0")
 
         if not self._buffer:
             if self._closed:
@@ -86,6 +86,7 @@ class BytesParser:
 
     #     Returns `None` to indicate feed required.
     #     """
+
 
 WAIT = 0
 SEND_START = 1
@@ -317,6 +318,7 @@ class HTTPClient:
         if (body := self._parser.read_some(max_size=count)) is None:
             return None
 
+        # Error case: we could have EOF here.
         self._recv_count += len(body)
         return body
 
@@ -350,7 +352,8 @@ class HTTPClient:
         count = min(remaining, MAX_BODY_STREAM)
         if (chunk := self._parser.read_some(max_size=count)) is None:
             return None
-        # Error case we could have EOF here.
+
+        # Error case: we could have EOF here.
         self._recv_te_frame_count += len(chunk)
         if self._recv_te_frame_count == self._recv_te_frame_size:
             self._recv_te_state = TE_FRAME_NEXT
