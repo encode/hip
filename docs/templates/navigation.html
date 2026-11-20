@@ -1,0 +1,17 @@
+{% set groups = [
+    ('Init', [('README', 'Introduction'), ('INSTALLATION', 'Installation')]),
+    ('Client', [('CLIENT', 'Making requests')]),
+    ('Server', [('SERVER', 'Running a server')]),
+    ('Core', [('CORE#request', 'Request'), ('CORE#response', 'Response'), ('CORE#method', 'Method'), ('CORE#statuscode', 'StatusCode'), ('CORE#headers', 'Headers'), ('CORE#url', 'URL'), ('CORE#queryparams', 'QueryParams'), ('CORE#content', 'Content')]),
+    ('Project', [('CONTRIBUTING', 'Contributing'), ('CHANGELOG', 'Changelog'), ('LICENSE', 'License'), ('RELEASING', 'Releasing')])
+] %}
+{% for heading, links in groups %}
+<p><strong>{{ heading }}</strong></p>
+<ul>
+    {% for source, label in links %}
+    {% for item in nav if item.title == source.split('#')[0] %}
+    <li><a href="{{ item.page.url | url }}{% if '#' in source %}#{{ source.split('#')[1] }}{% endif %}"{% if item.page.url == page.url and '#' not in source %} class="active" aria-current="page"{% endif %}>{{ label }}</a></li>
+    {% endfor %}
+    {% endfor %}
+</ul>
+{% endfor %}
