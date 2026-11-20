@@ -5,7 +5,6 @@ from .queryparams import QueryParams
 from .request import Method, Request
 from .response import Response, StatusCode
 from .streams import Stream
-from .timeouts import sleep, timeout
 from .urls import URL
 
 __all__ = [
@@ -27,6 +26,4 @@ __all__ = [
     "StatusCode",
     "Stream",
     "Text",
-    "sleep",
-    "timeout",
 ]

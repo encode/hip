@@ -1,5 +1,5 @@
 if [ -n "$GITHUB_ACTIONS" ]; then
-    uv sync --locked
+    uv sync --locked --extra trio
 else
     uv sync
 fi

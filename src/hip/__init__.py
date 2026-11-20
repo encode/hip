@@ -7,7 +7,6 @@ from .core.queryparams import QueryParams
 from .core.request import Method, Request
 from .core.response import Response, StatusCode
 from .core.streams import Stream
-from .core.timeouts import sleep, timeout
 from .core.urls import URL
 from .server import Server
 
@@ -33,6 +32,4 @@ __all__ = [
     "Text",
     "backends",
     "parsers",
-    "sleep",
-    "timeout",
 ]

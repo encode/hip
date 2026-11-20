@@ -1,11 +1,6 @@
 import io
 import types
 import typing
-
-if typing.TYPE_CHECKING:
-    # Once we drop 3.10 support, we can use 'typing.Self'.
-    from typing_extensions import Self
-
 import zlib
 
 from ..backends.sync import Lock, NetworkBackend
@@ -110,7 +105,7 @@ class Connection(Transport):
     def __repr__(self) -> str:
         return f"<Connection [{self._origin} {self.description()}]>"
 
-    def __enter__(self) -> "Self":
+    def __enter__(self) -> typing.Self:
         return self
 
     def __exit__(

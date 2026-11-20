@@ -1,5 +1,11 @@
 # Contributing
 
+The `hip` redesign is currently in early development.
+
+We are currently [seeking sponsorship](https://github.com/sponsors/encode), and looking to expand our team.
+
+-----
+
 We love to welcome you to the team. We're looking for writers, coders, designers.
 
 All experience levels are welcome, whether you're new to development, or a veteran.
@@ -18,14 +24,10 @@ There's plenty of good work to be done here - on technical, educational, and com
 
 ## How can I get involved?
 
-We currently have a sequence of inaugral sprints planned...
+If you're looking for a first contribution, browse the [open issues](https://github.com/encode/hip/issues) and comment on one that interests you, or join our office hours. We can help you find and scope a task.
 
-* Amsterdam, Netherlands, 27th October. Leading into FastAPI conf.
-* Biaritz, France. 29th & 30th October. Leading into PyCon FR.
-* Barcelona, Spain. 4th & 5th November. Leading into PyCon ES.
+Pull requests are currently limited to collaborators. If you have a fix, comment on the relevant issue and we can discuss how to receive it.
 
-If you'd like to attend our sprints please send an intro email to `lovelydinosaur <at> icloud.com`
-
-We're also looking at booking in further sprints, and starting regular open office hours.
+Join our open office hours every Wednesday at 🕥 12:30 UTC on Google Meet: https://meet.google.com/sae-aoun-brz.
 
 You can also book in time to [introduce yourself](https://calendly.com/encode-oss) and discuss working together.
