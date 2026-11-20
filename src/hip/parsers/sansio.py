@@ -20,12 +20,16 @@ class BytesParser:
 
     def read_some(self, max_size: int) -> bytes | None:
         """
-        Returns up to `max_size` bytes.
+        Read and return some data from the buffer, up to `max_size` bytes.
+        The `max_size` limit must be greater than 0.
+
         Returns b'' to indicate the end of the stream.
-        Removes the returned data from the buffer.
 
         Returns `None` to indicate feed required.
         """
+        if max_size <= 0:
+            raise ValueError('max_size must be > 0')
+
         if not self._buffer:
             if self._closed:
                 return b""
@@ -319,9 +323,14 @@ class HTTPClient:
         return body
 
     def _recv_body_content_length(self) -> bytes | None:
-        count = min(self._recv_content_length - self._recv_seen_bytes, MAX_BODY_STREAM)
+        remaining = self._recv_content_length - self._recv_seen_bytes
+        if not remaining:
+            return b""
+
+        count = min(remaining, MAX_BODY_STREAM)
         if (body := self._parser.read_some(max_size=count)) is None:
             return None
+
         self._recv_seen_bytes += len(body)
         return body
 
@@ -353,13 +362,12 @@ class HTTPClient:
             return b""
 
         # Read and return some '<data>' from the frame.
-        count = min(
-            self._recv_chunk_size - self._recv_chunk_seen_bytes, MAX_BODY_STREAM
-        )
+        remaining = self._recv_chunk_size - self._recv_chunk_seen_bytes
+        count = min(remaining, MAX_BODY_STREAM)
         if (chunk := self._parser.read_some(max_size=count)) is None:
             return None
         self._recv_chunk_seen_bytes += len(chunk)
-        if self._recv_chunk_seen_bytes >= self._recv_chunk_size:
+        if self._recv_chunk_seen_bytes == self._recv_chunk_size:
             self._recv_body_mode = CHUNK_FRAME_NEXT
         return chunk
 
