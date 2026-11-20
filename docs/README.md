@@ -2,7 +2,7 @@
   <img width="350" height="208" src="https://www.encode.io/hip/img/butterfly.png" alt="hip">
 </p>
 
-# [hip](https://www.encode.io/hip/)
+# hip
 
 <p align="center">
   <a href="https://github.com/encode/hip/actions/workflows/test.yml">
