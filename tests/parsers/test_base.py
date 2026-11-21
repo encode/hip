@@ -1,6 +1,6 @@
-import hip
-
 import pytest
+
+import hip
 
 
 def test_bytes_parser():
