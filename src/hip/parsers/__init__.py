@@ -1,5 +1,6 @@
+from .base import BytesParser, ParseError
 from .http import HTTPParser, ProtocolError
-from .sansio import BytesParser, HTTPClient, HTTPServer, ParseError
+from .sansio import HTTPClient, HTTPServer
 
 __all__ = [
     "BytesParser",

@@ -1,92 +1,14 @@
-class ParseError(Exception):
-    pass
+from .base import BytesParser, ParseError
 
+# * Content-Length validation
+# * Connection: keep-alive support
+# * Validate Host header
 
-class BytesParser:
-    """
-    A parser following the Sans-IO design pattern.
-
-    Provides parsing operations for "read some data" and
-    "read some data up until a fixed delimiter".
-
-    Used by the HTTP parsing to handle parsing the different
-    sections of the request and response.
-    """
-
-    def __init__(self):
-        self._buffer = bytearray()
-        self._closed = False
-        self._cursor = 0
-
-    def read_some(self, max_size: int) -> bytes | None:
-        """
-        Read and return some data from the buffer, up to `max_size` bytes.
-        The `max_size` limit must be greater than 0.
-
-        Returns b'' to indicate the end of the stream.
-
-        Returns `None` to indicate feed required.
-        """
-        if max_size <= 0:
-            raise ValueError("max_size must be > 0")
-
-        if not self._buffer:
-            if self._closed:
-                return b""
-            return None
-
-        read, unread = self._buffer[:max_size], self._buffer[max_size:]
-        self._buffer = bytearray(unread)
-        return bytes(read)
-
-    def read_until(self, marker: bytes, max_size: int) -> bytes | None:
-        """
-        Returns data up to and excluding the designated `marker`.
-        Returns at most `max_size` bytes.
-        Removes both the returned data and the marker from the buffer.
-
-        Returns `None` to indicate feed required.
-
-        Raises a `ParseError` if the marker cannot be found.
-        """
-        if self._cursor >= len(self._buffer):
-            if self._closed:
-                raise ParseError()
-            return None
-
-        start_point = self._cursor
-        end_point = max_size + len(marker)
-        idx = self._buffer.find(marker, start_point, end_point)
-        if idx < 0:
-            self._cursor = max(0, len(self._buffer) - len(marker))
-            return None
-
-        read, unread = self._buffer[:idx], self._buffer[idx + len(marker) :]
-        self._buffer = bytearray(unread)
-        self._cursor = 0
-        return bytes(read)
-
-    def feed(self, data: bytes) -> None:
-        """
-        Feed `data` bytes to the parser.
-        Feed b'' to indicate the end of the stream.
-        """
-        if data:
-            if self._closed:
-                raise ValueError("Attempted to feed data to a closed parser.")
-            self._buffer.extend(data)
-        else:
-            self._closed = True
-
-    # def read_is_eof(self) -> bool | None:
-    #     """
-    #     Returns True to indicate the end of the stream.
-    #     Returns False to indicate the st
-    #     Does not remove any data from the buffer.
-
-    #     Returns `None` to indicate feed required.
-    #     """
-
+# 'HEAD' responses
+# 'Connection: upgrade' / 101
+# 'CONNECT' support / 2xx
+# 'Transfer-Encoding: chunked' - chunk extensions
+# 'Transfer-Encoding: chunked' - trailing headers
 
 WAIT = 0
 SEND_START = 1
@@ -171,17 +93,6 @@ def _validate_data_transfer_mode(headers: list[tuple[bytes, bytes]]) -> int:
         if key.lower() == b"transfer-encoding" and val == b"chunked":
             return USE_TE_CHUNKED
     return USE_CONTENT_LENGTH
-
-
-# * Content-Length validation
-# * Connection: keep-alive support
-# * Validate Host header
-
-# 'HEAD' responses
-# 'Connection: upgrade' / 101
-# 'CONNECT' support / 2xx
-# 'Transfer-Encoding: chunked' - chunk extensions
-# 'Transfer-Encoding: chunked' - trailing headers
 
 
 class HTTPClient:

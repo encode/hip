@@ -324,7 +324,35 @@ def test_invalid_request_line():
         )
 
 
-def test_invalid_transitions():
+def test_client_invalid_transitions():
+    # Ensure calling parser methods cannot be called in an invalid order.
+    with pytest.raises(RuntimeError):
+        parser = hip.parsers.HTTPClient()
+        parser.send_request_line(b"GET", b"/", b"HTTP/1.1")
+        parser.send_request_line(b"GET", b"/", b"HTTP/1.1")
+
+    with pytest.raises(RuntimeError):
+        parser = hip.parsers.HTTPClient()
+        parser.send_headers([])
+
+    with pytest.raises(RuntimeError):
+        parser = hip.parsers.HTTPClient()
+        parser.send_body(b"")
+
+    with pytest.raises(RuntimeError):
+        parser = hip.parsers.HTTPClient()
+        parser.recv_status_line()
+
+    with pytest.raises(RuntimeError):
+        parser = hip.parsers.HTTPClient()
+        parser.recv_headers()
+
+    with pytest.raises(RuntimeError):
+        parser = hip.parsers.HTTPClient()
+        parser.recv_body()
+
+
+def test_server_invalid_transitions():
     # Ensure calling parser methods cannot be called in an invalid order.
     with pytest.raises(RuntimeError):
         parser = hip.parsers.HTTPServer()
