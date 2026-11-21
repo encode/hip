@@ -69,9 +69,7 @@ def test_url_properties():
     )
 
     assert url.scheme == "https"
-    assert url.username == "jo@email.com"
-    assert url.password == "a secret"
-    assert url.userinfo == b"jo%40email.com:a%20secret"
+    assert str(url) == "https://muller.de:1234/pa%20th?search=ab#anchorlink"
     assert url.host == "muller.de"
     assert url.netloc == "muller.de:1234"
     assert url.port == 1234
@@ -136,11 +134,53 @@ def test_url_constructor_accepts_netloc():
     assert str(url) == "//example.com:8080"
 
 
-def test_url_constructor_builds_userinfo_from_username_and_password():
-    url = hip.URL(
-        host="example.com", port=8080, username="user@example.com", password="a secret"
+@pytest.mark.parametrize(
+    "userinfo",
+    ["user:password", "user", ":password", "", "user%40example.com:a%20secret"],
+)
+@pytest.mark.parametrize("host", ["example.com:8080", "[::1]:8080"])
+def test_url_ignores_userinfo(userinfo, host):
+    url = hip.URL(f"https://{userinfo}@{host}/path?q=1#fragment")
+    expected = hip.URL(f"https://{host}/path?q=1#fragment")
+    assert str(url) == str(expected)
+    assert repr(url) == repr(expected)
+    assert url == expected
+    assert hash(url) == hash(expected)
+    assert hip.URL(url) == expected
+    assert url.copy_with(path="/other") == expected.copy_with(path="/other")
+    assert url.join("next") == expected.join("next")
+
+
+def test_url_join_ignores_userinfo():
+    url = hip.URL("https://example.com/base")
+    assert url.join("//user%40example.com:a%20secret@other.example/path") == (
+        "https://other.example/path"
     )
-    assert url.userinfo == b"user%40example.com:a%20secret"
+
+
+@pytest.mark.parametrize("name", ["username", "password", "userinfo"])
+def test_url_has_no_userinfo_properties(name):
+    url = hip.URL("https://user%40example.com:a%20secret@example.com/path")
+    with pytest.raises(AttributeError):
+        getattr(url, name)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"username": "user@example.com"},
+        {"password": "a secret"},
+        {"userinfo": b"user%40example.com:a%20secret"},
+    ],
+)
+def test_url_rejects_userinfo_kwargs(kwargs):
+    url = hip.URL("https://example.com/path")
+    name = next(iter(kwargs))
+    msg = re.escape(f"{name!r} is an invalid keyword argument for URL()")
+    with pytest.raises(TypeError, match=msg):
+        hip.URL("https://example.com/path", **kwargs)
+    with pytest.raises(TypeError, match=msg):
+        url.copy_with(**kwargs)
 
 
 def test_url_constructor_accepts_raw_path():
