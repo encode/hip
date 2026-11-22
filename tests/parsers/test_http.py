@@ -206,6 +206,8 @@ def test_invalid_request_line():
             b"<html>hola, mundo</html>",
         )
 
+
+def test_invalid_method():
     msg = "Invalid method"
     with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
@@ -219,6 +221,8 @@ def test_invalid_request_line():
             b"<html>hola, mundo</html>",
         )
 
+
+def test_invalid_url():
     msg = "Invalid url"
     with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
@@ -232,6 +236,8 @@ def test_invalid_request_line():
             b"<html>hola, mundo</html>",
         )
 
+
+def test_invalid_request_protocol():
     msg = "Invalid protocol"
     with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
@@ -245,6 +251,8 @@ def test_invalid_request_line():
             b"<html>hola, mundo</html>",
         )
 
+
+def test_invalid_status_line():
     msg = "Invalid status line"
     with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
@@ -258,6 +266,8 @@ def test_invalid_request_line():
             b"<html>hola, mundo</html>",
         )
 
+
+def test_invalid_response_protocol():
     msg = "Invalid protocol"
     with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
@@ -271,6 +281,8 @@ def test_invalid_request_line():
             b"<html>hola, mundo</html>",
         )
 
+
+def test_invalid_status_code():
     msg = "Invalid status code"
     with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
@@ -310,6 +322,8 @@ def test_invalid_request_line():
             b"<html>hola, mundo</html>",
         )
 
+
+def test_invalid_header():
     msg = "Invalid header"
     with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
@@ -321,6 +335,42 @@ def test_invalid_request_line():
             b"Content-Length: 24\r\n"
             b"\r\n"
             b"<html>hola, mundo</html>",
+        )
+
+
+def test_request_invalid_content_length():
+    msg = 'Request has less content than Content-Length'
+    with pytest.raises(hip.parsers.ParseError, match=msg):
+        send(
+            # Request...
+            b"POST / HTTP/1.1\r\n"
+            b"Host: www.example.com\r\n"
+            b"User-Agent: hip/dev\r\n"
+            b"Content-Type: text/html\r\n"
+            b"Content-Length: 24\r\n"
+            b"\r\n"
+            b"<html>hola, mundo</h",
+            # Response...
+            b"HTTP/1.1 200 OK\r\n"
+            b"Content-Type: text/html\r\n"
+            b"Content-Length: 24\r\n"
+            b"\r\n"
+            b"<html>hola, mundo</html>",
+        )
+
+
+def test_response_invalid_content_length():
+    msg = 'Response has less content than Content-Length'
+    with pytest.raises(hip.parsers.ParseError, match=msg):
+        send(
+            # Request...
+            b"GET / HTTP/1.1\r\nHost: www.example.com\r\nUser-Agent: hip/dev\r\n\r\n",
+            # Response...
+            b"HTTP/1.1 200 OK\r\n"
+            b"Content-Type: text/html\r\n"
+            b"Content-Length: 24\r\n"
+            b"\r\n"
+            b"<html>hola, mundo</h",
         )
 
 

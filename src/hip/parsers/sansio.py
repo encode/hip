@@ -213,6 +213,8 @@ class HTTPClient:
             body = self._recv_body_te_chunked()
 
         if body == b"":
+            if self._recv_mode == USE_CONTENT_LENGTH and self._recv_count < self._recv_content_length:
+                raise ParseError('Response has less content than Content-Length')
             self._server = SEND_COMPLETE
             # if self._client == SEND_COMPLETE:
             #     self._client = SEND_START
@@ -229,8 +231,8 @@ class HTTPClient:
         if (body := self._parser.read_some(max_size=count)) is None:
             return None
 
-        # Error case: we could have EOF here.
         self._recv_count += len(body)
+
         return body
 
     def _recv_body_te_chunked(self) -> bytes | None:
@@ -341,6 +343,8 @@ class HTTPServer:
             body = self._recv_body_te_chunked()
 
         if body == b"":
+            if self._recv_mode == USE_CONTENT_LENGTH and self._recv_count < self._recv_content_length:
+                raise ParseError('Request has less content than Content-Length')
             self._client = SEND_COMPLETE
             # if self._client == SEND_COMPLETE:
             #     self._client = SEND_START
@@ -358,6 +362,7 @@ class HTTPServer:
             return None
 
         self._recv_count += len(body)
+
         return body
 
     def _recv_body_te_chunked(self) -> bytes | None:
