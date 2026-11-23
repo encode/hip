@@ -1,8 +1,10 @@
 from .base import BytesParser, ParseError
 
-# * Content-Length validation
 # * Connection: keep-alive support
-# * Validate Host header
+
+# Sending...
+# * Validate body matches 'Content-Length'
+# * Validate 'Host' header
 
 # 'HEAD' responses
 # 'Connection: upgrade' / 101
@@ -308,7 +310,7 @@ class HTTPServer:
         if self._client != SEND_START:
             raise RuntimeError("Called 'recv_request_line' out of sequence.")
 
-        if (data := self._parser.read_until(b"\r\n", MAX_RESPONSE_LINE_SIZE)) is None:
+        if (data := self._parser.read_until(b"\r\n", MAX_REQUEST_LINE_SIZE)) is None:
             return None
 
         method, target, protocol = _validate_request_line(data)
