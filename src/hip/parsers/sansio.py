@@ -32,7 +32,7 @@ TE_FRAME_END = 3
 MAX_REQUEST_LINE_SIZE = 16384  # Maximum size of 'GET /path?search=blue HTTP/1.1'.
 MAX_RESPONSE_LINE_SIZE = 1024  # Maximum size of 'HTTP/1.1 200 OK'.
 MAX_HEADERS_SIZE = 65536  # Maximum size of the request or response headers.
-MAX_BODY_STREAM = 65536  # Limit individual part sizes while returning body.
+MAX_BODY_BUFFER = 65536  # Limit individual part sizes while returning body.
 
 
 def _validate_request_line(data: bytes) -> tuple[bytes, bytes, bytes]:
@@ -123,7 +123,7 @@ class HTTPClient:
 
     def send_request_line(self, method: bytes, target: bytes, protocol: bytes) -> bytes:
         if self._client != SEND_START:
-            raise RuntimeError("Called 'send_method_line' out of sequence.")
+            raise RuntimeError("Called 'send_request_line' out of sequence.")
 
         data = b"%b %b %b\r\n" % (method, target, protocol)
 
@@ -136,9 +136,9 @@ class HTTPClient:
 
         return data
 
-    def send_headers(self, headers: list[tuple[bytes, bytes]]) -> bytes:
+    def send_request_headers(self, headers: list[tuple[bytes, bytes]]) -> bytes:
         if self._client != SEND_HEADERS:
-            raise RuntimeError("Called 'send_headers' out of sequence.")
+            raise RuntimeError("Called 'send_request_headers' out of sequence.")
 
         self._send_content_length = _validate_content_length(headers)
         self._send_mode = _validate_data_transfer_mode(headers)
@@ -155,9 +155,9 @@ class HTTPClient:
 
         return data
 
-    def send_body(self, body: bytes) -> bytes:
+    def send_request_body(self, body: bytes) -> bytes:
         if self._client != SEND_BODY:
-            raise RuntimeError("Called 'send_body' out of sequence.")
+            raise RuntimeError("Called 'send_request_body' out of sequence.")
 
         # Too little body for declared Content-Length
         # Too much body for declared Content-Length
@@ -170,16 +170,14 @@ class HTTPClient:
 
         if body == b"":
             self._client = SEND_COMPLETE
-
-            # if self._server == SEND_COMPLETE:
-            #     self._client = SEND_START
-            #     self._server = WAIT
+            if self._server == SEND_COMPLETE:
+                self._reset()
 
         return part
 
-    def recv_status_line(self) -> tuple[bytes, int, bytes] | None:
+    def recv_response_line(self) -> tuple[bytes, int, bytes] | None:
         if self._server != SEND_START:
-            raise RuntimeError("Called 'recv_status_line' out of sequence.")
+            raise RuntimeError("Called 'recv_response_line' out of sequence.")
 
         if (data := self._parser.read_until(b"\r\n", MAX_RESPONSE_LINE_SIZE)) is None:
             return None
@@ -190,9 +188,9 @@ class HTTPClient:
 
         return protocol, status, reason
 
-    def recv_headers(self) -> list[tuple[bytes, bytes]] | None:
+    def recv_response_headers(self) -> list[tuple[bytes, bytes]] | None:
         if self._server != SEND_HEADERS:
-            raise RuntimeError("Called 'recv_headers' out of sequence.")
+            raise RuntimeError("Called 'recv_response_headers' out of sequence.")
 
         if (data := self._parser.read_until(b"\r\n\r\n", MAX_HEADERS_SIZE)) is None:
             return None
@@ -205,9 +203,9 @@ class HTTPClient:
 
         return headers
 
-    def recv_body(self) -> bytes | None:
+    def recv_response_body(self) -> bytes | None:
         if self._server != SEND_BODY:
-            raise RuntimeError("Called 'recv_body' out of sequence.")
+            raise RuntimeError("Called 'recv_response_body' out of sequence.")
 
         if self._recv_mode == USE_CONTENT_LENGTH:
             body = self._recv_body_content_length()
@@ -217,10 +215,10 @@ class HTTPClient:
         if body == b"":
             if self._recv_mode == USE_CONTENT_LENGTH and self._recv_count < self._recv_content_length:
                 raise ParseError('Response has less content than Content-Length')
+
             self._server = SEND_COMPLETE
-            # if self._client == SEND_COMPLETE:
-            #     self._client = SEND_START
-            #     self._server = WAIT
+            if self._client == SEND_COMPLETE:
+                self._reset()
 
         return body
 
@@ -229,7 +227,7 @@ class HTTPClient:
         if not remaining:
             return b""
 
-        count = min(remaining, MAX_BODY_STREAM)
+        count = min(remaining, MAX_BODY_BUFFER)
         if (body := self._parser.read_some(max_size=count)) is None:
             return None
 
@@ -264,7 +262,7 @@ class HTTPClient:
 
         # Read and return some '<data>' from the frame.
         remaining = self._recv_te_frame_size - self._recv_te_frame_count
-        count = min(remaining, MAX_BODY_STREAM)
+        count = min(remaining, MAX_BODY_BUFFER)
         if (chunk := self._parser.read_some(max_size=count)) is None:
             return None
 
@@ -273,6 +271,27 @@ class HTTPClient:
         if self._recv_te_frame_count == self._recv_te_frame_size:
             self._recv_te_state = TE_FRAME_NEXT
         return chunk
+
+    def _reset(self) -> None:
+        self._client = SEND_START
+        self._server = WAIT
+
+        # Switch for Content-Length vs Transfer-Encoding: chunked.
+        self._send_mode = USE_CONTENT_LENGTH
+        self._recv_mode = USE_CONTENT_LENGTH
+
+        # Track byte sent/recv counts.
+        self._send_count = 0
+        self._recv_count = 0
+
+        # Track Content-Length state.
+        self._send_content_length = 0
+        self._recv_content_length = 0
+
+        # Track Transfer-Encoding state.
+        self._recv_te_state = TE_FRAME_START
+        self._recv_te_frame_size = 0
+        self._recv_te_frame_count = 0
 
     def feed(self, data: bytes) -> None:
         """
@@ -306,6 +325,9 @@ class HTTPServer:
         self._recv_te_frame_size = 0
         self._recv_te_frame_count = 0
 
+    def maybe_read_eof(self) -> bool | None:
+        return self._parser.maybe_read_eof()
+
     def recv_request_line(self) -> tuple[bytes, bytes, bytes] | None:
         if self._client != SEND_START:
             raise RuntimeError("Called 'recv_request_line' out of sequence.")
@@ -320,9 +342,9 @@ class HTTPServer:
 
         return method, target, protocol
 
-    def recv_headers(self) -> list[tuple[bytes, bytes]] | None:
+    def recv_request_headers(self) -> list[tuple[bytes, bytes]] | None:
         if self._client != SEND_HEADERS:
-            raise RuntimeError("Called 'recv_headers' out of sequence.")
+            raise RuntimeError("Called 'recv_request_headers' out of sequence.")
 
         if (data := self._parser.read_until(b"\r\n\r\n", MAX_HEADERS_SIZE)) is None:
             return None
@@ -335,9 +357,9 @@ class HTTPServer:
 
         return headers
 
-    def recv_body(self) -> bytes | None:
+    def recv_request_body(self) -> bytes | None:
         if self._client != SEND_BODY:
-            raise RuntimeError("Called 'recv_body' out of sequence.")
+            raise RuntimeError("Called 'recv_request_body' out of sequence.")
 
         if self._recv_mode == USE_CONTENT_LENGTH:
             body = self._recv_body_content_length()
@@ -347,10 +369,10 @@ class HTTPServer:
         if body == b"":
             if self._recv_mode == USE_CONTENT_LENGTH and self._recv_count < self._recv_content_length:
                 raise ParseError('Request has less content than Content-Length')
+
             self._client = SEND_COMPLETE
-            # if self._client == SEND_COMPLETE:
-            #     self._client = SEND_START
-            #     self._server = WAIT
+            if self._server == SEND_COMPLETE:
+                self._reset()
 
         return body
 
@@ -359,7 +381,7 @@ class HTTPServer:
         if not remaining:
             return b""
 
-        count = min(remaining, MAX_BODY_STREAM)
+        count = min(remaining, MAX_BODY_BUFFER)
         if (body := self._parser.read_some(max_size=count)) is None:
             return None
 
@@ -394,7 +416,7 @@ class HTTPServer:
 
         # Read and return some '<data>' from the frame.
         remaining = self._recv_te_frame_size - self._recv_te_frame_count
-        count = min(remaining, MAX_BODY_STREAM)
+        count = min(remaining, MAX_BODY_BUFFER)
         if (chunk := self._parser.read_some(max_size=count)) is None:
             return None
         self._recv_te_frame_count += len(chunk)
@@ -402,9 +424,9 @@ class HTTPServer:
             self._recv_te_state = TE_FRAME_NEXT
         return chunk
 
-    def send_status_line(self, protocol: bytes, status: int, reason: bytes) -> bytes:
+    def send_response_line(self, protocol: bytes, status: int, reason: bytes) -> bytes:
         if self._server != SEND_START:
-            raise RuntimeError("Called 'send_method_line' out of sequence.")
+            raise RuntimeError("Called 'send_response_line' out of sequence.")
 
         data = b"%b %d %b\r\n" % (protocol, status, reason)
 
@@ -416,9 +438,9 @@ class HTTPServer:
 
         return data
 
-    def send_headers(self, headers: list[tuple[bytes, bytes]]) -> bytes:
+    def send_response_headers(self, headers: list[tuple[bytes, bytes]]) -> bytes:
         if self._server != SEND_HEADERS:
-            raise RuntimeError("Called 'send_headers' out of sequence.")
+            raise RuntimeError("Called 'send_response_headers' out of sequence.")
 
         self._send_content_length = _validate_content_length(headers)
         self._send_mode = _validate_data_transfer_mode(headers)
@@ -435,9 +457,9 @@ class HTTPServer:
 
         return data
 
-    def send_body(self, body: bytes) -> bytes:
+    def send_response_body(self, body: bytes) -> bytes:
         if self._server != SEND_BODY:
-            raise RuntimeError("Called 'send_body' out of sequence.")
+            raise RuntimeError("Called 'send_response_body' out of sequence.")
 
         # Too little body for declared Content-Length
         # Too much body for declared Content-Length
@@ -450,8 +472,31 @@ class HTTPServer:
 
         if body == b"":
             self._server = SEND_COMPLETE
+            if self._client == SEND_COMPLETE:
+                self._reset()
 
         return part
+
+    def _reset(self) -> None:
+        self._client = SEND_START
+        self._server = WAIT
+
+        # Switch for Content-Length vs Transfer-Encoding: chunked.
+        self._send_mode = USE_CONTENT_LENGTH
+        self._recv_mode = USE_CONTENT_LENGTH
+
+        # Track byte sent/recv counts.
+        self._send_count = 0
+        self._recv_count = 0
+
+        # Track Content-Length state.
+        self._send_content_length = 0
+        self._recv_content_length = 0
+
+        # Track Transfer-Encoding state.
+        self._recv_te_state = TE_FRAME_START
+        self._recv_te_frame_size = 0
+        self._recv_te_frame_count = 0
 
     def feed(self, data: bytes) -> None:
         """

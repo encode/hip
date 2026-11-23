@@ -69,6 +69,13 @@ class BytesParser:
         self._cursor = 0
         return bytes(read)
 
+    def maybe_read_eof(self) -> bool | None:
+        if not self._buffer:
+            if self._closed:
+                return True  # buffer is empty and closed
+            return None  # buffer is empty and not closed
+        return False  # buffer is not empty
+
     def feed(self, data: bytes) -> None:
         """
         Feed `data` bytes to the parser.
