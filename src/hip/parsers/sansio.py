@@ -1,16 +1,19 @@
 from .base import BytesParser, ParseError
 
-# * Connection: keep-alive support
-
 # Sending...
-# * Validate body matches 'Content-Length'
-# * Validate 'Host' header
+# Validate body matches 'Content-Length'
+# Validate 'Host' header
 
 # 'HEAD' responses
+#
 # 'Connection: upgrade' / 101
 # 'CONNECT' support / 2xx
 # 'Transfer-Encoding: chunked' - chunk extensions
 # 'Transfer-Encoding: chunked' - trailing headers
+#
+# 'HTTP/1.0' support (keep alive off, different body framing)
+
+# Note. We don't support pipelining. Because we shouldn't.
 
 WAIT = 0
 SEND_START = 1
@@ -90,6 +93,13 @@ def _validate_content_length(headers: list[tuple[bytes, bytes]]) -> int:
     return 0
 
 
+def _validate_keep_alive(headers: list[tuple[bytes, bytes]]) -> bool:
+    for key, val in headers:
+        if key.lower() == b"connection":
+            return val.lower() == "keep-alive"
+    return True
+
+
 def _validate_data_transfer_mode(headers: list[tuple[bytes, bytes]]) -> int:
     for key, val in headers:
         if key.lower() == b"transfer-encoding" and val == b"chunked":
@@ -112,6 +122,10 @@ class HTTPClient:
         self._send_count = 0
         self._recv_count = 0
 
+        # Track Connection state.
+        self._send_keep_alive = True
+        self._recv_keep_alive = True
+
         # Track Content-Length state.
         self._send_content_length = 0
         self._recv_content_length = 0
@@ -127,10 +141,6 @@ class HTTPClient:
 
         data = b"%b %b %b\r\n" % (method, target, protocol)
 
-        # Request method line too long
-        # Invalid request method line
-        # Protocol not supported
-
         self._client = SEND_HEADERS
         self._server = SEND_START
 
@@ -141,15 +151,12 @@ class HTTPClient:
             raise RuntimeError("Called 'send_request_headers' out of sequence.")
 
         self._send_content_length = _validate_content_length(headers)
+        self._send_keep_alive = _validate_keep_alive(headers)
         self._send_mode = _validate_data_transfer_mode(headers)
 
         lines = [b"%b: %b\r\n" % (name, value) for name, value in headers]
         lines.append(b"\r\n")
         data = b"".join(lines)
-
-        # Headers too long
-        # Too many headers
-        # Invalid request header
 
         self._client = SEND_BODY
 
@@ -159,8 +166,6 @@ class HTTPClient:
         if self._client != SEND_BODY:
             raise RuntimeError("Called 'send_request_body' out of sequence.")
 
-        # Too little body for declared Content-Length
-        # Too much body for declared Content-Length
         if self._send_mode == USE_CONTENT_LENGTH:
             part = body
         else:
@@ -170,7 +175,7 @@ class HTTPClient:
 
         if body == b"":
             self._client = SEND_COMPLETE
-            if self._server == SEND_COMPLETE:
+            if self._server == SEND_COMPLETE and self.keep_alive():
                 self._reset()
 
         return part
@@ -197,6 +202,7 @@ class HTTPClient:
 
         headers = _validate_headers(data)
         self._recv_content_length = _validate_content_length(headers)
+        self._recv_keep_alive = _validate_keep_alive(headers)
         self._recv_mode = _validate_data_transfer_mode(headers)
 
         self._server = SEND_BODY
@@ -213,11 +219,14 @@ class HTTPClient:
             body = self._recv_body_te_chunked()
 
         if body == b"":
-            if self._recv_mode == USE_CONTENT_LENGTH and self._recv_count < self._recv_content_length:
-                raise ParseError('Response has less content than Content-Length')
+            if (
+                self._recv_mode == USE_CONTENT_LENGTH
+                and self._recv_count < self._recv_content_length
+            ):
+                raise ParseError("Response has less content than Content-Length")
 
             self._server = SEND_COMPLETE
-            if self._client == SEND_COMPLETE:
+            if self._client == SEND_COMPLETE and self.keep_alive():
                 self._reset()
 
         return body
@@ -272,6 +281,9 @@ class HTTPClient:
             self._recv_te_state = TE_FRAME_NEXT
         return chunk
 
+    def keep_alive(self) -> bool:
+        return self._send_keep_alive and self._recv_keep_alive
+
     def _reset(self) -> None:
         self._client = SEND_START
         self._server = WAIT
@@ -283,6 +295,10 @@ class HTTPClient:
         # Track byte sent/recv counts.
         self._send_count = 0
         self._recv_count = 0
+
+        # Track Connection state.
+        self._send_keep_alive = True
+        self._recv_keep_alive = True
 
         # Track Content-Length state.
         self._send_content_length = 0
@@ -315,6 +331,10 @@ class HTTPServer:
         # Track byte sent/recv counts.
         self._send_count = 0
         self._recv_count = 0
+
+        # Track Connection state.
+        self._send_keep_alive = True
+        self._recv_keep_alive = True
 
         # Track Content-Length state.
         self._send_content_length = 0
@@ -351,6 +371,7 @@ class HTTPServer:
 
         headers = _validate_headers(data)
         self._recv_content_length = _validate_content_length(headers)
+        self._recv_keep_alive = _validate_keep_alive(headers)
         self._recv_mode = _validate_data_transfer_mode(headers)
 
         self._client = SEND_BODY
@@ -367,11 +388,14 @@ class HTTPServer:
             body = self._recv_body_te_chunked()
 
         if body == b"":
-            if self._recv_mode == USE_CONTENT_LENGTH and self._recv_count < self._recv_content_length:
-                raise ParseError('Request has less content than Content-Length')
+            if (
+                self._recv_mode == USE_CONTENT_LENGTH
+                and self._recv_count < self._recv_content_length
+            ):
+                raise ParseError("Request has less content than Content-Length")
 
             self._client = SEND_COMPLETE
-            if self._server == SEND_COMPLETE:
+            if self._server == SEND_COMPLETE and self.keep_alive():
                 self._reset()
 
         return body
@@ -430,10 +454,6 @@ class HTTPServer:
 
         data = b"%b %d %b\r\n" % (protocol, status, reason)
 
-        # Request method line too long
-        # Invalid request method line
-        # Protocol not supported
-
         self._server = SEND_HEADERS
 
         return data
@@ -443,15 +463,12 @@ class HTTPServer:
             raise RuntimeError("Called 'send_response_headers' out of sequence.")
 
         self._send_content_length = _validate_content_length(headers)
+        self._send_keep_alive = _validate_keep_alive(headers)
         self._send_mode = _validate_data_transfer_mode(headers)
 
         lines = [b"%b: %b\r\n" % (name, value) for name, value in headers]
         lines.append(b"\r\n")
         data = b"".join(lines)
-
-        # Headers too long
-        # Too many headers
-        # Invalid request header
 
         self._server = SEND_BODY
 
@@ -461,8 +478,6 @@ class HTTPServer:
         if self._server != SEND_BODY:
             raise RuntimeError("Called 'send_response_body' out of sequence.")
 
-        # Too little body for declared Content-Length
-        # Too much body for declared Content-Length
         if self._send_mode == USE_CONTENT_LENGTH:
             part = body
         else:
@@ -472,10 +487,13 @@ class HTTPServer:
 
         if body == b"":
             self._server = SEND_COMPLETE
-            if self._client == SEND_COMPLETE:
+            if self._client == SEND_COMPLETE and self.keep_alive():
                 self._reset()
 
         return part
+
+    def keep_alive(self) -> bool:
+        return self._send_keep_alive and self._recv_keep_alive
 
     def _reset(self) -> None:
         self._client = SEND_START
@@ -488,6 +506,10 @@ class HTTPServer:
         # Track byte sent/recv counts.
         self._send_count = 0
         self._recv_count = 0
+
+        # Track Connection state.
+        self._send_keep_alive = True
+        self._recv_keep_alive = True
 
         # Track Content-Length state.
         self._send_content_length = 0

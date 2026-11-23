@@ -339,7 +339,7 @@ def test_invalid_header():
 
 
 def test_request_invalid_content_length():
-    msg = 'Request has less content than Content-Length'
+    msg = "Request has less content than Content-Length"
     with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
             # Request...
@@ -360,7 +360,7 @@ def test_request_invalid_content_length():
 
 
 def test_response_invalid_content_length():
-    msg = 'Response has less content than Content-Length'
+    msg = "Response has less content than Content-Length"
     with pytest.raises(hip.parsers.ParseError, match=msg):
         send(
             # Request...
@@ -442,3 +442,59 @@ def test_clean_eof():
     parser.feed(b"GET / HTTP/1.1\r\n")
     parser.feed(b"")
     assert parser.maybe_read_eof() is False
+
+
+def test_client_keep_alive():
+    parser = hip.parsers.HTTPClient()
+    assert parser.keep_alive()
+
+    parser.send_request_line(b"GET", b"/", b"HTTP/1.1")
+    parser.send_request_headers(
+        [
+            (b"Host", b"www.example.com"),
+            (b"User-Agent", b"hip/dev"),
+        ]
+    )
+    parser.send_request_body(b"")
+
+    parser.feed(
+        b"HTTP/1.1 200 OK\r\n"
+        b"Content-Type: text/html\r\n"
+        b"Content-Length: 24\r\n"
+        b"\r\n"
+        b"<html>hola, mundo</html>",
+    )
+    parser.recv_response_line()
+    parser.recv_response_headers()
+    parser.recv_response_body()
+    parser.recv_response_body()
+
+    assert parser.keep_alive()
+
+    # Reuse the connection
+    parser.send_request_line(b"GET", b"/", b"HTTP/1.1")
+    parser.send_request_headers(
+        [
+            (b"Host", b"www.example.com"),
+            (b"User-Agent", b"hip/dev"),
+        ]
+    )
+    parser.send_request_body(b"")
+
+    parser.feed(
+        b"HTTP/1.1 200 OK\r\n"
+        b"Content-Type: text/html\r\n"
+        b"Content-Length: 24\r\n"
+        b"Connection: close\r\n"
+        b"\r\n"
+        b"<html>hola, mundo</html>",
+    )
+    parser.recv_response_line()
+    parser.recv_response_headers()
+    parser.recv_response_body()
+    parser.recv_response_body()
+
+    assert not parser.keep_alive()
+
+    with pytest.raises(RuntimeError):
+        parser.send_request_line(b"GET", b"/", b"HTTP/1.1")
