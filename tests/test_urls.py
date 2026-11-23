@@ -160,6 +160,7 @@ def test_url_join_ignores_userinfo():
         "https://other.example/path"
     )
 
+
 def test_url_constructor_accepts_raw_path():
     url = hip.URL(host="example.com", raw_path=b"/search?query=hip")
     assert url.path == "/search"
