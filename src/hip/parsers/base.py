@@ -87,12 +87,3 @@ class BytesParser:
             self._buffer.extend(data)
         else:
             self._closed = True
-
-    # def read_is_eof(self) -> bool | None:
-    #     """
-    #     Returns True to indicate the end of the stream.
-    #     Returns False to indicate the st
-    #     Does not remove any data from the buffer.
-
-    #     Returns `None` to indicate feed required.
-    #     """
