@@ -13,9 +13,9 @@ class URL:
     """
     The components of a URL are broken down like this:
 
-       https://jo%40email.com:a%20secret@müller.de:1234/pa%20th?search=ab#anchorlink
-    [scheme]   [  username  ] [password] [ host ][port][ path ] [ query ] [fragment]
-               [       userinfo        ] [   netloc   ][    raw_path    ]
+       https://example.com:1234/pa%20th?search=ab#anchorlink
+    [scheme]   [  host   ][port][ path ] [ query ] [fragment]
+               [   netloc    ][        target  ]
 
     Note that:
 
@@ -44,8 +44,7 @@ class URL:
       assert hip.URL("http://example.com").port is None
       assert hip.URL("http://example.com:80").port is None
 
-    * `url.userinfo` is raw bytes, without URL escaping. Usually you'll want to work
-      with `url.username` and `url.password` instead, which handle the URL escaping.
+    * User information in the URL is ignored and omitted from the resulting URL.
 
     * `url.raw_path` is raw bytes of both the path and query, without URL escaping.
       This portion is used as the target when constructing HTTP requests. Usually you'll
@@ -60,9 +59,6 @@ class URL:
         if kwargs:
             allowed = {
                 "scheme": str,
-                "username": str,
-                "password": str,
-                "userinfo": bytes,
                 "host": str,
                 "port": int,
                 "netloc": str,
@@ -112,32 +108,6 @@ class URL:
         Always normalised to lowercase.
         """
         return self._uri_reference.scheme
-
-    @property
-    def userinfo(self) -> bytes:
-        """
-        The URL userinfo as a raw bytestring.
-        For example: b"jo%40email.com:a%20secret".
-        """
-        return self._uri_reference.userinfo.encode("ascii")
-
-    @property
-    def username(self) -> str:
-        """
-        The URL username as a string, with URL decoding applied.
-        For example: "jo@email.com"
-        """
-        userinfo = self._uri_reference.userinfo
-        return unquote(userinfo.partition(":")[0])
-
-    @property
-    def password(self) -> str:
-        """
-        The URL password as a string, with URL decoding applied.
-        For example: "a secret"
-        """
-        userinfo = self._uri_reference.userinfo
-        return unquote(userinfo.partition(":")[2])
 
     @property
     def host(self) -> str:
@@ -280,9 +250,9 @@ class URL:
         For example:
 
         url = hip.URL("https://www.example.com").copy_with(
-            username="jo@gmail.com", password="a secret"
+            path="/search"
         )
-        assert url == "https://jo%40email.com:a%20secret@www.example.com"
+        assert url == "https://www.example.com/search"
         """
         return URL(self, **kwargs)
 

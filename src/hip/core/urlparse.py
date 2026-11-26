@@ -59,44 +59,6 @@ PATH_SAFE = "".join(
     ]
 )
 
-# The userinfo percent-encode set is the path percent-encode set
-# and U+002F (/), U+003A (:), U+003B (;), U+003D (=), U+0040 (@),
-# U+005B ([) to U+005E (^), inclusive, and U+007C (|).
-USERNAME_SAFE = "".join(
-    [
-        chr(i)
-        for i in range(0x20, 0x7F)
-        if i
-        not in (0x20, 0x22, 0x23, 0x3C, 0x3E)
-        + (0x3F, 0x60, 0x7B, 0x7D)
-        + (0x2F, 0x3A, 0x3B, 0x3D, 0x40, 0x5B, 0x5C, 0x5D, 0x5E, 0x7C)
-    ]
-)
-PASSWORD_SAFE = "".join(
-    [
-        chr(i)
-        for i in range(0x20, 0x7F)
-        if i
-        not in (0x20, 0x22, 0x23, 0x3C, 0x3E)
-        + (0x3F, 0x60, 0x7B, 0x7D)
-        + (0x2F, 0x3A, 0x3B, 0x3D, 0x40, 0x5B, 0x5C, 0x5D, 0x5E, 0x7C)
-    ]
-)
-# Note... The terminology 'userinfo' percent-encode set in the WHATWG document
-# is used for the username and password quoting. For the joint userinfo component
-# we remove U+003A (:) from the safe set.
-USERINFO_SAFE = "".join(
-    [
-        chr(i)
-        for i in range(0x20, 0x7F)
-        if i
-        not in (0x20, 0x22, 0x23, 0x3C, 0x3E)
-        + (0x3F, 0x60, 0x7B, 0x7D)
-        + (0x2F, 0x3B, 0x3D, 0x40, 0x5B, 0x5C, 0x5D, 0x5E, 0x7C)
-    ]
-)
-
-
 # {scheme}:      (optional)
 # //{authority}  (optional)
 # {path}
@@ -142,7 +104,6 @@ COMPONENT_REGEX = {
     "path": re.compile("[^?#]*"),
     "query": re.compile("[^#]*"),
     "fragment": re.compile(".*"),
-    "userinfo": re.compile("[^@]*"),
     "host": re.compile("(\\[.*\\]|[^:]*)"),
     "port": re.compile(".*"),
 }
@@ -156,7 +117,6 @@ IPv6_STYLE_HOSTNAME = re.compile(r"^\[.*\]$")
 
 class ParseResult(typing.NamedTuple):
     scheme: str
-    userinfo: str
     host: str
     port: int | None
     path: str
@@ -167,7 +127,6 @@ class ParseResult(typing.NamedTuple):
     def authority(self) -> str:
         return "".join(
             [
-                f"{self.userinfo}@" if self.userinfo else "",
                 f"[{self.host}]" if ":" in self.host else self.host,
                 f":{self.port}" if self.port is not None else "",
             ]
@@ -240,12 +199,6 @@ def urlparse(url: str = "", **kwargs: str | None) -> ParseResult:
         netloc = kwargs.pop("netloc") or ""
         kwargs["host"], _, kwargs["port"] = netloc.partition(":")
 
-    # Replace "username" and/or "password" with "userinfo".
-    if "username" in kwargs or "password" in kwargs:
-        username = quote(kwargs.pop("username", "") or "", safe=USERNAME_SAFE)
-        password = quote(kwargs.pop("password", "") or "", safe=PASSWORD_SAFE)
-        kwargs["userinfo"] = f"{username}:{password}" if password else username
-
     # Replace "raw_path" with "path" and "query".
     if "raw_path" in kwargs:
         raw_path = kwargs.pop("raw_path") or ""
@@ -305,9 +258,9 @@ def urlparse(url: str = "", **kwargs: str | None) -> ParseResult:
     assert authority_match is not None
     authority_dict = authority_match.groupdict()
 
-    # * 'userinfo' and 'host' may be empty strings.
+    # Userinfo is recognized by AUTHORITY_REGEX but deliberately discarded.
+    # * 'host' may be an empty string.
     # * 'port' may be 'None'.
-    userinfo = kwargs.get("userinfo", authority_dict["userinfo"]) or ""
     host = kwargs.get("host", authority_dict["host"]) or ""
     port = kwargs.get("port", authority_dict["port"])
 
@@ -315,14 +268,11 @@ def urlparse(url: str = "", **kwargs: str | None) -> ParseResult:
     # We end up with a parsed representation of the URL,
     # with components that are plain ASCII bytestrings.
     parsed_scheme: str = scheme.lower()
-    parsed_userinfo: str = quote(userinfo, safe=USERINFO_SAFE)
     parsed_host: str = encode_host(host)
     parsed_port: int | None = normalize_port(port, scheme)
 
     has_scheme = parsed_scheme != ""
-    has_authority = (
-        parsed_userinfo != "" or parsed_host != "" or parsed_port is not None
-    )
+    has_authority = parsed_host != "" or parsed_port is not None
     validate_path(path, has_scheme=has_scheme, has_authority=has_authority)
     if has_scheme or has_authority:
         path = normalize_path(path)
@@ -335,7 +285,6 @@ def urlparse(url: str = "", **kwargs: str | None) -> ParseResult:
     # All properties of the URL are derived from these.
     return ParseResult(
         parsed_scheme,
-        parsed_userinfo,
         parsed_host,
         parsed_port,
         parsed_path,
