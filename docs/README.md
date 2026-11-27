@@ -1,8 +1,17 @@
 <p align="center">
-  <img width="350" height="208" src="img/butterfly.png" alt='hip'>
+  <img width="350" height="208" src="https://www.encode.io/hip/img/butterfly.png" alt="hip">
 </p>
 
-# [hip](README.md)
+# hip
+
+<p align="center">
+  <a href="https://github.com/encode/hip/actions/workflows/test.yml">
+    <img src="https://github.com/encode/hip/actions/workflows/test.yml/badge.svg?branch=main" alt="Test Suite">
+  </a>
+  <a href="https://pypi.org/project/hip/">
+    <img src="https://img.shields.io/pypi/v/hip" alt="Package version">
+  </a>
+</p>
 
 Engineered for simplicity, `hip` provides a complete Python web suite&hellip;
 
@@ -14,46 +23,59 @@ Engineered for simplicity, `hip` provides a complete Python web suite&hellip;
 
 ## Installation
 
-Install the package from PyPI&hellip;
+hip requires Python 3.11 or later.
 
 ```shell
-$ uv add hip --dev
+pip install hip
 ```
+
+See the [installation guide](https://www.encode.io/hip/installation/) for more options.
 
 ## Client
 
-Sending HTTP requests&hellip;
+Send an HTTP request:
 
 ```python
->>> import hip
+import hip
 
->>> cli = hip.Client()
->>> r = cli.get('https://www.example.com/')
->>> r
+with hip.Client() as client:
+    response = client.get("https://www.example.com/")
+    print(response)
+```
+
+```text
 <Response [200 OK]>
 ```
 
 ## Server
 
-Creating web apps&hellip;
+Run a local HTTP server:
 
 ```python
->>> import hip
+import hip
 
->>> def app(request):
-...     content = hip.HTML('<html><body>¡Hola, mundo!</body></html>')
-...     return hip.Response(200, content=content)
 
->>> with hip.Server(app) as server:
-...     print(server.url)
-...     server.until_interrupt()
+def app(request):
+    return hip.Response(200, content=hip.Text("Hello, world!"))
+
+
+with hip.Server(app, port=8000) as server:
+    server.until_interrupt()
 ```
 
----
+Open http://127.0.0.1:8000/ to see `Hello, world!`. Press Ctrl+C to stop the server.
+
+## Documentation
+
+See the [documentation](https://www.encode.io/hip/) for the full guides:
+
+* [Client](https://www.encode.io/hip/client/): making requests.
+* [Server](https://www.encode.io/hip/server/): running a server.
+* [Core](https://www.encode.io/hip/core/): shared HTTP models and content types.
 
 ## Motivation
 
-A clean modern design, with [a focused API](API.md) and an exceptionally light installation footprint.
+A clean modern design, with a focused API and an exceptionally light installation footprint.
 
 For comparison, see `hip` <small>vs</small> `requests`&hellip;
 
@@ -78,12 +100,12 @@ requests v2.33.1 (63.4KiB)
 
 ## Contribution
 
-See [Contributing](CONTRIBUTING.md) to get involved.
+See [Contributing](https://www.encode.io/hip/contributing/) to get involved.
 
 ---
 
 <p align="center">
-<a href="license/">MIT Licensed</a>.<br/>Designed & Built with Love.
+<a href="https://www.encode.io/hip/license/">MIT Licensed</a>.<br/>Designed & Built with Love.
 </p>
 
 <p align="center">&mdash; 💖 &mdash;</p>
